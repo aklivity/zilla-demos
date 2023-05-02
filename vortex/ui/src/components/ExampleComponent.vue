@@ -1,15 +1,20 @@
 <template>
-  <div>
-    <p>{{ title }}</p>
-    <ul>
-      <li v-for="todo in todos" :key="todo.id" @click="increment">
-        {{ todo.id }} - {{ todo.content }}
-      </li>
-    </ul>
-    <p>Count: {{ todoCount }} / {{ meta.totalCount }}</p>
-    <p>Active: {{ active ? 'yes' : 'no' }}</p>
-    <p>Clicks on todos: {{ clickCount }}</p>
-  </div>
+  <q-item-label v-for="[key, msg] in messages" :key="key">
+    <q-tooltip>
+      {{msg}} | {{msg.title}} | {{msg.pulse}}
+    </q-tooltip>
+    <q-circular-progress
+      :indeterminate="msg.pulse"
+      size="40px"
+      :thickness="0.4"
+      :value="msg.value"
+      font-size="50px"
+      :color="msg.color"
+      track-color="grey-3"
+      center-color="grey-8"
+      class="q-ma-md"
+    />
+  </q-item-label>
 </template>
 
 <script lang="ts">

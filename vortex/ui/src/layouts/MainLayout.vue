@@ -1,116 +1,75 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+  <q-layout view="hHh lpR fFf">
+
+    <q-header elevated class="bg-primary text-white">
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-
-        <q-toolbar-title>
-          Quasar App
+        <q-toolbar-title class="row items-center no-wrap">
+          <img :height="75" src="https://docs.aklivity.io/zilla/latest/logo.png">
+          <span class="q-ml-lg">Vortex Demo</span>
         </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
-
     <q-page-container>
-      <router-view />
+      <q-page class="flex content-start q-gutter-xs" padding>
+        <div v-for="[key, msg] in messages" :key="key">
+          <q-tooltip>
+            {{msg}} | {{msg.title}} | {{msg.pulse}}
+          </q-tooltip>
+          <q-circular-progress
+            :indeterminate="msg.pulse"
+            size="40px"
+            :thickness="0.4"
+            :value="msg.value"
+            font-size="50px"
+            :color="msg.color"
+            track-color="grey-3"
+            center-color="grey-8"
+            class="q-ma-md"
+          />
+        </div>
+      </q-page>
     </q-page-container>
+
   </q-layout>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import EssentialLink from 'components/EssentialLink.vue';
+import { defineComponent, reactive } from 'vue';
 
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-];
+const events = new EventSource('http://localhost:8001/events');
 
 export default defineComponent({
   name: 'MainLayout',
 
-  components: {
-    EssentialLink
-  },
-
   setup () {
-    const leftDrawerOpen = ref(false)
+    const messages = reactive(new Map<number, {title:string, color:string, value:number, pulse:boolean}>([]));
+
+
+    events.onmessage = function ({data}: MessageEvent) {
+      var {title, id} = <{title:string, id:number}>JSON.parse(data);
+      console.log(id, data);
+      if (id){
+        messages.set(id, {
+          title,
+          color: 'blue',
+          value: id * 10,
+          pulse: true,
+        });
+        setTimeout(() => {
+          messages.set(id, { ...messages.get(id), pulse:false, color: 'green' })
+        }, 500);
+      }
+    };
 
     return {
-      essentialLinks: linksList,
-      leftDrawerOpen,
-      toggleLeftDrawer () {
-        leftDrawerOpen.value = !leftDrawerOpen.value
-      }
+      messages,
     }
-  }
+  },
+
+  onUnmounted () {
+    events.close();
+    console.log('events closed', events);
+  },
 });
 </script>

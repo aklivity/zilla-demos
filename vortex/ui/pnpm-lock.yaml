@@ -13,9 +13,6 @@ dependencies:
   vue-router:
     specifier: ^4.1.6
     version: 4.1.6(vue@3.2.47)
-  vue-sse:
-    specifier: ^2.5.2
-    version: 2.5.2(vue@3.2.47)
 
 devDependencies:
   '@quasar/app-vite':
@@ -1500,10 +1497,6 @@ packages:
     engines: {node: '>= 0.6'}
     dev: true
 
-  /event-source-polyfill@1.0.31:
-    resolution: {integrity: sha512-4IJSItgS/41IxN5UVAVuAyczwZF7ZIEsM1XAoUzIHA6A+xzusEZUutdXz2Nr+MQPLxfTiCvqE79/C8HT8fKFvA==}
-    dev: false
-
   /express@4.18.2:
     resolution: {integrity: sha512-5/PsL6iGPdfQ/lKM1UuielYgv3BUoJfz1aUwU9vHZ+J7gyvwdQXFEBIEIaxeGf0GIcreATNyBExtalisDbuMqQ==}
     engines: {node: '>= 0.10.0'}
@@ -2963,15 +2956,6 @@ packages:
     dependencies:
       '@vue/devtools-api': 6.5.0
       vue: 3.2.47
-
-  /vue-sse@2.5.2(vue@3.2.47):
-    resolution: {integrity: sha512-HJu2JGEld2ez1Ko9ZhuTCTe563eq4qXESg1cjlS99pwMQ8COE5fAAtoJ4Lw/dr+K+1tLLBiFvvb98364YWZ2UQ==}
-    peerDependencies:
-      vue: ^2.0.0 || ^3.0.0
-    dependencies:
-      event-source-polyfill: 1.0.31
-      vue: 3.2.47
-    dev: false
 
   /vue@3.2.47:
     resolution: {integrity: sha512-60188y/9Dc9WVrAZeUVSDxRQOZ+z+y5nO2ts9jWXSTkMvayiWxCWOWtBQoYjLeccfXkiiPZWAHcV+WTPhkqJHQ==}
