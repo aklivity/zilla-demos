@@ -2,6 +2,11 @@
 
 Zilla example demonstrating HTTP(REST), gRPC & SSE protocol interacting with Kafka Cluster.
 
+<div align="center">
+  </br>
+  <img src="./.assets/zilla.config.svg">
+</div>
+
 ### Requirements
 
 - bash, jq, nc, grpcurl
@@ -75,7 +80,7 @@ Connect `sse-cat` client, to verify the events produced from gRPC Client.
 Note that the `events` will not arrive until after `POST` request is triggered in the next step.
 
 ```bash
-$ sse-cat http://localhost:8080/echo-messages
+sse-cat http://localhost:8080/echo-messages
 ```
 
 Send a POST request with an event body.

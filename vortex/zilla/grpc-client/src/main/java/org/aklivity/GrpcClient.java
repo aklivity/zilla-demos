@@ -74,6 +74,7 @@ public class GrpcClient
                 if (noRecordsCount > giveUp)
                 {
                     System.out.println("I'm still waiting for new events");
+                    noRecordsCount = 0;
                     //break;
                 }
                 else
