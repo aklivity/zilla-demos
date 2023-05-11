@@ -41,25 +41,25 @@ bindings:
     routes:
       - when:
           - headers:
-              :scheme: https
-              :authority: localhost:9090
+              ':scheme': https
+              ':authority': localhost:9090
               content-type: application/grpc
         exit: grpc_server0
       - when:
           - headers:
-              :scheme: http
-              :authority: localhost:8080
+              ':scheme': http
+              ':authority': localhost:8080
               content-type: application/grpc
         exit: grpc_server0  
       - when:
           - headers:
               :scheme: http
               :authority: localhost:8080
-              :path: /echo-messages
+              :path: /sse_messages
           - headers:
               :scheme: https
               :authority: localhost:9090
-              :path: /echo-messages
+              :path: /sse_messages
         exit: sse_server0  
       - when:
           - headers:
@@ -76,7 +76,7 @@ bindings:
         exit: kafka_cache_client0
         with:
           capability: produce
-          topic: events        
+          topic: http_messages
   grpc_server0:
     type: grpc
     kind: server
@@ -92,13 +92,19 @@ bindings:
     kind: proxy
     routes:
       - when:
-          - service: example.DemoService
+          - method: example.DemoService/DemoUnary
         exit: kafka_cache_client0
         with:
           capability: produce
-          topic: echo-messages
+          topic: grpc_exchanges
           acks: leader_only
-          reply-to: echo-messages
+          reply-to: grpc_exchanges
+      - when:
+          - method: example.DemoService/DemoServerStream
+        exit: kafka_cache_client0
+        with:
+          capability: fetch
+          topic: grpc_messages   
   sse_server0:
     type: sse
     kind: server
