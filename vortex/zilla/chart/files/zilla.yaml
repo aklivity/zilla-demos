@@ -104,7 +104,7 @@ bindings:
         exit: kafka_cache_client0
         with:
           capability: fetch
-          topic: grpc_messages   
+          topic: grpc_messages
   sse_server0:
     type: sse
     kind: server
@@ -117,7 +117,7 @@ bindings:
           - path: /{topic}
         exit: kafka_cache_client0
         with:
-          topic: ${params.topic}        
+          topic: ${params.topic}
   kafka_cache_client0:
     type: kafka
     kind: cache_client
