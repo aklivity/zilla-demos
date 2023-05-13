@@ -38,6 +38,9 @@ bindings:
   http_server0:
     type: http
     kind: server
+    options:
+      access-control:
+        policy: cross-origin
     routes:
       - when:
           - headers:
@@ -55,11 +58,11 @@ bindings:
           - headers:
               :scheme: http
               :authority: localhost:8080
-              :path: /sse_messages
+              :path: /LoopProgress
           - headers:
               :scheme: https
               :authority: localhost:9090
-              :path: /sse_messages
+              :path: /LoopProgress
         exit: sse_server0  
       - when:
           - headers:
@@ -72,7 +75,7 @@ bindings:
     kind: proxy
     routes:
       - when:
-          - path: /events
+          - path: /BoothVisitor
         exit: kafka_cache_client0
         with:
           capability: produce
@@ -114,10 +117,10 @@ bindings:
     kind: proxy
     routes:
       - when:
-          - path: /{topic}
+          - path: /LoopProgress
         exit: kafka_cache_client0
         with:
-          topic: ${params.topic}
+          topic: sse_messages
   kafka_cache_client0:
     type: kafka
     kind: cache_client

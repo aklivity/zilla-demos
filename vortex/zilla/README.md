@@ -70,21 +70,21 @@ Connect `sse-cat` client, to verify the events produced by the gRPC Client.
 Note that the `events` will not arrive until after `POST` request is triggered in the next step.
 
 ```bash
-sse-cat http://localhost:8080/sse_messages
+sse-cat http://localhost:8080/LoopProgress
 ```
 
 Send a POST request with an event body.
 
 ```bash
 curl -v \
-       -X "POST" http://localhost:8080/events \
+       -X "POST" http://localhost:8080/BoothVisitor \
        -H "Content-Type: application/json" \
        -d "{\"greeting\":\"Hello, world\"}"
 ```
 
 ```text
 ...
-> POST /events HTTP/1.1
+> POST /BoothVisitor HTTP/1.1
 > Content-Type: application/json
 ...
 < HTTP/1.1 204 No Content
@@ -225,7 +225,7 @@ kcat -C -b localhost:9092 -t sse_messages -J -u | jq .
 Verify the same using the `sse-cat` client.
 
 ```text
-sse-cat http://localhost:8080/sse_messages
+sse-cat http://localhost:8080/LoopProgress
 
 
 Hello, world :: been through gRPC Flow
