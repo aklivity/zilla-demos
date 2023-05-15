@@ -30,5 +30,7 @@ service DemoService
 
 message DemoMessage
 {
-  string message = 1;
+  string name = 1;
+  string color = 2;
+  int32 loop_count = 3;
 }

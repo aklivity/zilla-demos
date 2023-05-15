@@ -2,6 +2,11 @@ package io.aklivity;
 
 import com.google.gson.Gson;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.AbstractMessage.Builder;
+import com.google.protobuf.Message;
+import com.google.protobuf.MessageOrBuilder;
+import com.google.protobuf.Struct;
+import com.google.protobuf.util.JsonFormat;
 import example.Demo;
 import io.aklivity.model.Events;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -16,6 +21,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.io.IOException;
 
 public class KafkaEventTranslator
 {
@@ -127,19 +133,27 @@ public class KafkaEventTranslator
                 {
                     Events events = new Gson().fromJson(record.value(), Events.class);
                     producer.send(new ProducerRecord<String, byte[]>(GRPC_TOPIC, record.key(),
-                            Demo.DemoMessage.newBuilder().setMessage(events.getGreeting()).build().toByteArray()));
+                            Demo.DemoMessage.newBuilder()
+                                .setName(events.getName())
+                                .setColor(events.getColor())
+                                .setLoopCount(events.getLoopCount())
+                                .build().toByteArray()));
                 }
                 else if (record.topic().equals(GRPC_EXCHANGE_TOPIC) && record.value() != null)
                 {
                     try
                     {
-                        sSEProducer.send(new ProducerRecord<String, String>(SSE_TOPIC, record.key(),
-                                Demo.DemoMessage
+                        Demo.DemoMessage msg = Demo.DemoMessage
                                         .newBuilder()
                                         .mergeFrom(record.value().getBytes(StandardCharsets.UTF_8))
-                                        .build()
-                                        .getMessage()));
-                    } catch (InvalidProtocolBufferException e) {
+                                        .build();
+
+                        sSEProducer.send(new ProducerRecord<String, String>(
+                            SSE_TOPIC, 
+                            record.key(),
+                            toJson(msg)
+                        ));
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }
@@ -147,5 +161,16 @@ public class KafkaEventTranslator
 
             consumer.commitAsync();
         }
+    }
+
+    public static String toJson(MessageOrBuilder messageOrBuilder) throws IOException {
+        return JsonFormat.printer().print(messageOrBuilder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Message fromJson(String json) throws IOException {
+        Builder structBuilder = Struct.newBuilder();
+        JsonFormat.parser().ignoringUnknownFields().merge(json, structBuilder);
+        return structBuilder.build();
     }
 }

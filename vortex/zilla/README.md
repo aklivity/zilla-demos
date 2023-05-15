@@ -79,7 +79,7 @@ Send a POST request with an event body.
 curl -v \
        -X "POST" http://localhost:8080/BoothVisitor \
        -H "Content-Type: application/json" \
-       -d "{\"greeting\":\"Hello, world\"}"
+       -d "{ \"name\": \"Hello World\", \"color\": \"blue\", \"loopCount\": 0 }"
 ```
 
 ```text
@@ -109,7 +109,7 @@ kcat -C -b localhost:9092 -t http_messages -J -u | jq .
     "application/json"
   ],
   "key": null,
-  "payload": "{\"greeting\":\"Hello, world\"}"
+  "payload": "{ \"name\": \"Hello World\", \"color\": \"blue\", \"loopCount\": 0 }"
 }
 % Reached end of topic http_messages [0] at offset 1
 ```
@@ -117,7 +117,7 @@ kcat -C -b localhost:9092 -t http_messages -J -u | jq .
 Verify message processed(converted to proto format) by Kafka Event Translator Client.
 
 ```text
-Consumer Record:(null, {"greeting":"Hello, world"}, 0, 0)
+Consumer Record:(null, { "name": "Hello World", "color": "blue", "loopCount": 0 }, 0, 0)
 ```
 
 Verify the JSON payload is converted to proto format and published to `grpc_messages` topic by Kafka Event Translator Client.

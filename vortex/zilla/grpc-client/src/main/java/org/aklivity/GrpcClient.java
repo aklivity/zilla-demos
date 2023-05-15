@@ -25,7 +25,11 @@ public class GrpcClient
         {
             Demo.DemoMessage message = response.next();
             System.out.println("Found message: " + message);
-            stub.demoUnary(Demo.DemoMessage.newBuilder().setMessage(message.getMessage() + " :: been through gRPC Flow").build());
+            stub.demoUnary(Demo.DemoMessage.newBuilder()
+                    .setName(message.getName())
+                    .setColor(message.getColor())
+                    .setLoopCount(message.getLoopCount() + 1)
+                    .build());
         }
 
         channel.shutdown();

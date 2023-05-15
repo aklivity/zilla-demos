@@ -36,7 +36,7 @@
 
               <div class="row q-gutter-sm j">
                 <div class="col">
-                  <q-input filled v-model="title" label="Name" class="col" />
+                  <q-input filled v-model="name" label="Name" class="col" />
                 </div>
                 <div class="col-3">
                   <q-input
@@ -79,14 +79,14 @@
                     :indeterminate="msg.pulse"
                     size="30px"
                     :thickness="0.4"
-                    :value="msg.value"
+                    :value="msg.loopCount"
                     font-size="30px"
                     track-color="transparent"
                     center-color="grey-7"
                     class="q-ma-xs"
                   />
                   <p class="q-ma-sm">
-                    {{msg.title}}
+                    {{msg.name}}
                   </p>
                 </div>
               </div>
@@ -110,21 +110,21 @@ export default defineComponent({
     const messages = reactive(
       new Map<
         number,
-        { title: string; color: string; value: number; pulse: boolean }
+        { name: string; color: string; loopCount: number; pulse: boolean }
       >([])
     );
 
     events.onmessage = function ({ data }: MessageEvent) {
-      var { title, id, color, value } = <
-        { title: string; id: number; color: string; value: number }
+      var { name, id, color, loopCount } = <
+        { name: string; id: number; color: string; loopCount: number }
       >JSON.parse(data);
       console.log(id, data);
       if (id) {
         messages.set(id, {
-          title,
-          color: 'blue',
-          value: value,
-          pulse: true,
+          name,
+          color,
+          loopCount,
+          pulse: false,
         });
         setTimeout(() => {
           messages.set(id, { ...messages.get(id), pulse: false, color: color });
@@ -133,18 +133,10 @@ export default defineComponent({
       }
     };
 
-    for (let i = 1; i <= 300; i++) {
-      messages.set(i, {
-        title: `hello ${i}`,
-        color: '#1ED5A7',
-        value: i,
-        pulse: false,
-      });
-    }
 
     return {
       messages,
-      title: ref(''),
+      name: ref(''),
       color: ref(''),
     };
   },
@@ -155,29 +147,13 @@ export default defineComponent({
   },
 
   methods: {
-    sendMsg() {
-      const requestOptions = {
+    async sendMsg() {
+      await fetch('http://localhost:8080/BoothVisitor', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ greeting: 'Vue 3 POST Request Example' })
-      };
-      fetch('http://localhost:8080/BoothVisitor', requestOptions)
-        // .then(response => response.json())
+          body: JSON.stringify({ name: this.name, color: this.color, loopCount: 0 })
+        })
         .then(console.log);
-      this.messages.set(1, {
-        title: this.title,
-        color: '#1ED5A7',
-        value: 100,
-        pulse: true,
-      });
-      setTimeout(() => {
-        this.messages.set(1, {
-          ...this.messages.get(1),
-          pulse: false,
-          color: this.color,
-        });
-        console.log(JSON.stringify(this.messages.get(1)));
-      }, 500);
     },
   },
 });
