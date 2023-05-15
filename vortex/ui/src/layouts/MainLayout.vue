@@ -66,7 +66,7 @@
                   </q-input>
                 </div>
                 <div class="col-1 flex">
-                  <q-btn @click="sendMsg" color="primary" label="Send" />
+                  <q-btn @click="newVisitor" color="primary" label="Send" />
                 </div>
               </div>
 
@@ -79,7 +79,7 @@
                     :indeterminate="msg.pulse"
                     size="30px"
                     :thickness="0.4"
-                    :value="msg.loopCount"
+                    :value="msg.loopCount * 20"
                     font-size="30px"
                     track-color="transparent"
                     center-color="grey-7"
@@ -103,41 +103,55 @@ import { defineComponent, reactive, ref } from 'vue';
 
 const events = new EventSource('http://localhost:8080/LoopProgress');
 
+const sendBoothVisitor =  async(name: string, color: string, loopCount: number) => {
+  await fetch('http://localhost:8080/BoothVisitor', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Idempotency-Key': `${name}-${color}-${loopCount}`
+       },
+      body: JSON.stringify({ name, color, loopCount })
+    })
+    .then(console.log);
+};
+
 export default defineComponent({
   name: 'MainLayout',
+
+
 
   setup() {
     const messages = reactive(
       new Map<
-        number,
+        string,
         { name: string; color: string; loopCount: number; pulse: boolean }
       >([])
     );
 
-    events.onmessage = function ({ data }: MessageEvent) {
-      var { name, id, color, loopCount } = <
-        { name: string; id: number; color: string; loopCount: number }
+    events.onmessage = ({ data }: MessageEvent) => {
+      var { name, color, loopCount } = <
+        { name: string; color: string; loopCount: number }
       >JSON.parse(data);
-      console.log(id, data);
-      if (id) {
-        messages.set(id, {
+      if (name && color) {
+        console.log('message received', data);
+        messages.set(name + color, {
           name,
           color,
           loopCount,
           pulse: false,
         });
         setTimeout(() => {
-          messages.set(id, { ...messages.get(id), pulse: false, color: color });
-          //send message back over http
-        }, 500);
+          if (loopCount < 3) {
+            sendBoothVisitor(name, color, loopCount)
+          }
+        }, 1000);
       }
     };
 
-
     return {
       messages,
-      name: ref(''),
-      color: ref(''),
+      name: ref('test'),
+      color: ref('#d66c00'),
     };
   },
 
@@ -147,14 +161,13 @@ export default defineComponent({
   },
 
   methods: {
-    async sendMsg() {
-      await fetch('http://localhost:8080/BoothVisitor', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: this.name, color: this.color, loopCount: 0 })
-        })
-        .then(console.log);
-    },
+    newVisitor() {
+      if (this.name && this.color) {
+        sendBoothVisitor(this.name, this.color, 0);
+        this.name = '';
+        this.color = '';
+      }
+    }
   },
 });
 </script>
