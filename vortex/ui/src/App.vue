@@ -157,8 +157,8 @@ export default defineComponent({
   setup() {
     return {
       messages,
-      name: ref('test'),
-      color: ref('#d66c00'),
+      name: ref(''),
+      color: ref('#5A7CD9'),
       reversedList,
     };
   },
@@ -173,7 +173,7 @@ export default defineComponent({
       if (this.name && this.color) {
         sendBoothVisitor(this.name, this.color, 0);
         this.name = '';
-        this.color = '';
+        this.color = '#5A7CD9';
       }
     }
   },
