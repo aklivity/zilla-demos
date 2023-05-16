@@ -79,7 +79,7 @@
                     :indeterminate="msg.pulse"
                     size="30px"
                     :thickness="0.4"
-                    :value="msg.loopCount * 20"
+                    :value="msg.loopCount"
                     font-size="30px"
                     track-color="transparent"
                     center-color="grey-7"
@@ -147,7 +147,7 @@ events.onmessage = ({ data }: MessageEvent) => {
         loopCount,
         pulse: false,
       });
-      if (loopCount < 5) {
+      if (loopCount < 100) {
         console.log('send new message', loopCount)
         sendBoothVisitor(name, color, loopCount)
       }
@@ -159,7 +159,6 @@ export default defineComponent({
   name: 'App',
 
   setup() {
-
     return {
       messages,
       name: ref('test'),
