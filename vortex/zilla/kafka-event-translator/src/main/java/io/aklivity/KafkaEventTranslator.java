@@ -110,7 +110,6 @@ public class KafkaEventTranslator
             final ConsumerRecords<String, String> consumerRecords =
                     consumer.poll(1000);
 
-            System.out.printf("found Records:(%d)\n", consumerRecords.count());
             consumerRecords.forEach(record -> {
                 if (record.topic().equals(HTTP_TOPIC))
                 {
@@ -152,12 +151,5 @@ public class KafkaEventTranslator
 
     public static String toJson(MessageOrBuilder messageOrBuilder) throws IOException {
         return JsonFormat.printer().print(messageOrBuilder);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static Message fromJson(String json) throws IOException {
-        Builder structBuilder = Struct.newBuilder();
-        JsonFormat.parser().ignoringUnknownFields().merge(json, structBuilder);
-        return structBuilder.build();
     }
 }

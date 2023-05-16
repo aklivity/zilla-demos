@@ -77,9 +77,15 @@ Send a POST request with an event body.
 
 ```bash
 curl -v \
-       -X "POST" http://localhost:8080/BoothVisitor \
-       -H "Content-Type: application/json" \
-       -d "{ \"name\": \"Hello World\", \"color\": \"blue\", \"loopCount\": 0 }"
+  -X "POST" http://localhost:8080/BoothVisitor/HelloWorldblue \
+  -H "Content-Type: application/json" \
+  -d "{ \"name\": \"HelloWorld\", \"color\": \"blue\", \"loopCount\": 0 }"
+```
+
+or Send directly to the kafka topic:
+
+```bash
+   echo "{ \"name\": \"HelloWorld\", \"color\": \"blue\", \"loopCount\": 0 }" | kcat -P -b localhost:9092 -t http_messages -k HelloWorldblue
 ```
 
 ```text
