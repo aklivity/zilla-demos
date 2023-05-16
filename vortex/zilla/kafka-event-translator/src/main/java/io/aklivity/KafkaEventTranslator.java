@@ -105,32 +105,17 @@ public class KafkaEventTranslator
         Producer<String, byte[]> producer,
         Producer<String, String> sSEProducer) throws InterruptedException
     {
-        final int giveUp = 10;   int noRecordsCount = 0;
-
         while (true)
         {
             final ConsumerRecords<String, String> consumerRecords =
-                    consumer.poll(giveUp);
+                    consumer.poll(1000);
 
-            if (consumerRecords.count()==0)
-            {
-                noRecordsCount++;
-                if (noRecordsCount > giveUp)
-                {
-                    // System.out.println("I'm still waiting for new events");
-                    noRecordsCount = 0;
-                    //break;
-                }
-                else
-                    continue;
-            }
-
+            System.out.printf("found Records:(%d)\n", consumerRecords.count());
             consumerRecords.forEach(record -> {
                 if (record.topic().equals(HTTP_TOPIC))
                 {
-                    System.out.printf("sending to GRPC_TOPIC Record:(%s, %s, %d, %d)\n",
-                        record.key(), record.value(),
-                        record.partition(), record.offset());
+                    System.out.printf("sending to GRPC_TOPIC Record:(%s, %d)\n",
+                        record.key(), record.offset());
                     Events events = new Gson().fromJson(record.value(), Events.class);
                     producer.send(new ProducerRecord<String, byte[]>(GRPC_TOPIC, record.key(),
                             Demo.DemoMessage.newBuilder()
@@ -143,9 +128,8 @@ public class KafkaEventTranslator
                 {
                     try
                     {
-                    System.out.printf("sending to SSE_TOPIC Record:(%s, %s, %d, %d)\n",
-                        record.key(), record.value(),
-                        record.partition(), record.offset());
+                    System.out.printf("sending to SSE_TOPIC Record:(%s, %d)\n",
+                        record.value(), record.offset());
                         Demo.DemoMessage msg = Demo.DemoMessage
                                         .newBuilder()
                                         .mergeFrom(record.value().getBytes(StandardCharsets.UTF_8))

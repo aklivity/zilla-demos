@@ -103,12 +103,15 @@ import { defineComponent, reactive, ref } from 'vue';
 
 const events = new EventSource('http://localhost:8080/LoopProgress');
 
+const getKey = (name: string, color: string) => `${name}${color.replace('#', '')}`
+
 const sendBoothVisitor =  async(name: string, color: string, loopCount: number) => {
-  await fetch('http://localhost:8080/BoothVisitor', {
+  console.log('POSTing', getKey(name,color));
+
+  await fetch(`http://localhost:8080/BoothVisitor/${getKey(name,color)}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Idempotency-Key': `${name}-${color}-${loopCount}`
        },
       body: JSON.stringify({ name, color, loopCount })
     })
@@ -117,8 +120,6 @@ const sendBoothVisitor =  async(name: string, color: string, loopCount: number) 
 
 export default defineComponent({
   name: 'MainLayout',
-
-
 
   setup() {
     const messages = reactive(
@@ -134,17 +135,17 @@ export default defineComponent({
       >JSON.parse(data);
       if (name && color) {
         console.log('message received', data);
-        messages.set(name + color, {
+        messages.set(getKey(name, color), {
           name,
           color,
           loopCount,
           pulse: false,
         });
         setTimeout(() => {
-          if (loopCount < 3) {
+          if (loopCount < 2) {
             sendBoothVisitor(name, color, loopCount)
           }
-        }, 1000);
+        }, 50);
       }
     };
 

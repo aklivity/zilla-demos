@@ -9,6 +9,7 @@ KAFKA_POD=$(kubectl get pods --namespace zilla-vortex-demo --selector app.kubern
 kubectl exec --namespace zilla-vortex-demo "$KAFKA_POD" -- \
     /opt/bitnami/kafka/bin/kafka-topics.sh \
         --bootstrap-server localhost:9092 \
+        --config "cleanup.policy=compact" \
         --create \
         --topic http_messages \
         --if-not-exists
@@ -17,6 +18,7 @@ KAFKA_POD=$(kubectl get pods --namespace zilla-vortex-demo --selector app.kubern
 kubectl exec --namespace zilla-vortex-demo "$KAFKA_POD" -- \
     /opt/bitnami/kafka/bin/kafka-topics.sh \
         --bootstrap-server localhost:9092 \
+        --config "cleanup.policy=compact" \
         --create \
         --topic grpc_messages \
         --if-not-exists
