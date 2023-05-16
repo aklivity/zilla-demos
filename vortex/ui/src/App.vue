@@ -123,8 +123,7 @@ const sendBoothVisitor =  async(name: string, color: string, loopCount: number) 
         'Content-Type': 'application/json',
        },
       body: JSON.stringify({ name, color, loopCount })
-    })
-    .then(console.log);
+    });
 };
 
 
@@ -135,10 +134,7 @@ events.onmessage = ({ data }: MessageEvent) => {
   >JSON.parse(data);
   if (name && color) {
     const key = getKey(name, color);
-    if (loopCount)
-    {console.log('message received', key + loopCount);}
-    else
-    {console.log('no loop count', key + loopCount);}
+    // console.log('message received', key);
     const current = messages.get(key);
     if (loopCount > (current?.loopCount ? current.loopCount : 0)) {
       messages.set(key, {
@@ -148,7 +144,7 @@ events.onmessage = ({ data }: MessageEvent) => {
         pulse: false,
       });
       if (loopCount < 100) {
-        console.log('send new message', loopCount)
+        // console.log('send new message', loopCount)
         sendBoothVisitor(name, color, loopCount)
       }
     }
