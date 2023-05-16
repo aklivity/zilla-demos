@@ -72,8 +72,8 @@
 
               <div class="row">
               </div>
-              <div class="row" style="width: 100%; height: 70%; overflow: scroll;">
-                <div class="q-ma-sm flex justify-center" v-for="[key, msg] in messages" :key="key">
+              <div class="row  content-start" style="width: 100%; height: 70%; overflow: scroll;">
+                <div class="q-ma-sm flex justify-center" v-for="[key, msg] in reversedList" :key="key">
                   <q-circular-progress
                     :style="{ color: msg.color }"
                     :indeterminate="msg.pulse"
@@ -99,7 +99,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue';
+import { defineComponent, reactive, ref, computed } from 'vue';
 
 const messages = reactive(
       new Map<
@@ -107,6 +107,10 @@ const messages = reactive(
         { name: string; color: string; loopCount: number; pulse: boolean }
       >([])
     );
+
+const reversedList = computed(() => {
+  return Array.from(messages).reverse()
+})
 
 const getKey = (name: string, color: string) => `${name}${color.replace('#', '')}`
 
@@ -160,6 +164,7 @@ export default defineComponent({
       messages,
       name: ref('test'),
       color: ref('#d66c00'),
+      reversedList,
     };
   },
 
