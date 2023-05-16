@@ -21,16 +21,16 @@ import "google/protobuf/empty.proto";
 
 service DemoService
 {
-  rpc DemoUnary(DemoMessage) returns (DemoMessage);
 
-  rpc DemoClientStream(stream DemoMessage) returns (DemoMessage);
+  rpc DemoUnary(DemoMessage) returns (DemoMessage);
 
   rpc DemoServerStream(google.protobuf.Empty) returns (stream DemoMessage);
 
-  rpc DemoBidiStream(stream DemoMessage) returns (stream DemoMessage);
 }
 
 message DemoMessage
 {
-  string message = 1;
+  string name = 1;
+  string color = 2;
+  int32 loop_count = 3;
 }
