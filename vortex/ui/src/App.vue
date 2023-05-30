@@ -18,7 +18,7 @@
           <q-responsive
             :ratio="1"
             class="col fit"
-            style="max-width: 40%"
+            style="max-width: 50%"
           >
             <div class="q-gutter-lg q-pt-lg">
               <div class="row justify-center">
@@ -73,21 +73,21 @@
               <div class="row">
               </div>
               <div class="row  content-start" style="width: 100%; height: 70%; overflow: scroll;">
-                <div class="q-ma-sm flex justify-center" v-for="[key, msg] in reversedList" :key="key">
+                <div class="q-ma-sm flex flex-center" v-for="[key, msg] in reversedList" :key="key">
                   <q-circular-progress
                     :style="{ color: msg.color }"
                     :indeterminate="msg.pulse"
-                    size="30px"
+                    size="50px"
                     :thickness="0.4"
                     :value="msg.loopCount"
-                    font-size="30px"
+                    font-size="50px"
                     track-color="transparent"
                     center-color="grey-7"
-                    class="q-ma-xs"
+                    class="q-ma-md"
                   />
-                  <p class="q-ma-sm">
+                  <div class="">
                     {{msg.name}}
-                  </p>
+                  </div>
                 </div>
               </div>
             </div>
