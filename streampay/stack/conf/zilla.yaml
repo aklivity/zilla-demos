@@ -1,0 +1,321 @@
+name: Example
+vaults:
+  filesystem2814ec86-7736-49c9-babe-d8e6cedde0dc:
+    type: filesystem
+    options:
+      keys:
+        store: localhost.p12
+        type: pkcs12
+        password: generated
+bindings:
+  tcp_servera3342d5b-71aa-44f4-b20d-59994b2482c1:
+    type: tcp
+    kind: server
+    options:
+      host: 0.0.0.0
+      port: 9090
+    exit: tls_servera3342d5b-71aa-44f4-b20d-59994b2482c1
+  tls_servera3342d5b-71aa-44f4-b20d-59994b2482c1:
+    type: tls
+    kind: server
+    vault: filesystem2814ec86-7736-49c9-babe-d8e6cedde0dc
+    options:
+      keys:
+        - localhost
+      sni:
+        - localhost
+      alpn:
+        - http/1.1
+        - h2
+    exit: http_servera3342d5b-71aa-44f4-b20d-59994b2482c1
+  http_servera3342d5b-71aa-44f4-b20d-59994b2482c1:
+    type: http
+    kind: server
+    options:
+      access-control:
+        policy: cross-origin
+      authorization:
+        jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+          credentials:
+            headers:
+              authorization: Bearer {credentials}
+            query:
+              access_token: "{credentials}"
+    routes:
+      - when:
+          - headers:
+              :method: GET
+              :path: /activities
+          - headers:
+              :method: GET
+              :path: /payment-requests
+          - headers:
+              :method: GET
+              :path: /current-balance
+          - headers:
+              :method: GET
+              :path: /balance-histories
+          - headers:
+              :method: GET
+              :path: /total-transactions
+          - headers:
+              :method: GET
+              :path: /average-transactions
+        exit: sse_servera3342d5b-71aa-44f4-b20d-59994b2482c1
+      - when:
+          - headers:
+              :method: POST
+              :path: /pay
+          - headers:
+              :method: POST
+              :path: /request
+          - headers:
+              :method: PUT
+              :path: /current-user
+          - headers:
+              :method: GET
+              :path: /users
+          - headers:
+              :method: GET
+              :path: /current-payment-requests
+          - headers:
+              :method: GET
+              :path: /payment-requests/*
+        exit: http-kafka_proxya3342d5b-71aa-44f4-b20d-59994b2482c1
+    exit: http_filesystem_proxya3342d5b-71aa-44f4-b20d-59994b2482c1
+  http_filesystem_proxya3342d5b-71aa-44f4-b20d-59994b2482c1:
+    type: http-filesystem
+    kind: proxy
+    routes:
+      - when:
+          - path: /
+        exit: filesystem_servera3342d5b-71aa-44f4-b20d-59994b2482c1
+        with:
+          path: index.html
+      - when:
+          - path: /{path}
+        exit: filesystem_servera3342d5b-71aa-44f4-b20d-59994b2482c1
+        with:
+          path: ${params.path}
+  filesystem_servera3342d5b-71aa-44f4-b20d-59994b2482c1:
+    type: filesystem
+    kind: server
+    options:
+      location: /app/dist/
+  sse_servera3342d5b-71aa-44f4-b20d-59994b2482c1:
+    type: sse
+    kind: server
+    exit: sse-kafka_proxya3342d5b-71aa-44f4-b20d-59994b2482c1
+  sse-kafka_proxya3342d5b-71aa-44f4-b20d-59994b2482c1:
+    type: sse-kafka
+    kind: proxy
+    routes:
+      - when:
+          - path: /activities
+        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
+        with:
+          event:
+            id: '["${base64(key)}","${etag}"]'
+          topic: activities
+        guarded:
+          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+            - read:activities
+      - when:
+          - path: /payment-requests
+        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
+        with:
+          event:
+            id: '["${base64(key)}","${etag}"]'
+          topic: payment-requests
+          filters:
+            - headers:
+                zilla:identity: ${guarded['jwt3dc23de6-5185-46f8-86f7-717c3b023d8a'].identity}
+        guarded:
+          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+            - read:payment-requests
+      - when:
+          - path: /current-balance
+        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
+        with:
+          event:
+            id: '["${base64(key)}","${etag}"]'
+          topic: balances
+          filters:
+            - key: ${guarded['jwt3dc23de6-5185-46f8-86f7-717c3b023d8a'].identity}
+        guarded:
+          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+            - read:balances
+      - when:
+          - path: /balance-histories
+        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
+        with:
+          event:
+            id: '["${base64(key)}","${etag}"]'
+          topic: balance-histories
+          filters:
+            - key: ${guarded['jwt3dc23de6-5185-46f8-86f7-717c3b023d8a'].identity}
+        guarded:
+          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+            - read:balances
+      - when:
+          - path: /total-transactions
+        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
+        with:
+          event:
+            id: '["${base64(key)}","${etag}"]'
+          topic: total-transactions
+        guarded:
+          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+            - read:balances
+      - when:
+          - path: /average-transactions
+        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
+        with:
+          event:
+            id: '["${base64(key)}","${etag}"]'
+          topic: average-transactions
+        guarded:
+          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+            - read:balances
+  http-kafka_proxya3342d5b-71aa-44f4-b20d-59994b2482c1:
+    type: http-kafka
+    kind: proxy
+    routes:
+      - when:
+          - method: POST
+            path: /pay
+        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
+        with:
+          capability: produce
+          reply-to: replies
+          topic: commands
+          key: ${idempotencyKey}
+          overrides:
+            zilla:domain-model: PayCommand
+            zilla:identity: ${guarded['jwt3dc23de6-5185-46f8-86f7-717c3b023d8a'].identity}
+        guarded:
+          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+            - write:pay
+      - when:
+          - method: POST
+            path: /request
+        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
+        with:
+          capability: produce
+          reply-to: replies
+          topic: commands
+          key: ${idempotencyKey}
+          overrides:
+            zilla:domain-model: RequestCommand
+            zilla:identity: ${guarded['jwt3dc23de6-5185-46f8-86f7-717c3b023d8a'].identity}
+        guarded:
+          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+            - write:request
+      - when:
+          - method: PUT
+            path: /current-user
+        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
+        with:
+          capability: produce
+          topic: users
+          overrides: {}
+          key: ${guarded['jwt3dc23de6-5185-46f8-86f7-717c3b023d8a'].identity}
+        guarded:
+          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+            - write:users
+      - when:
+          - method: GET
+            path: /users
+        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
+        with:
+          capability: fetch
+          topic: users
+          merge:
+            content-type: application/json
+        guarded:
+          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+            - read:users
+      - when:
+          - method: GET
+            path: /payment-requests/{id}
+        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
+        with:
+          capability: fetch
+          topic: payment-requests
+          filters:
+            - key: ${params.id}
+        guarded:
+          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+            - read:payment-requests
+      - when:
+          - method: GET
+            path: /current-payment-requests
+        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
+        with:
+          capability: fetch
+          topic: payment-requests
+          merge:
+            content-type: application/json
+          filters:
+            - headers:
+                zilla:identity: ${guarded['jwt3dc23de6-5185-46f8-86f7-717c3b023d8a'].identity}
+        guarded:
+          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+            - read:payment-requests
+  kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3:
+    type: kafka
+    kind: cache_client
+    exit: kafka_cache_server1808eec1-480a-4f24-af7d-3a99101cc5b3
+  kafka_cache_server1808eec1-480a-4f24-af7d-3a99101cc5b3:
+    type: kafka
+    kind: cache_server
+    options:
+      bootstrap:
+        - replies
+        - payment-requests
+        - balances
+        - users
+    exit: kafka_client1808eec1-480a-4f24-af7d-3a99101cc5b3
+  kafka_client1808eec1-480a-4f24-af7d-3a99101cc5b3:
+    type: kafka
+    kind: client
+    exit: tcp_client1808eec1-480a-4f24-af7d-3a99101cc5b3
+    options:
+      sasl:
+        mechanism: scram-sha-256
+        username: user
+        password: redpanda
+  tcp_client1808eec1-480a-4f24-af7d-3a99101cc5b3:
+    type: tcp
+    kind: client
+    options:
+      host: redpanda.internal.net
+      port: 29092
+    routes:
+      - when:
+          - cidr: 0.0.0.0/0
+guards:
+  jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+    type: jwt
+    options:
+      issuer: https://aklivity.us.auth0.com/
+      audience: https://localhost:9090/streampay
+      keys:
+        - alg: RS256
+          kty: RSA
+          use: sig
+          n: xpUpx4ytuhi0Tz4_l7qqigo_CleAGBs7zalBLHR68tRz3EM2rf6JZapeT7vA6FcdGJskcqNSEYZJsbX0RWsqH_2WwXKOV8HOJJ_XrUmWy1Eeeco8nqM7NoImvubQ_3pxwGq2RaW4Ll3jZ90tWEWoGlk9qo_oJc2WKfnHSjpzuQxX0v5xKxJ3qJN9-SzJ-hit89Uj67o9aC5qOYbZTNgYDOyuawhAN3MlVF_twj7iqogpJprQEeLZTMpsmQbx0DvAju4Za_edJXAkVQeAeQq04SgLU0cagEmk7raNAuk19mWjPAPDq8OldVoecxtsqCGF_I17xdWozI98tJPDS00YWw
+          e: AQAB
+          kid: x9YmmTzyWUxAj6683CkM-
+          x5t: xKsfyirPoDUfrpgvjnKI5wmYzBg
+          x5c:
+            - MIIDBTCCAe2gAwIBAgIJfcoikPv8CQX+MA0GCSqGSIb3DQEBCwUAMCAxHjAcBgNVBAMTFWFrbGl2aXR5LnVzLmF1dGgwLmNvbTAeFw0yMjA1MzEyMTI5MzZaFw0zNjAyMDcyMTI5MzZaMCAxHjAcBgNVBAMTFWFrbGl2aXR5LnVzLmF1dGgwLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMaVKceMrboYtE8+P5e6qooKPwpXgBgbO82pQSx0evLUc9xDNq3+iWWqXk+7wOhXHRibJHKjUhGGSbG19EVrKh/9lsFyjlfBziSf161JlstRHnnKPJ6jOzaCJr7m0P96ccBqtkWluC5d42fdLVhFqBpZPaqP6CXNlin5x0o6c7kMV9L+cSsSd6iTffksyfoYrfPVI+u6PWguajmG2UzYGAzsrmsIQDdzJVRf7cI+4qqIKSaa0BHi2UzKbJkG8dA7wI7uGWv3nSVwJFUHgHkKtOEoC1NHGoBJpO62jQLpNfZlozwDw6vDpXVaHnMbbKghhfyNe8XVqMyPfLSTw0tNGFsCAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUUONbQh3M0n4qXgTRDu7F1XgFSN0wDgYDVR0PAQH/BAQDAgKEMA0GCSqGSIb3DQEBCwUAA4IBAQBdskJlljltBm+JPPEStfa264aKiKvdyjSuwQcvrqXPm5q5/GEmKjMdG3c+3R6BmgWOKCHL3Bg70aFWidqy6sYfbdZ806JctN2FGsJUa5hSTZSjkhn+VkER16/6iCNr5e/KVnZwkWd5U05asshoaMugHTLlFHISxJ2qMUKda2Wi3tkf7eMzc7+1BReY+6etT0ZMf1st1BPalj41cnaBSiLcO67s7XIvH2gkTdYABbzIwXBLuWvQUZ5pX73JdCOuXhfXN/3oE3ICZfOJjGcqeg4eAO8Ns/NFyho8U2xFP8pqhrHqyvxkNHh7eJZaB5gdfUodL4Ldtkmz351zFBCRey0g
+        - alg: RS256
+          kty: RSA
+          use: sig
+          n: zlx0IeG8Gzw77BPCuR9MvZVSbSTRkfkcAklS23roIr4mxLr8m5I2Q2bOj56qHztV8frPVTZ0GyesxwScdaSRkNomF2nnzibWRabcek50UmHbpgeA3dXAmxCMUR-Tah0w-eCSsbXu6PbtpWmLm_7niSJnRed45x7b876E2G_DitQFErGMZaLmSG7ewF0aHz-gn37Uio2l71-oXnvshpC7Y17-TUYUDKIiko6P1UKsY7fUBEaZk9-he6Khsny7KYUkcZ1F45q0WKlGwiZyZjU8jPhNGPIc8qj6QmjEhJ07IzjDR4x8pZN3F4go6mKB1thWWhGWrkaLI8UmluHDcD33RQ
+          e: AQAB
+          kid: sBT98m8u8lpwvV_Cm5ZAX
+          x5t: vfM0DKkRNUmYxs13GJnM-NlADuU
+          x5c:
+            - MIIDBTCCAe2gAwIBAgIJevGCW7bs17g5MA0GCSqGSIb3DQEBCwUAMCAxHjAcBgNVBAMTFWFrbGl2aXR5LnVzLmF1dGgwLmNvbTAeFw0yMjA1MzEyMTI5MzZaFw0zNjAyMDcyMTI5MzZaMCAxHjAcBgNVBAMTFWFrbGl2aXR5LnVzLmF1dGgwLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM5cdCHhvBs8O+wTwrkfTL2VUm0k0ZH5HAJJUtt66CK+JsS6/JuSNkNmzo+eqh87VfH6z1U2dBsnrMcEnHWkkZDaJhdp584m1kWm3HpOdFJh26YHgN3VwJsQjFEfk2odMPngkrG17uj27aVpi5v+54kiZ0XneOce2/O+hNhvw4rUBRKxjGWi5khu3sBdGh8/oJ9+1IqNpe9fqF577IaQu2Ne/k1GFAyiIpKOj9VCrGO31ARGmZPfoXuiobJ8uymFJHGdReOatFipRsImcmY1PIz4TRjyHPKo+kJoxISdOyM4w0eMfKWTdxeIKOpigdbYVloRlq5GiyPFJpbhw3A990UCAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUt/86Q4B1Xalsr8077ehQ9iqi3rkwDgYDVR0PAQH/BAQDAgKEMA0GCSqGSIb3DQEBCwUAA4IBAQBC6ejNbo9u7+qFvh+j1Zh7YZW+uz06Gd4WnwCU+926JP6U7NMNt3guvPVPYtFXSpKhdAom2t/UjBVZh3l7DATU48rE4E/9pzLu8Urg9AVkfRHhLQi+6JZv7ZXDyEcUPtl6jENYZhT1CS2lPsDQ35Ap4BUgWVV8AOOacLVsomHRtS8Q1MtKbNvR+7tJeUEqRxCE7RNXM+FXMDPtwtn5DeKgdDF1HJh95G2Pw4m2W0ZtV1h6NtTuMZMgJtQSqF2IDwaPghLCqdznecLtwuUrVZxjxpuxX2vdYlmtLi2SPf1coKhRHYb4AMj8NNKmBZs9hgPOJxkvQxu8sh7XFbKSQ0gY

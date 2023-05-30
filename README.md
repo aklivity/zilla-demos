@@ -6,4 +6,5 @@ Try out these Zilla demos.
 
 | Name                             | Description                                                           |
 |----------------------------------|-----------------------------------------------------------------------|
-| [vortex WIP](vortex)             | Multi protocol loop of messages                                       |
+| [Stream Pay](streampay)          | Connects Redpanda with zilla to a UI for a full event streaming setup |
+| [Vortex](vortex)                 | Multi protocol loop of messages                                       |

@@ -1,0 +1,33 @@
+name: app
+
+on:
+  push:
+    branches: [ main, 'feature/**'  ]
+  pull_request:
+    branches: [ main, 'feature/**' ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build App
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x]
+
+    defaults:
+      run:
+        working-directory: app
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      #- run: npm run check:prettier
+      #- run: npm run check:lint
+      - run: npm run build --if-present
+      - run: npm test
