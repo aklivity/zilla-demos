@@ -42,7 +42,7 @@ services:
       - "8080:8080"
       - "9090:9090"
     volumes:
-      - ./zilla/chart/files:/etc/zilla
+      - ./zilla:/etc/zilla
     environment:
       KEYSTORE_PASSWORD: generated
     command: start -v
