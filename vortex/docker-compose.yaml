@@ -67,7 +67,7 @@ services:
       kafka-init:
         condition: service_completed_successfully
 
-  ui:
+  vortex_ui:
     build:
       context: ./ui
     container_name: vortex_ui
