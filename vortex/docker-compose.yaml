@@ -64,7 +64,8 @@ services:
     build: ./services/kafka-event-translator
     container_name: kafka_event_translator
     depends_on:
-      - zilla
+      kafka-init:
+        condition: service_completed_successfully
 
   ui:
     build:
@@ -79,40 +80,28 @@ services:
     image: confluentinc/cp-kafkacat:7.0.9.arm64
     container_name: http_messages
     depends_on:
-      - kafka
-    command:
-      - "sh"
-      - "-c"
-      - |
-          wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.3/wait-for | 
-          sh -s -- kafka:9092 --timeout=160 -- echo "kafka ready";
-          kafkacat -C -b kafka:9092 -t http_messages -J -u
+      kafka-init:
+        condition: service_completed_successfully
+    command:  kafkacat -C -b kafka:9092 -t http_messages -J -u
+         
 
   grpc_messages:
     image: confluentinc/cp-kafkacat:7.0.9.arm64
     container_name: grpc_messages
     depends_on:
-      - kafka
-    command:
-      - "sh"
-      - "-c"
-      - |
-          wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.3/wait-for | 
-          sh -s -- kafka:9092 --timeout=160 -- echo "kafka ready";
-          kafkacat -C -b kafka:9092 -t grpc_messages -J -u
+      kafka-init:
+        condition: service_completed_successfully
+    command: kafkacat -C -b kafka:9092 -t grpc_messages -J -u
+          
 
   sse_messages:
     image: confluentinc/cp-kafkacat:7.0.9.arm64
     container_name: sse_messages
     depends_on:
-      - kafka
-    command:
-      - "sh"
-      - "-c"
-      - |
-          wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.3/wait-for | 
-          sh -s -- kafka:9092 --timeout=160 -- echo "kafka ready";
-          kafkacat -C -b kafka:9092 -t sse_messages -J -u
+      kafka-init:
+        condition: service_completed_successfully
+    command: kafkacat -C -b kafka:9092 -t sse_messages -J -u
+          
 
 
 networks:
