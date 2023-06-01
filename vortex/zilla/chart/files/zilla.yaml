@@ -45,13 +45,13 @@ bindings:
       - when:
           - headers:
               ':scheme': https
-              ':authority': localhost:9090
+              ':authority': zilla:9090
               content-type: application/grpc
         exit: grpc_server0
       - when:
           - headers:
               ':scheme': http
-              ':authority': localhost:8080
+              ':authority': zilla:8080
               content-type: application/grpc
         exit: grpc_server0  
       - when:

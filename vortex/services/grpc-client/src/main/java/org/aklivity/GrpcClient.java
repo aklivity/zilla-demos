@@ -13,7 +13,7 @@ public class GrpcClient
     public static void main(String[] args) throws InterruptedException
     {
         final ManagedChannel channel = ManagedChannelBuilder.forAddress(
-                "localhost", 8080).usePlaintext().build();
+                "zilla", 8080).usePlaintext().build();
 
         DemoServiceGrpc.DemoServiceBlockingStub stub = DemoServiceGrpc.newBlockingStub(channel);
 

@@ -4,7 +4,7 @@
       <q-toolbar>
         <q-toolbar-title class="row items-center no-wrap">
           <img
-            :height="75"
+            :height="60"
             src="https://docs.aklivity.io/zilla/latest/logo.png"
           />
           <span class="q-ml-lg">Vortex Demo</span>

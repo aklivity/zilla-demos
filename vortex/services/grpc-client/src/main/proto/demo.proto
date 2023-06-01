@@ -13,25 +13,24 @@
  * specific language governing permissions and limitations under the License.
  */
 
- syntax = "proto3";
+syntax = "proto3";
 
- package example;
- 
- import "google/protobuf/empty.proto";
- 
- service DemoService
- {
- 
-   rpc DemoUnary(DemoMessage) returns (DemoMessage);
- 
-   rpc DemoServerStream(google.protobuf.Empty) returns (stream DemoMessage);
- 
- }
- 
- message DemoMessage
- {
-   string name = 1;
-   string color = 2;
-   int32 loop_count = 3;
- }
- 
+package example;
+
+import "google/protobuf/empty.proto";
+
+service DemoService
+{
+
+  rpc DemoUnary(DemoMessage) returns (DemoMessage);
+
+  rpc DemoServerStream(google.protobuf.Empty) returns (stream DemoMessage);
+
+}
+
+message DemoMessage
+{
+  string name = 1;
+  string color = 2;
+  int32 loop_count = 3;
+}
