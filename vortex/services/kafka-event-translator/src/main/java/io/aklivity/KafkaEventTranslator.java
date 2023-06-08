@@ -25,7 +25,7 @@ import java.io.IOException;
 
 public class KafkaEventTranslator
 {
-    private final static String BOOTSTRAP_SERVERS = "localhost:9092";
+    private final static String BOOTSTRAP_SERVERS = "kafka:9092";
     private final static String HTTP_TOPIC = "http_messages";
     private final static String GRPC_TOPIC = "grpc_messages";
     private final static String SSE_TOPIC = "sse_messages";
@@ -53,7 +53,7 @@ public class KafkaEventTranslator
     static Producer<String, byte[]> createGRPCProducer()
     {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
+        props.put("bootstrap.servers", BOOTSTRAP_SERVERS);
         props.put("acks", "all");
         props.put("retries", 0);
         props.put("batch.size", 16384);
@@ -68,7 +68,7 @@ public class KafkaEventTranslator
     static Producer<String, String> createSSEProducer()
     {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
+        props.put("bootstrap.servers", BOOTSTRAP_SERVERS);
         props.put("acks", "all");
         props.put("retries", 0);
         props.put("batch.size", 16384);

@@ -17,7 +17,7 @@ services:
       KAFKA_CFG_PROCESS_ROLES: "broker,controller"
       KAFKA_CFG_LISTENERS: "CLIENT://:9092,INTERNAL://:29092,CONTROLLER://:9093"
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "CLIENT://localhost:9092,INTERNAL://kafka:29092"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "CLIENT://kafka:9092,INTERNAL://kafka:29092"
 
   kafka-init:
     image: docker.io/bitnami/kafka:latest
@@ -42,25 +42,69 @@ services:
       - "8080:8080"
       - "9090:9090"
     volumes:
-      - ./zilla/chart/files:/etc/zilla
+      - ./zilla:/etc/zilla
     environment:
       KEYSTORE_PASSWORD: generated
     command: start -v
 
-  # grpc_client:
-  #   build: ./grpc-client
-  #   container_name: grpc_client
-  #   depends_on:
-  #     - zilla
-  # kafka_event_translator:
-  #   build: ./kafka-event-translator
-  #   container_name: kafka_event_translator
-  #   depends_on:
-  #     - zilla
-    
+  grpc_client:
+    build: ./services/grpc-client
+    container_name: grpc_client
+    depends_on:
+      - zilla
+    command:
+      - "sh"
+      - "-c"
+      - |
+          wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.3/wait-for | 
+          sh -s -- zilla:8080 --timeout=160 -- echo "zilla ready";
+          java -jar grpc-client-1.0-SNAPSHOT-shaded.jar;
+
+  kafka_event_translator:
+    build: ./services/kafka-event-translator
+    container_name: kafka_event_translator
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+
+  vortex_ui:
+    build:
+      context: ./ui
+    container_name: vortex_ui
+    ports:
+    - '80:80'
+    volumes:
+    - './ui:/app'
+
+  http_messages:
+    image: confluentinc/cp-kafkacat:7.0.9.arm64
+    container_name: http_messages
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    command:  kafkacat -C -b kafka:9092 -t http_messages -J -u
+         
+
+  grpc_messages:
+    image: confluentinc/cp-kafkacat:7.0.9.arm64
+    container_name: grpc_messages
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    command: kafkacat -C -b kafka:9092 -t grpc_messages -J -u
+          
+
+  sse_messages:
+    image: confluentinc/cp-kafkacat:7.0.9.arm64
+    container_name: sse_messages
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    command: kafkacat -C -b kafka:9092 -t sse_messages -J -u
+          
+
 
 networks:
   default:
     name: zilla-network
-    driver: bridge
 
