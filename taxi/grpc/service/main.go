@@ -4,10 +4,12 @@ import (
 	"context"
 	"flag"
 	"net"
+	"os"
 
 	pb "github.com/aklivity/zilla-demos/taxi/grpc/service/taxiroute"
 	"github.com/golang/glog"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/encoding/protojson"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -15,16 +17,14 @@ const (
 	port = ":50051"
 )
 
-type taxiRouteServer struct{
+type taxiRouteServer struct {
 	pb.UnimplementedTaxiRouteServer
 }
 
 func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptypb.Empty, error) {
 	defer glog.Flush()
-	glog.Info("Received", in.Timestamp)
-	glog.Info("Bbox", in.Bbox)
-	glog.Info("Coordinates", in.Coordinates)
-	return &emptypb.Empty{}, nil
+	err := os.WriteFile("test.json", []byte(protojson.Format(in)), 0644)
+	return &emptypb.Empty{}, err
 }
 
 func main() {

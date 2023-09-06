@@ -51,19 +51,6 @@
     }
   },
   "definitions": {
-    "RoutePoint": {
-      "type": "object",
-      "properties": {
-        "latitude": {
-          "type": "number",
-          "format": "float"
-        },
-        "longitude": {
-          "type": "number",
-          "format": "float"
-        }
-      }
-    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -72,6 +59,14 @@
         }
       },
       "additionalProperties": {}
+    },
+    "protobufNullValue": {
+      "type": "string",
+      "enum": [
+        "NULL_VALUE"
+      ],
+      "default": "NULL_VALUE",
+      "description": "`NullValue` is a singleton enumeration to represent the null value for the\n`Value` type union.\n\n The JSON representation for `NullValue` is JSON `null`.\n\n - NULL_VALUE: Null value."
     },
     "rpcStatus": {
       "type": "object",
@@ -103,7 +98,7 @@
           "type": "array",
           "items": {
             "type": "number",
-            "format": "float"
+            "format": "double"
           }
         },
         "distance": {
@@ -117,9 +112,12 @@
         "coordinates": {
           "type": "array",
           "items": {
-            "type": "object",
-            "$ref": "#/definitions/RoutePoint"
-          }
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "title": "repeated Point coordinates = 5;"
         }
       }
     }
