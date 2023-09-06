@@ -1,0 +1,127 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "taxi_route.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "TaxiRoute"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/taxiroute.TaxiRoute/CreateTaxi": {
+      "post": {
+        "operationId": "TaxiRoute_CreateTaxi",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/taxirouteRoute"
+            }
+          }
+        ],
+        "tags": [
+          "TaxiRoute"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "RoutePoint": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "format": "float"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "taxirouteRoute": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "number",
+          "format": "double"
+        },
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "format": "float"
+          }
+        },
+        "distance": {
+          "type": "number",
+          "format": "double"
+        },
+        "duration": {
+          "type": "number",
+          "format": "double"
+        },
+        "coordinates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/RoutePoint"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,4 +1,4 @@
-module github.com/aklivity/zilla-demos/taxi/grpc
+module github.com/aklivity/zilla-demos/taxi/grpc/gateway
 
 go 1.21.0
 
