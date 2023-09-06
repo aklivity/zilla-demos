@@ -104,43 +104,43 @@ bindings:
           capability: produce
           topic: taxi-route-requests
           acks: leader_only
-          reply-to: taxi-route-requests
+          reply-to: taxi-route-replies
 
-# # gRPC Kafka fanout to a remote server
-#   taxi_route_remote_server:
-#     type: kafka-grpc
-#     kind: remote_server
-#     entry: kafka_cache_client
-#     options:
-#       acks: leader_only
-#     routes:
-#       - when:
-#           - topic: taxi-route-requests
-#             reply-to: taxi-route-requests
-#             method: taxiroute.TaxiRoute/*
-#         with:
-#           scheme: http
-#           authority: ${{env.TAXI_ROUTE_SERVER_HOST}}:${{env.TAXI_ROUTE_SERVER_PORT}}
-#         exit: taxi_route_server_grpc_client
+# gRPC Kafka fanout to a remote server
+  taxi_route_remote_server:
+    type: kafka-grpc
+    kind: remote_server
+    entry: kafka_cache_client
+    options:
+      acks: leader_only
+    routes:
+      - when:
+          - topic: taxi-route-requests
+            reply-to: taxi-route-replies
+            method: taxiroute.TaxiRoute/*
+        with:
+          scheme: http
+          authority: ${{env.TAXI_ROUTE_SERVER_HOST}}:${{env.TAXI_ROUTE_SERVER_PORT}}
+        exit: taxi_route_server_grpc_client
 
-# # gRPC RoutGuide server
-#   taxi_route_server_grpc_client:
-#     type: grpc
-#     kind: client
-#     exit: taxi_route_server_http_client
-#   taxi_route_server_http_client:
-#     type: http
-#     kind: client
-#     options:
-#       versions:
-#         - h2
-#     exit: taxi_route_server_tcp_client
-#   taxi_route_server_tcp_client:
-#     type: tcp
-#     kind: client
-#     options:
-#       host: ${{env.TAXI_ROUTE_SERVER_HOST}}
-#       port: ${{env.TAXI_ROUTE_SERVER_PORT}}
+# gRPC RoutGuide server
+  taxi_route_server_grpc_client:
+    type: grpc
+    kind: client
+    exit: taxi_route_server_http_client
+  taxi_route_server_http_client:
+    type: http
+    kind: client
+    options:
+      versions:
+        - h2
+    exit: taxi_route_server_tcp_client
+  taxi_route_server_tcp_client:
+    type: tcp
+    kind: client
+    options:
+      host: ${{env.TAXI_ROUTE_SERVER_HOST}}
+      port: ${{env.TAXI_ROUTE_SERVER_PORT}}
 
 # Kafka caching layer
   kafka_cache_client:

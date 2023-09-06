@@ -4,6 +4,10 @@ plugins:
     out: gateway/taxiroute
     opt:
       - paths=source_relative
+  - plugin: buf.build/grpc/go:v1.3.0
+    out: gateway/taxiroute
+    opt:
+      - paths=source_relative
   - plugin: buf.build/grpc-ecosystem/gateway:v2.16.2
     out: gateway/taxiroute
     opt:

@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	gw "github.com/aklivity/zilla-demos/taxi/grpc/taxiroute" // Update
+	gw "github.com/aklivity/zilla-demos/taxi/grpc/gateway/taxiroute" // Update
 )
 
 var (

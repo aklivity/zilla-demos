@@ -21,7 +21,9 @@ type taxiRouteServer struct{
 
 func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptypb.Empty, error) {
 	defer glog.Flush()
-	glog.Info("Received: %v", in.Timestamp)
+	glog.Info("Received", in.Timestamp)
+	glog.Info("Bbox", in.Bbox)
+	glog.Info("Coordinates", in.Coordinates)
 	return &emptypb.Empty{}, nil
 }
 

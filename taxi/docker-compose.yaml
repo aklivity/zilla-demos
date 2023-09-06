@@ -27,6 +27,7 @@ services:
       - "-c"
       -  | 
         /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-route-requests --config cleanup.policy=compact
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-route-replies --config cleanup.policy=compact
         /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-locations --config cleanup.policy=compact
     depends_on:
       - kafka
@@ -56,8 +57,8 @@ services:
       - ./zilla.yaml:/etc/zilla/zilla.yaml
       - ./grpc/taxi_route.proto:/etc/zilla/proto/taxi_route.proto
     environment:
-      ROUTE_GUIDE_SERVER_HOST: taxi-route-server
-      ROUTE_GUIDE_SERVER_PORT: 50051
+      TAXI_ROUTE_SERVER_HOST: host.docker.internal
+      TAXI_ROUTE_SERVER_PORT: 50051
     command: start -v -e
 
 networks:
