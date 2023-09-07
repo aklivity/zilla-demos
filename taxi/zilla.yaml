@@ -161,8 +161,8 @@ bindings:
     kind: proxy
     options:
       topics:
-        sessions: iot-sessions
-        messages: iot-messages
+        sessions: taxi-sessions
+        messages: taxi-messages
         retained: taxi-locations
     exit: kafka_cache_client
 
@@ -170,13 +170,14 @@ bindings:
   kafka_cache_client:
     type: kafka
     kind: cache_client
-    options:
-      bootstrap:
-        - taxi-locations
     exit: kafka_cache_server
   kafka_cache_server:
     type: kafka
     kind: cache_server
+    options:
+      bootstrap:
+        - taxi-locations
+        - taxi-sessions
     exit: kafka_client
 
 # Connect to local Kafka
