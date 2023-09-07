@@ -7,7 +7,16 @@ bindings:
     kind: server
     options:
       host: 0.0.0.0
-      port: 7114
+      port: 
+        - 7114
+        - 1883
+    routes:
+        - when: 
+            - port: 7114
+          exit: http_server
+        - when: 
+            - port: 1883
+          exit: mqtt_server
     telemetry:
       metrics:
         - stream.*
@@ -25,12 +34,12 @@ bindings:
     #           :authority: localhost:7114
     #           :path: /taxi-routes
     #     exit: http_kafka_proxy
-    #   - when:
-    #       - headers:
-    #           :scheme: http
-    #           :authority: localhost:7114
-    #           :path: /taxi/*
-    #     exit: http_kafka_proxy
+      - when:
+          - headers:
+              :scheme: http
+              :authority: localhost:7114
+              :path: /taxi/*
+        exit: http_kafka_proxy
       - when:
           - headers:
               :scheme: http
@@ -141,6 +150,21 @@ bindings:
     options:
       host: ${{env.TAXI_ROUTE_SERVER_HOST}}
       port: ${{env.TAXI_ROUTE_SERVER_PORT}}
+
+# MQTT Server With an exit to Kafka
+  mqtt_server:
+    type: mqtt
+    kind: server
+    exit: mqtt_kafka_proxy
+  mqtt_kafka_proxy:
+    type: mqtt-kafka
+    kind: proxy
+    options:
+      topics:
+        sessions: iot-sessions
+        messages: iot-messages
+        retained: taxi-locations
+    exit: kafka_cache_client
 
 # Kafka caching layer
   kafka_cache_client:
