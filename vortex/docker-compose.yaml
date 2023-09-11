@@ -72,9 +72,9 @@ services:
       context: ./ui
     container_name: vortex_ui
     ports:
-    - '80:80'
+      - '80:80'
     volumes:
-    - './ui:/app'
+      - './ui:/app'
 
   http_messages:
     image: confluentinc/cp-kafkacat:7.0.9.arm64

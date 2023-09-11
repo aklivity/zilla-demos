@@ -30,3 +30,4 @@ node_modules/
 *.mobi
 *.pdf
 .quasar
+taxi/grpc/service/mqtt-simulator/__pycache__

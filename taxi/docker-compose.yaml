@@ -39,7 +39,7 @@ services:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
     ports:
-      - 80:8080
+      - 8080:8080
     depends_on:
       kafka-init:
         condition: service_completed_successfully
@@ -63,6 +63,14 @@ services:
       TAXI_ROUTE_SERVER_HOST: host.docker.internal
       TAXI_ROUTE_SERVER_PORT: 50051
     command: start -v -e
+
+  maps_ui:
+    build: https://github.com/vordimous/taxi-demo-map.git
+    image: aklivity/ors-map-client:local
+    container_name: maps_ui
+    user: "${UID:-0}:${GID:-0}"
+    ports:
+      - 80:80
 
 networks:
   default:
