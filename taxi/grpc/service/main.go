@@ -53,7 +53,7 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 	if errs != nil {
 		glog.Fatal(errs)
 	}
-	// defer os.Remove(file.Name())
+	defer os.Remove(file.Name())
 
 	inJson := protojson.Format(in)
 
@@ -61,6 +61,7 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 		Values [][]float64 `json:"coordinates"`
 	}
 	json.Unmarshal([]byte(inJson), &coords)
+	coords.Values = append(coords.Values, []float64{})
 
 	simConfig := simulatorConfig{
 		BrokerURL:       "localhost",
@@ -95,7 +96,7 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 	glog.Info(file.Name())
 	cmd := exec.Command("python3", "mqtt-simulator/main.py", "-f", file.Name())
 	// pipe, _ := cmd.StdoutPipe()
-	if err := cmd.Start(); err != nil {
+	if err := cmd.Run(); err != nil {
 		glog.Fatal(err)
 		glog.Flush()
 	}
