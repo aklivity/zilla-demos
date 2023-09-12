@@ -37,7 +37,7 @@ bindings:
       - when:
           - headers:
               :scheme: http
-              :authority: localhost:7114
+              :authority: zilla:7114
         exit: grpc_server
     exit: http_kafka_proxy
     telemetry:

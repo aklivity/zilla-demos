@@ -39,7 +39,7 @@ services:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
     ports:
-      - 8080:8080
+      - 8081:8080
     depends_on:
       kafka-init:
         condition: service_completed_successfully
@@ -78,6 +78,8 @@ services:
     build: ./grpc/service
     image: aklivity/taxi-service:local
     container_name: taxi-service
+    environment:
+      BROKER_HOST: zilla
     ports:
       - 50051:50051
 
@@ -86,6 +88,9 @@ services:
     image: aklivity/ors-map-client:local
     container_name: maps-ui
     user: "${UID:-0}:${GID:-0}"
+    environment:
+      TAXIROUTEAPI: 'http://localhost:7114/taxi/locations'
+      TAXILOCATIONAPI: 'http://localhost:8080/taxiroute.TaxiRoute/CreateTaxi'
     ports:
       - 80:80
 

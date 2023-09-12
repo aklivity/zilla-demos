@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"flag"
@@ -19,6 +20,9 @@ import (
 
 var (
 	servicePort = env.GetIntDefault("SERVICE_PORT", 50051)
+	brokerURL = env.GetDefault("BROKER_HOST", "localhost")
+	brokerPort = env.GetIntDefault("BROKER_PORT", 1883)
+	printSim = env.GetBoolDefault("PRINT_SIM_LOGS", false)
 )
 
 type dataConfig struct {
@@ -54,7 +58,6 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 	if errs != nil {
 		glog.Fatal(errs)
 	}
-	defer os.Remove(file.Name())
 
 	inJson := protojson.Format(in)
 
@@ -65,8 +68,8 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 	coords.Values = append(coords.Values, []float64{})
 
 	simConfig := simulatorConfig{
-		BrokerURL:       "localhost",
-		BrokerPort:      1883,
+		BrokerURL:       brokerURL,
+		BrokerPort:      brokerPort,
 		ProtocolVersion: 5,
 		CleanSession:    false,
 		Qos:             0,
@@ -94,30 +97,44 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 	if errs != nil {
 		glog.Fatal(errs)
 	}
-	glog.Info(file.Name())
+
+	glog.Info("Running simulator for file: ", file.Name())
+	if printSim {
+		glog.Info(simConfig)
+	}
 	cmd := exec.Command("python3", "mqtt-simulator/main.py", "-f", file.Name())
-	// pipe, _ := cmd.StdoutPipe()
-	if err := cmd.Run(); err != nil {
+	pipe, _ := cmd.StdoutPipe()
+	if err := cmd.Start(); err != nil {
 		glog.Fatal(err)
 		glog.Flush()
 	}
-	// reader := bufio.NewReader(pipe)
-	// line, err := reader.ReadString('\n')
-	// if err != nil {
-	// 	glog.Fatal(err)
-	// 	glog.Flush()
-	// }
-	// for err == nil {
-	// 	glog.Info(line)
-	// 	glog.Flush()
-	// 	line, err = reader.ReadString('\n')
-	// }
-
-	// save local
-	errs = os.WriteFile(fmt.Sprintf("%.0f_route.json", in.GetTimestamp()), jsonConfig, 0644)
-	if errs != nil {
-		glog.Fatal(errs)
+	if printSim {
+		ch := make(chan string)
+		go func(ch chan string) {
+			reader := bufio.NewReader(pipe)
+			for {
+				line, err := reader.ReadString('\n')
+				if err != nil {
+					glog.Fatal(err)
+					glog.Flush()
+					close(ch)
+					return
+				}
+				for err == nil {
+					glog.Info(line)
+					glog.Flush()
+					line, err = reader.ReadString('\n')
+				}
+				ch <- line
+			}
+		}(ch)
 	}
+	go func() {
+		cmd.Wait()
+		glog.Info("simulation done deleting: ", file.Name())
+		os.Remove(file.Name())
+	}()
+
 	return &emptypb.Empty{}, errs
 }
 
