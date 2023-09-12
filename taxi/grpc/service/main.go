@@ -10,14 +10,15 @@ import (
 	"os/exec"
 
 	pb "github.com/aklivity/zilla-demos/taxi/grpc/service/taxiroute"
+	env "github.com/caitlinelfring/go-env-default"
 	"github.com/golang/glog"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/encoding/protojson"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
-const (
-	port = ":50051"
+var (
+	servicePort = env.GetIntDefault("SERVICE_PORT", 50051)
 )
 
 type dataConfig struct {
@@ -124,15 +125,20 @@ func main() {
 	flag.Parse()
 	defer glog.Flush()
 
-	lis, err := net.Listen("tcp", port)
+	if _, err := os.Stat("mqtt-simulator/main.py"); err == nil {
+		glog.Info("Simulator files exists\n");
+	 } else {
+		glog.Info("Simulator files do not exist\n");
+	 }
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", servicePort))
 	if err != nil {
 		glog.Fatal("failed to listen:", err)
 	}
-	glog.Info("Listening on port: ", port)
+	glog.Info("Listening on port: ", servicePort)
 	s := grpc.NewServer()
 	pb.RegisterTaxiRouteServer(s, &taxiRouteServer{})
 	if err := s.Serve(lis); err != nil {
 		glog.Fatal("failed to serve:", err)
 	}
-	glog.Info("Serving on port: ", port)
 }

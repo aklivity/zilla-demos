@@ -28,12 +28,6 @@ bindings:
       access-control:
         policy: cross-origin
     routes:
-    #   - when:
-    #       - headers:
-    #           :scheme: http
-    #           :authority: localhost:7114
-    #           :path: /taxi-routes
-    #     exit: http_kafka_proxy
       - when:
           - headers:
               :scheme: http

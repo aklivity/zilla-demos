@@ -60,14 +60,31 @@ services:
       - ./zilla.yaml:/etc/zilla/zilla.yaml
       - ./grpc/taxi_route.proto:/etc/zilla/proto/taxi_route.proto
     environment:
-      TAXI_ROUTE_SERVER_HOST: host.docker.internal
+      TAXI_ROUTE_SERVER_HOST: taxi-service
       TAXI_ROUTE_SERVER_PORT: 50051
     command: start -v -e
 
-  maps_ui:
+  taxi-gateway:
+    build: ./grpc/gateway
+    image: aklivity/taxi-gateway:local
+    container_name: taxi-gateway
+    environment:
+      GATEWAY_PORT: 8080
+      GRPC_SERVER_ENDPOINT: zilla:7114
+    ports:
+      - 8080:8080
+
+  taxi-service:
+    build: ./grpc/service
+    image: aklivity/taxi-service:local
+    container_name: taxi-service
+    ports:
+      - 50051:50051
+
+  maps-ui:
     build: https://github.com/vordimous/taxi-demo-map.git
     image: aklivity/ors-map-client:local
-    container_name: maps_ui
+    container_name: maps-ui
     user: "${UID:-0}:${GID:-0}"
     ports:
       - 80:80
