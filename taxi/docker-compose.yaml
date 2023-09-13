@@ -55,7 +55,7 @@ services:
     ports:
       - 7114:7114
       - 1883:1883
-      - 9090:9090
+      - 7190:7190
     volumes:
       - ./zilla.yaml:/etc/zilla/zilla.yaml
       - ./grpc/taxi_route.proto:/etc/zilla/proto/taxi_route.proto
@@ -79,6 +79,7 @@ services:
     image: aklivity/taxi-service:local
     container_name: taxi-service
     environment:
+      PRINT_SIM_LOGS: true
       BROKER_HOST: zilla
     ports:
       - 50051:50051

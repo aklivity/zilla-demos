@@ -111,6 +111,7 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 	if printSim {
 		ch := make(chan string)
 		go func(ch chan string) {
+			defer glog.Flush()
 			reader := bufio.NewReader(pipe)
 			for {
 				line, err := reader.ReadString('\n')
@@ -130,8 +131,17 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 		}(ch)
 	}
 	go func() {
-		cmd.Wait()
-		glog.Info("simulation done deleting: ", file.Name())
+		defer glog.Flush()
+		if err := cmd.Wait(); err != nil {
+			if exiterr, ok := err.(*exec.ExitError); ok {
+				glog.Info("Exit Status: ", exiterr.ExitCode())
+				glog.Info(exiterr)
+			} else {
+				glog.Info("Exit Status: ", exiterr.ExitCode())
+				glog.Fatal("Simulation Error: ", err)
+			}
+		}
+		glog.Info("Simulation done deleting: ", file.Name())
 		os.Remove(file.Name())
 	}()
 
@@ -143,10 +153,10 @@ func main() {
 	defer glog.Flush()
 
 	if _, err := os.Stat("mqtt-simulator/main.py"); err == nil {
-		glog.Info("Simulator files exists\n");
-	 } else {
-		glog.Info("Simulator files do not exist\n");
-	 }
+		glog.Info("Simulator files exist\n")
+	} else {
+		glog.Info("Simulator files do not exist\n")
+	}
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", servicePort))
 	if err != nil {

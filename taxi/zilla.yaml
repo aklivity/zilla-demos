@@ -1,4 +1,4 @@
-name: zilla-quickstart
+name: zilla-taxi-demo
 bindings:
 
 # Gateway ingress config
@@ -190,14 +190,27 @@ bindings:
           - cidr: 0.0.0.0/0
 
 telemetry:
-  attributes:
-    service.namespace: zilla-quickstart
-
   # Desired metrics to track
   metrics:
+    - grpc.active.requests
+    - grpc.duration
+    - grpc.request.size
+    - grpc.response.size
+    - grpc.requests.per.rpc
+    - grpc.responses.per.rpc
+    - http.active.requests
+    - http.duration
     - http.request.size
     - http.response.size
+    - stream.active.received
+    - stream.active.sent
+    - stream.opens.received
     - stream.opens.sent
+    - stream.data.received
+    - stream.data.sent
+    - stream.errors.received
+    - stream.errors.sent
+    - stream.closes.received
     - stream.closes.sent
 
   # Prometheus endpoint definition
@@ -208,4 +221,4 @@ telemetry:
         endpoints:
           - scheme: http
             path: /metrics
-            port: 9090
+            port: 7190
