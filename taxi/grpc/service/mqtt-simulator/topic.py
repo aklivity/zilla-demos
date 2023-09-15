@@ -117,9 +117,13 @@ class TopicAuto(Topic, threading.Thread):
         if self.old_payload == None:
             # generate initial data
             for data in self.topic_data:
+                payload = data.get('PAYLOAD_ROOT', payload)
                 payload[data['NAME']] = self.generate_initial_value(data)
         else:
             # generate next data
             for data in self.topic_data:
+                payload = data.get('PAYLOAD_ROOT', payload)
                 payload[data['NAME']] = self.generate_next_value(data, self.old_payload[data['NAME']])
+        print("topic", self.topic_url)
+        print("payload", payload[data['NAME']])
         return payload

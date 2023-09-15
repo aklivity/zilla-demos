@@ -20,15 +20,16 @@ import (
 
 var (
 	servicePort = env.GetIntDefault("SERVICE_PORT", 50051)
-	brokerURL = env.GetDefault("BROKER_HOST", "localhost")
-	brokerPort = env.GetIntDefault("BROKER_PORT", 1883)
-	printSim = env.GetBoolDefault("PRINT_SIM_LOGS", false)
+	brokerURL   = env.GetDefault("BROKER_HOST", "localhost")
+	brokerPort  = env.GetIntDefault("BROKER_PORT", 1883)
+	printSim    = env.GetBoolDefault("PRINT_SIM_LOGS", false)
 )
 
 type dataConfig struct {
-	Name   string      `json:"NAME"`
-	Type   string      `json:"TYPE"`
-	Values [][]float64 `json:"VALUES"`
+	Name        string      `json:"NAME"`
+	PayloadRoot any         `json:"PAYLOAD_ROOT"`
+	Type        string      `json:"TYPE"`
+	Values      [][]float64 `json:"VALUES"`
 }
 
 type topicConfig struct {
@@ -81,7 +82,10 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 				TimeInterval: int(in.GetDuration() / float64(len(coords.Values))),
 				Data: []dataConfig{
 					{
-						Name:   "coordinate",
+						Name: "coordinate",
+						PayloadRoot: struct {
+							Key string `json:"key"`
+						}{Key: fmt.Sprintf("%.0f", in.GetTimestamp())},
 						Type:   "raw_values",
 						Values: coords.Values,
 					},
