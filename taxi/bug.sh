@@ -2,6 +2,7 @@
 echo -e "Running test with 5 calls \n"
 for i in {1..5}
 do
+    sleep 5
     curl --location 'http://localhost:8080/taxiroute.TaxiRoute/CreateTaxi' \
     --header 'Content-Type: application/json' \
     --header 'Accept: application/json' \
@@ -15,6 +16,7 @@ sleep 10
 echo -e "Running test with 10 calls \n"
 for i in {1..10}
 do
+    sleep 5
     curl --location 'http://localhost:8080/taxiroute.TaxiRoute/CreateTaxi' \
     --header 'Content-Type: application/json' \
     --header 'Accept: application/json' \
@@ -25,9 +27,10 @@ done
 echo -e "Finished, waiting... \n"
 sleep 10
 
-echo -e "Running test with 20 calls \n"
-for i in {1..20}
+echo -e "Running test with 200 calls \n"
+for i in {1..200}
 do
+    sleep 5
     curl --location 'http://localhost:8080/taxiroute.TaxiRoute/CreateTaxi' \
     --header 'Content-Type: application/json' \
     --header 'Accept: application/json' \
