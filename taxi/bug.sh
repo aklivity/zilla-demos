@@ -31,9 +31,9 @@ done
 echo -e "Finished, waiting... \n"
 sleep 5
 
-echo -e "Running test with 200 fast calls \n"
-for i in {1..200}
+echo -e "Running test with 500 fast calls \n"
 timestamp=$(date +%s)
+for i in {1..500}
 do
     sleep 0.01
     ((timestamp++))
