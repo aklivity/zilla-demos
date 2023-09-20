@@ -55,7 +55,7 @@ type taxiRouteServer struct {
 
 func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptypb.Empty, error) {
 	defer glog.Flush()
-	file, errs := os.CreateTemp("", fmt.Sprintf("%.0f-route-*.json", in.GetTimestamp()))
+	file, errs := os.CreateTemp("", fmt.Sprintf("%.0f-route-*.json", in.GetKey()))
 	if errs != nil {
 		glog.Fatal(errs)
 	}
@@ -80,14 +80,14 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 		Topics: []topicConfig{
 			{
 				Type:         "single",
-				Prefix:       fmt.Sprintf("%.0f", in.GetTimestamp()),
+				Prefix:       in.GetKey(),
 				TimeInterval: int(in.GetDuration() / float64(len(coords.Values))),
 				Data: []dataConfig{
 					{
 						Name: "coordinate",
 						PayloadRoot: struct {
 							Key string `json:"key"`
-						}{Key: fmt.Sprintf("%.0f", in.GetTimestamp())},
+						}{Key: in.GetKey()},
 						Type:   "raw_values",
 						Values: coords.Values,
 					},

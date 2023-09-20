@@ -90,9 +90,8 @@
     "taxirouteRoute": {
       "type": "object",
       "properties": {
-        "timestamp": {
-          "type": "number",
-          "format": "double"
+        "key": {
+          "type": "string"
         },
         "bbox": {
           "type": "array",
@@ -116,8 +115,7 @@
             "items": {
               "type": "object"
             }
-          },
-          "title": "repeated Point coordinates = 5;"
+          }
         }
       }
     }
