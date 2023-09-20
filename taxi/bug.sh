@@ -33,8 +33,10 @@ sleep 5
 
 echo -e "Running test with 200 fast calls \n"
 for i in {1..200}
+timestamp=$(date +%s)
 do
-    timestamp=$(date +%s)
+    sleep 0.01
+    ((timestamp++))
     curl --location 'http://localhost:8080/taxiroute.TaxiRoute/CreateTaxi' \
     --header 'Content-Type: application/json' \
     --header 'Accept: application/json' \

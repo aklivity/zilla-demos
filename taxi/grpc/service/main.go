@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -19,10 +20,12 @@ import (
 )
 
 var (
-	servicePort = env.GetIntDefault("SERVICE_PORT", 50051)
-	brokerURL   = env.GetDefault("BROKER_HOST", "localhost")
-	brokerPort  = env.GetIntDefault("BROKER_PORT", 1883)
-	printSim    = env.GetBoolDefault("PRINT_SIM_LOGS", false)
+	servicePort   = env.GetIntDefault("SERVICE_PORT", 50051)
+	brokerURL     = env.GetDefault("BROKER_HOST", "localhost")
+	brokerPort    = env.GetIntDefault("BROKER_PORT", 1883)
+	printSim      = env.GetBoolDefault("PRINT_SIM_LOGS", false)
+	defaultRoutes = env.GetBoolDefault("DEFAUlT_ROUTES", false)
+	logChannel  = make(chan string)
 )
 
 type dataConfig struct {
@@ -45,7 +48,7 @@ type simulatorConfig struct {
 	ProtocolVersion int           `json:"PROTOCOL_VERSION"`
 	CleanSession    bool          `json:"CLEAN_SESSION"`
 	Qos             int           `json:"QOS"`
-	Retained        bool          `json:"RETAINED"`
+	Retain          bool          `json:"RETAIN"`
 	Topics          []topicConfig `json:"TOPICS"`
 }
 
@@ -53,9 +56,65 @@ type taxiRouteServer struct {
 	pb.UnimplementedTaxiRouteServer
 }
 
+func printStdPipe(pipe io.ReadCloser, ch chan string) {
+	go func(ch chan string) {
+		defer glog.Flush()
+		reader := bufio.NewReader(pipe)
+		for {
+			line, err := reader.ReadString('\n')
+			if err != nil {
+				glog.Fatal(err)
+				glog.Flush()
+				close(ch)
+				return
+			}
+			for err == nil {
+				glog.Info(line)
+				glog.Flush()
+				line, err = reader.ReadString('\n')
+			}
+			ch <- line
+		}
+	}(ch)
+}
+
+func runSim(fileName string) {
+	defer glog.Flush()
+	cmd := exec.Command("python3", "mqtt-simulator/main.py", "-f", fileName)
+	glog.Info("python3", "mqtt-simulator/main.py", "-f", fileName)
+	pipe, _ := cmd.StdoutPipe()
+	pipeErr, _ := cmd.StderrPipe()
+	if err := cmd.Start(); err != nil {
+		glog.Fatal(err)
+		glog.Flush()
+	}
+	glog.Info("Running simulator for file: ", fileName)
+	if printSim {
+		printStdPipe(pipe, logChannel)
+		printStdPipe(pipeErr, logChannel)
+	}
+	go func() {
+		defer glog.Flush()
+		if err := cmd.Wait(); err != nil {
+			if exiterr, ok := err.(*exec.ExitError); ok {
+				glog.Info("Exit Status: ", exiterr.ExitCode())
+				glog.Info(exiterr)
+			} else {
+				glog.Info("Exit Status: ", exiterr.ExitCode())
+				glog.Fatal("Simulation Error: ", err)
+			}
+		}
+		if fileName != "" {
+			glog.Info("Simulation done deleting: ", fileName)
+			// os.Remove(fileName)
+		}
+		
+	}()
+}
+
 func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptypb.Empty, error) {
 	defer glog.Flush()
-	file, errs := os.CreateTemp("", fmt.Sprintf("%.0f-route-*.json", in.GetKey()))
+	file, errs := os.CreateTemp("", fmt.Sprintf("%s-route-*.json", in.GetKey()))
 	if errs != nil {
 		glog.Fatal(errs)
 	}
@@ -76,7 +135,7 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 		ProtocolVersion: 5,
 		CleanSession:    false,
 		Qos:             0,
-		Retained:        true,
+		Retain:          true,
 		Topics: []topicConfig{
 			{
 				Type:         "single",
@@ -104,52 +163,11 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 		glog.Fatal(errs)
 	}
 
-	glog.Info("Running simulator for file: ", file.Name())
 	if printSim {
 		glog.Info(simConfig)
 	}
-	cmd := exec.Command("python3", "mqtt-simulator/main.py", "-f", file.Name())
-	pipe, _ := cmd.StdoutPipe()
-	if err := cmd.Start(); err != nil {
-		glog.Fatal(err)
-		glog.Flush()
-	}
-	if printSim {
-		ch := make(chan string)
-		go func(ch chan string) {
-			defer glog.Flush()
-			reader := bufio.NewReader(pipe)
-			for {
-				line, err := reader.ReadString('\n')
-				if err != nil {
-					glog.Fatal(err)
-					glog.Flush()
-					close(ch)
-					return
-				}
-				for err == nil {
-					glog.Info(line)
-					glog.Flush()
-					line, err = reader.ReadString('\n')
-				}
-				ch <- line
-			}
-		}(ch)
-	}
-	go func() {
-		defer glog.Flush()
-		if err := cmd.Wait(); err != nil {
-			if exiterr, ok := err.(*exec.ExitError); ok {
-				glog.Info("Exit Status: ", exiterr.ExitCode())
-				glog.Info(exiterr)
-			} else {
-				glog.Info("Exit Status: ", exiterr.ExitCode())
-				glog.Fatal("Simulation Error: ", err)
-			}
-		}
-		glog.Info("Simulation done deleting: ", file.Name())
-		os.Remove(file.Name())
-	}()
+
+	runSim(file.Name())
 
 	return &emptypb.Empty{}, errs
 }
@@ -157,9 +175,13 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 func main() {
 	flag.Parse()
 	defer glog.Flush()
+	defer close(logChannel)
 
 	if _, err := os.Stat("mqtt-simulator/main.py"); err == nil {
 		glog.Info("Simulator files exist\n")
+		if defaultRoutes {
+			runSim("default_routes.json")
+		}
 	} else {
 		glog.Info("Simulator files do not exist\n")
 	}

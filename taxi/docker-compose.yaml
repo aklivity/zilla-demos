@@ -78,8 +78,12 @@ services:
     build: ./grpc/service
     image: aklivity/taxi-service:local
     container_name: taxi-service
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
     environment:
-      PRINT_SIM_LOGS: true
+      PRINT_SIM_LOGS: false
+      DEFAUlT_ROUTES: false
       BROKER_HOST: zilla
     ports:
       - 50051:50051
@@ -88,6 +92,9 @@ services:
     build: https://github.com/vordimous/taxi-demo-map.git#main
     image: aklivity/ors-map-client:local
     container_name: maps-ui
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
     user: "${UID:-0}:${GID:-0}"
     environment:
       TAXIROUTEAPI: 'http://localhost:7114/taxi/locations'
@@ -97,5 +104,5 @@ services:
 
 networks:
   default:
-    name: zilla-network
+    name: zilla-taxi-demo-network
     driver: bridge
