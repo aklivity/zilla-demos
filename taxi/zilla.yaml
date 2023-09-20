@@ -60,22 +60,6 @@ bindings:
     kind: proxy
     routes:
       - when:
-          - method: POST
-            path: /taxi-routes
-        exit: kafka_cache_client
-        with:
-          capability: produce
-          topic: taxi-routes
-          key: ${idempotencyKey}
-      - when:
-          - method: POST
-            path: /taxi/locations
-        exit: kafka_cache_client
-        with:
-          capability: produce
-          topic: taxi-locations
-          key: ${idempotencyKey}
-      - when:
           - method: GET
             path: /taxi/locations
         exit: kafka_cache_client

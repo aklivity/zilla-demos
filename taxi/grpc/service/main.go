@@ -66,7 +66,9 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 		Values [][]float64 `json:"coordinates"`
 	}
 	json.Unmarshal([]byte(inJson), &coords)
-	coords.Values = append(coords.Values, []float64{})
+	endMark := coords.Values[len(coords.Values)-1]
+	endMark = append(endMark, -1)
+	coords.Values = append(coords.Values, endMark)
 
 	simConfig := simulatorConfig{
 		BrokerURL:       brokerURL,
