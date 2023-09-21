@@ -9,17 +9,6 @@ bindings:
       host: 0.0.0.0
       port:
         - 7114
-    telemetry:
-      metrics:
-        - stream.*
-    exit: http_server
-  tcp_server_:
-    type: tcp
-    kind: server
-    options:
-      host: 0.0.0.0
-      port:
-        - 7114
         - 1883
     routes:
         - when:
