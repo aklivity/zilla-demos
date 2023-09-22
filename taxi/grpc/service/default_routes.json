@@ -8,12 +8,12 @@
   "TOPICS": [
     {
       "TYPE": "single",
-      "PREFIX": "O'Flaherty's_Irish_Pub-0",
+      "PREFIX": "O'Flaherty's_Irish_Pub",
       "TIME_INTERVAL": 15,
       "DATA": [
         {
           "NAME": "coordinate",
-          "PAYLOAD_ROOT": { "key": "O'Flaherty's_Irish_Pub-0" },
+          "PAYLOAD_ROOT": { "key": "O'Flaherty's_Irish_Pub", "icon": "airport_shuttle" },
           "TYPE": "raw_values",
           "RESTART_ON_END": true,
           "VALUES": [
@@ -52,12 +52,12 @@
     },
     {
       "TYPE": "single",
-      "PREFIX": "ISO_Beers-0",
+      "PREFIX": "ISO_Beers",
       "TIME_INTERVAL": 10,
       "DATA": [
         {
           "NAME": "coordinate",
-          "PAYLOAD_ROOT": { "key": "ISO_Beers-0" },
+          "PAYLOAD_ROOT": { "key": "ISO_Beers", "icon": "airport_shuttle" },
           "TYPE": "raw_values",
           "RESTART_ON_END": true,
           "VALUES": [

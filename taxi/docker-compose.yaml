@@ -83,7 +83,7 @@ services:
         condition: service_completed_successfully
     environment:
       PRINT_SIM_LOGS: false
-      DEFAUlT_ROUTES: false
+      DEFAUlT_ROUTES: true
       BROKER_HOST: zilla
     ports:
       - 50051:50051
