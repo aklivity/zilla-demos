@@ -62,7 +62,7 @@ services:
     environment:
       TAXI_ROUTE_SERVER_HOST: taxi-service
       TAXI_ROUTE_SERVER_PORT: 50051
-    command: start -v -e
+    command: start -v -e -Pzilla.engine.worker.capacity=512
 
   taxi-gateway:
     build: ./grpc/gateway
@@ -81,6 +81,8 @@ services:
     depends_on:
       kafka-init:
         condition: service_completed_successfully
+    volumes:
+      - ./grpc/service/default_routes.json:/usr/src/app/default_routes.json
     environment:
       PRINT_SIM_LOGS: false
       DEFAUlT_ROUTES: true

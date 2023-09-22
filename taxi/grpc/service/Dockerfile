@@ -9,7 +9,6 @@ WORKDIR /usr/src/app
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
-COPY default_routes.json default_routes.json
 COPY mqtt-simulator mqtt-simulator
 
 COPY --from=build /bin/service /usr/bin/service

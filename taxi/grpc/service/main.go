@@ -179,8 +179,11 @@ func main() {
 
 	if _, err := os.Stat("mqtt-simulator/main.py"); err == nil {
 		glog.Info("Simulator files exist\n")
-		if defaultRoutes {
-			runSim("default_routes.json")
+		if _, err := os.Stat("default_routes.json"); defaultRoutes && err == nil {
+			glog.Info("default_routes file exist\n")
+			if defaultRoutes {
+				runSim("default_routes.json")
+			}
 		}
 	} else {
 		glog.Info("Simulator files do not exist\n")
