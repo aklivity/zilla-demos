@@ -22,6 +22,24 @@ This demo was created to showcase the MQTT protocol brokered by Zilla. It uses [
 1. The location will be filed as the destination with the San Jose Convention center being the origin.
 1. A Taxi marker will appear along the route and travel along it for the duration shown in the popup.
 
+## Run through
+
+1. Introduce the taxi-demo that demonstrates multiple taxi clients publishing location updates to Kafka using Zilla as an MQTT broker.
+1. Walkthrough architecture slide
+   1. Cover all different parts of the setup
+      - Use the Diagram to describe the architecture
+      - Describe the data flow through Zilla using MQTT protocol
+   1. Highlight what to note as running through demo
+      - Moving taxi/bus icons
+      - Ask for input to select a new route
+1. Show the demo explaining what is happening at each step
+   1. Map UI Hail cab
+   1. Show Kafka UI with the latest message key being destination
+   1. Show MQTT Postman, can sub to new topic
+      - potential ot update bus icon using postman
+   1. Show Grafana, number of connected clients should have increased by 1
+   1. Back to Map UI
+1. End the demo by binging back up the architecture slide and summarizing outcomes and highlighting Zilla benefits
 
 ## Load Testing
 
