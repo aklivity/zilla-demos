@@ -1,0 +1,42 @@
+.DS_Store
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/src/ors-js/
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+## The ignores below can be removed/commented in the case
+## you want to include the config files, the plugins
+## and the built static app in a custom repo.
+
+# Ignore config file
+!/src/config/.gitkeep
+
+# Ignore config file
+!/src/plugins/plugin-example/
+
+# Built web app #
+static
+!/static/css/.gitkeep
+!/static/fonts/.gitkeep
+!/static/img/.gitkeep
+
+# leaflet helpers
+
+/images
+
+# cypress tests
+/cypress/videos/
+/cypress/screenshots/
+/cypress/downloads/
+/index.html
+/nginx/

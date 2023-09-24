@@ -1,0 +1,42 @@
+.map-search-tab {
+  padding: 5px !important;
+}
+
+.opt-btn {
+  margin-left: 0;
+  margin-top: 15px
+}
+.extra-btn {
+  padding-left: 0;
+}
+
+ul.place-inputs {
+  padding: 0;
+  padding-top: 10px;
+}
+
+ul.place-inputs li {
+  list-style: none;
+}
+
+.reorder-handle:hover{
+  cursor:move;
+}
+
+.reorder-handle{
+  padding-top:18px;
+}
+
+.ghost {
+  opacity: 0.4;
+}
+
+.route-importer {
+  margin-left: -10px;
+  margin-top: 9px;
+  float: left;
+}
+
+.tab-title {
+  font-size: 11px;
+}

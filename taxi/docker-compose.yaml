@@ -1,0 +1,116 @@
+version: "3"
+services:
+  kafka:
+    image: docker.io/bitnami/kafka:latest
+    container_name: kafka
+    restart: unless-stopped
+    ports:
+      - 9092:9092
+      - 29092:9092
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_CFG_NODE_ID: "1"
+      KAFKA_CFG_BROKER_ID: "1"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@127.0.0.1:9093"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "CLIENT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_CFG_LOG_DIRS: "/tmp/logs"
+      KAFKA_CFG_PROCESS_ROLES: "broker,controller"
+      KAFKA_CFG_LISTENERS: "CLIENT://:9092,INTERNAL://:29092,CONTROLLER://:9093"
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "CLIENT://localhost:9092,INTERNAL://kafka:29092"
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  kafka-init:
+    image: docker.io/bitnami/kafka:latest
+    command:
+      - "/bin/bash"
+      - "-c"
+      - |
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-route-requests --config cleanup.policy=delete
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-route-replies --config cleanup.policy=delete
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-messages
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-locations --config cleanup.policy=compact
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-sessions --config cleanup.policy=compact
+    depends_on:
+      - kafka
+    init: true
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    restart: unless-stopped
+    ports:
+      - 8081:8080
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+
+  zilla:
+    image: ghcr.io/aklivity/zilla:latest
+    container_name: zilla
+    restart: unless-stopped
+    depends_on:
+      - kafka
+    ports:
+      - 7114:7114
+      - 1883:1883
+      - 7190:7190
+    volumes:
+      - ./zilla.yaml:/etc/zilla/zilla.yaml
+      - ./grpc/taxi_route.proto:/etc/zilla/proto/taxi_route.proto
+    environment:
+      TAXI_ROUTE_SERVER_HOST: taxi-service
+      TAXI_ROUTE_SERVER_PORT: 50051
+    command: start -v -e -Pzilla.engine.worker.capacity=512
+
+  taxi-gateway:
+    build: ./grpc/gateway
+    container_name: taxi-gateway
+    image: aklivity/taxi-gateway:local
+    restart: unless-stopped
+    environment:
+      GATEWAY_PORT: 8080
+      GRPC_SERVER_ENDPOINT: zilla:7114
+    ports:
+      - 8080:8080
+
+  taxi-service:
+    build: ./grpc/service
+    container_name: taxi-service
+    image: aklivity/taxi-service:local
+    restart: unless-stopped
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    volumes:
+      - ./grpc/service/default_routes.json:/usr/src/app/default_routes.json
+    environment:
+      PRINT_SIM_LOGS: false
+      DEFAUlT_ROUTES: true
+      BROKER_HOST: zilla
+    ports:
+      - 50051:50051
+
+  taxi-map-ui:
+    build: ./map-ui
+    container_name: taxi-map-ui
+    image: aklivity/taxi-map-ui:local
+    restart: unless-stopped
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    user: "${UID:-0}:${GID:-0}"
+    environment:
+      TAXIROUTEAPI: "http://localhost:7114/taxi/locations"
+      TAXILOCATIONAPI: "http://localhost:8080/taxiroute.TaxiRoute/CreateTaxi"
+    ports:
+      - 80:80
+
+networks:
+  default:
+    name: zilla-taxi-demo-network
+    driver: bridge

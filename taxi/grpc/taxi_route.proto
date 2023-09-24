@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package taxiroute;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/aklivity/zilla-demos/taxi/grpc/taxiroute";
+
+service TaxiRoute {
+  rpc CreateTaxi(Route) returns (google.protobuf.Empty) {}
+}
+
+message Route {
+  string key = 1;
+  repeated double bbox = 2;
+  double distance = 3;
+  double duration = 4;
+  repeated google.protobuf.ListValue  coordinates = 5;
+}

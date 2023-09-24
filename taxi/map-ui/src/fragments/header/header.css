@@ -1,0 +1,26 @@
+/* Customize the ORS toolbar */
+
+.app-toolbar {
+  background-color: #fff !important;
+  border-bottom: 2px solid #e7e7e7;
+  -webkit-box-shadow:none;
+  box-shadow:none;
+  z-index: 5;
+  padding-left: 0 !important;
+  position: absolute;
+  top:0;
+  transition:all 1s ease;
+}
+
+.app-toolbar.hidden {
+  top:-100px;
+}
+
+@media (min-width: 1200px) {
+  .app-toolbar .v-toolbar__content {
+    max-width: 1170px;
+    margin: auto;
+  }
+}
+
+/* End customize the ORS toolbar */
