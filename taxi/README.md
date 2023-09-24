@@ -2,6 +2,8 @@
 
 This demo was created to showcase the MQTT protocol brokered by Zilla. It uses [Open Street Maps](https://www.openstreetmap.org/), [Open Route Service](https://openrouteservice.org/), and the [MQTT Simulator](https://github.com/DamascenoRafael/mqtt-simulator) to demonstrate a real world taxi hailing and location tracking service.
 
+![](.assets/zilla-taxi-demo-diagram@2x.png)
+
 ## Requirements
 
 - Docker Compose
@@ -21,6 +23,14 @@ This demo was created to showcase the MQTT protocol brokered by Zilla. It uses [
 1. Click the directions button for the selected location.
 1. The location will be filed as the destination with the San Jose Convention center being the origin.
 1. A Taxi marker will appear along the route and travel along it for the duration shown in the popup.
+
+## Using the Demo UI
+
+The UI has a set of bars highlighted in the downtown San Jose, CA area. Users can hail taxis to take them to these locations. There are also a number of shuttle busses running route to the bars as well that will make permanent round trips.
+
+- Clicking on one of the bar markers lets you hail a taxi
+- The hailed taxi will "pickup" the passenger at the San Jose, CA Convention center
+- The taxi will then proceed to the designated location on the map and stop sending location updates
 
 ## Run through
 
