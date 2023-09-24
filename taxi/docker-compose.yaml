@@ -48,7 +48,7 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
 
   zilla:
-    image: ghcr.io/aklivity/zilla:develop-SNAPSHOT
+    image: ghcr.io/aklivity/zilla:latest
     container_name: zilla
     depends_on:
       - kafka
