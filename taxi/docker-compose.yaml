@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   kafka:
     image: docker.io/bitnami/kafka:latest
@@ -26,7 +26,7 @@ services:
     command:
       - "/bin/bash"
       - "-c"
-      -  | 
+      - |
         /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-route-requests --config cleanup.policy=delete
         /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-route-replies --config cleanup.policy=delete
         /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-messages
@@ -105,8 +105,8 @@ services:
         condition: service_completed_successfully
     user: "${UID:-0}:${GID:-0}"
     environment:
-      TAXIROUTEAPI: 'http://localhost:7114/taxi/locations'
-      TAXILOCATIONAPI: 'http://localhost:8080/taxiroute.TaxiRoute/CreateTaxi'
+      TAXIROUTEAPI: "http://localhost:7114/taxi/locations"
+      TAXILOCATIONAPI: "http://localhost:8080/taxiroute.TaxiRoute/CreateTaxi"
     ports:
       - 80:80
 

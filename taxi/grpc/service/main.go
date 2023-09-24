@@ -106,7 +106,7 @@ func runSim(fileName string) {
 		}
 		if fileName != "" {
 			glog.Info("Simulation done deleting: ", fileName)
-			// os.Remove(fileName)
+			os.Remove(fileName)
 		}
 		
 	}()

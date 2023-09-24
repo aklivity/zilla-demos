@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   kafka:
     image: docker.io/bitnami/kafka:latest
@@ -21,10 +21,10 @@ services:
 
   kafka-init:
     image: docker.io/bitnami/kafka:latest
-    command: 
+    command:
       - "/bin/bash"
       - "-c"
-      -  | 
+      - |
         /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic http_messages
         /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic grpc_messages
         /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic grpc_exchanges
@@ -56,9 +56,9 @@ services:
       - "sh"
       - "-c"
       - |
-          wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.3/wait-for | 
-          sh -s -- zilla:8080 --timeout=160 -- echo "zilla ready";
-          java -jar grpc-client-1.0-SNAPSHOT-shaded.jar;
+        wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.3/wait-for | 
+        sh -s -- zilla:8080 --timeout=160 -- echo "zilla ready";
+        java -jar grpc-client-1.0-SNAPSHOT-shaded.jar;
 
   kafka_event_translator:
     build: ./services/kafka-event-translator
@@ -72,9 +72,9 @@ services:
       context: ./ui
     container_name: vortex_ui
     ports:
-      - '80:80'
+      - "80:80"
     volumes:
-      - './ui:/app'
+      - "./ui:/app"
 
   http_messages:
     image: confluentinc/cp-kafkacat:7.0.9.arm64
@@ -82,8 +82,7 @@ services:
     depends_on:
       kafka-init:
         condition: service_completed_successfully
-    command:  kafkacat -C -b kafka:9092 -t http_messages -J -u
-         
+    command: kafkacat -C -b kafka:9092 -t http_messages -J -u
 
   grpc_messages:
     image: confluentinc/cp-kafkacat:7.0.9.arm64
@@ -92,7 +91,6 @@ services:
       kafka-init:
         condition: service_completed_successfully
     command: kafkacat -C -b kafka:9092 -t grpc_messages -J -u
-          
 
   sse_messages:
     image: confluentinc/cp-kafkacat:7.0.9.arm64
@@ -101,10 +99,7 @@ services:
       kafka-init:
         condition: service_completed_successfully
     command: kafkacat -C -b kafka:9092 -t sse_messages -J -u
-          
-
 
 networks:
   default:
     name: zilla-network
-
