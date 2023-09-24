@@ -33,7 +33,7 @@ const defaultMapSettings = {
   accessibleModeActive: false,
   shownOnceTooltips: {},
   // mapCenter: {lat: 37.32897976943132, lng: -121.88891172409059}, // Convention Center, San Jose, CA, USA
-  mapCenter: {lat: 37.333927711214876, lng: -121.88273191452028}, // downtown
+  mapCenter: {lat: 37.334678404943276, lng: -121.88837528228761}, // downtown
   defaultIsochroneColors: [  // qgis plugin color scheme as default
     '#2b83ba',
     '#64abb0',
