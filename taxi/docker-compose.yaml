@@ -3,6 +3,7 @@ services:
   kafka:
     image: docker.io/bitnami/kafka:latest
     container_name: kafka
+    restart: unless-stopped
     ports:
       - 9092:9092
       - 29092:9092
@@ -38,6 +39,7 @@ services:
   kafka-ui:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
+    restart: unless-stopped
     ports:
       - 8081:8080
     depends_on:
@@ -50,6 +52,7 @@ services:
   zilla:
     image: ghcr.io/aklivity/zilla:latest
     container_name: zilla
+    restart: unless-stopped
     depends_on:
       - kafka
     ports:
@@ -66,8 +69,9 @@ services:
 
   taxi-gateway:
     build: ./grpc/gateway
-    image: aklivity/taxi-gateway:local
     container_name: taxi-gateway
+    image: aklivity/taxi-gateway:local
+    restart: unless-stopped
     environment:
       GATEWAY_PORT: 8080
       GRPC_SERVER_ENDPOINT: zilla:7114
@@ -76,8 +80,9 @@ services:
 
   taxi-service:
     build: ./grpc/service
-    image: aklivity/taxi-service:local
     container_name: taxi-service
+    image: aklivity/taxi-service:local
+    restart: unless-stopped
     depends_on:
       kafka-init:
         condition: service_completed_successfully
@@ -92,8 +97,9 @@ services:
 
   taxi-map-ui:
     build: ./map-ui
-    image: aklivity/taxi-map-ui:local
     container_name: taxi-map-ui
+    image: aklivity/taxi-map-ui:local
+    restart: unless-stopped
     depends_on:
       kafka-init:
         condition: service_completed_successfully
