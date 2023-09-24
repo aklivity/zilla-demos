@@ -90,10 +90,10 @@ services:
     ports:
       - 50051:50051
 
-  maps-ui:
-    build: https://github.com/vordimous/taxi-demo-map.git#main
-    image: aklivity/ors-map-client:local
-    container_name: maps-ui
+  taxi-map-ui:
+    build: ./map-ui
+    image: aklivity/taxi-map-ui:local
+    container_name: taxi-map-ui
     depends_on:
       kafka-init:
         condition: service_completed_successfully

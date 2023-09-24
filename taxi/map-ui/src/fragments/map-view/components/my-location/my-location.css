@@ -1,0 +1,8 @@
+.my-location-title {
+  height: 40px;
+}
+
+.v-menu__content {
+  box-shadow: none;
+  margin-top: -10px;
+}
