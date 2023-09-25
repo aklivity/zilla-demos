@@ -1,8 +1,8 @@
-# Taxi Caller Demo
+# Taxi Demo
 
 This demo was created to showcase the MQTT protocol brokered by Zilla. It uses [Open Street Maps](https://www.openstreetmap.org/), [Open Route Service](https://openrouteservice.org/), and the [MQTT Simulator](https://github.com/DamascenoRafael/mqtt-simulator) to demonstrate a real world taxi hailing and location tracking service.
 
-![](.assets/zilla-taxi-demo-diagram@2x.png)
+![zilla-taxi-demo-diagram](.assets/zilla-taxi-demo-diagram@2x.png)
 
 ## Requirements
 
@@ -31,6 +31,8 @@ The UI has a set of bars highlighted in the downtown San Jose, CA area. Users ca
 - Clicking on one of the bar markers lets you hail a taxi
 - The hailed taxi will "pickup" the passenger at the San Jose, CA Convention center
 - The taxi will then proceed to the designated location on the map and stop sending location updates
+
+![demo](.assets/taxi-demo.gif)
 
 ## Run through
 
