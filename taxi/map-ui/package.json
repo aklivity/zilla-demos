@@ -126,7 +126,7 @@
     "cypress": "^12.17.3",
     "cz-conventional-changelog": "^3.3.0",
     "geckodriver": "^3.2.0",
-    "node-notifier": "^5.4.5",
+    "node-notifier": "^8.0.1",
     "ora": "^1.4.0",
     "os-browserify": "^0.3.0",
     "portfinder": "^1.0.32",
