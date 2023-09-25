@@ -1,12 +1,16 @@
 version: "3"
 services:
   kafka:
-    image: docker.io/bitnami/kafka:latest
+    image: docker.io/bitnami/kafka:3.1.0
     container_name: kafka
     restart: unless-stopped
     ports:
       - 9092:9092
       - 29092:9092
+    command:
+      - 'sh'
+      - '-c'
+      - '/opt/bitnami/scripts/kafka/setup.sh && kafka-storage.sh format --config "$${KAFKA_CONF_FILE}" --cluster-id "lkorDA4qT6W1K_dk0LHvtg" --ignore-formatted  && /opt/bitnami/scripts/kafka/run.sh' # Kraft specific initialise
     environment:
       ALLOW_PLAINTEXT_LISTENER: "yes"
       KAFKA_CFG_NODE_ID: "1"
