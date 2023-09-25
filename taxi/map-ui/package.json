@@ -98,6 +98,7 @@
     "vue-rest-client": "^0.1.15",
     "vue-router": "^3.6.5",
     "vue-style-loader": "^3.1.2",
+    "vue-template-compiler": "^2.7.14",
     "vue2-dropzone": "^3.6.0",
     "vue2-leaflet": "^2.7.1",
     "vue2-leaflet-draw-toolbar": "^0.1.1",
