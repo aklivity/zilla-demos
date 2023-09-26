@@ -24,10 +24,10 @@ services:
     ports:
       - 9090:9090
     links:
-      - cadvisor:cadvisor
+      # - cadvisor:cadvisor
       - alertmanager:alertmanager
-    depends_on:
-      - cadvisor
+    # depends_on:
+    #   - cadvisor
     networks:
       - back-tier
     restart: always
@@ -65,25 +65,25 @@ services:
       - "--config.file=/etc/alertmanager/config.yml"
       - "--storage.path=/alertmanager"
 
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor-arm64:v0.47.2
-    # image: gcr.io/cadvisor/cadvisor:v0.47.2
-    container_name: cadvisor
-    privileged: true
-    devices:
-      - /dev/kmsg:/dev/kmsg
-    volumes:
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /etc/machine-id:/etc/machine-id:ro
-      - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro
-    restart: unless-stopped
-    ports:
-      - 8083:8080
-    networks:
-      - back-tier
+  # cadvisor:
+  #   image: gcr.io/cadvisor/cadvisor-arm64:v0.47.2
+  #   # image: gcr.io/cadvisor/cadvisor:v0.47.2
+  #   container_name: cadvisor
+  #   privileged: true
+  #   devices:
+  #     - /dev/kmsg:/dev/kmsg
+  #   volumes:
+  #     - /var/run:/var/run:ro
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - /etc/machine-id:/etc/machine-id:ro
+  #     - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro
+  #   restart: unless-stopped
+  #   ports:
+  #     - 8083:8080
+  #   networks:
+  #     - back-tier
 
   grafana:
     image: grafana/grafana
