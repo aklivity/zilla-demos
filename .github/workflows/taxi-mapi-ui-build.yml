@@ -2,8 +2,10 @@ name: Extension Check Build
 
 on:
   pull_request:
-    branches: [main]
-    paths: ['taxi/map-ui/**']
+    branches:
+      - main
+    paths:
+      - 'taxi/map-ui/**'
 
 permissions:
   contents: read
