@@ -8,7 +8,7 @@ COPY package.json ./
 COPY package-lock.json ./
 RUN npm i
 ADD . ./
-RUN npm build
+RUN quasar build
 
 # run stage
 FROM nginx:stable-alpine as run-stage

@@ -9,7 +9,7 @@ COPY package.json ./
 COPY pnpm-lock.yaml ./
 RUN pnpm i
 ADD . ./
-RUN pnpm build
+RUN quasar build
 
 # run stage
 FROM nginx:stable-alpine as run-stage
