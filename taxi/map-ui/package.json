@@ -70,7 +70,7 @@
     "moment": "^2.29.4",
     "openrouteservice-js": "^0.3.1",
     "path-browserify": "^1.0.1",
-    "postcss": "^8.4.19",
+    "postcss": "^8.4.31",
     "postcss-import": "^11.1.0",
     "postcss-loader": "^7.0.2",
     "postcss-preset-env": "^7.8.3",
