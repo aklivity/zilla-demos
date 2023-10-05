@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'taxi/map-ui/**'
+      - 'taxi/map-ui/**/*'
 
 permissions:
   contents: read
