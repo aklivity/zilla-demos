@@ -219,8 +219,8 @@ dependencies:
     specifier: ^0.1.1
     version: 0.1.1
   vue2-leaflet-height-graph:
-    specifier: github:GIScience/vue2-leaflet-height-graph
-    version: git/github.com+GIScience/vue2-leaflet-height-graph/d44cc4b7c9b3d46d4b42ff9ae183228c9f5984c2(@types/leaflet@1.9.6)(leaflet@1.9.4)(vue2-leaflet@2.7.1)
+    specifier: https://github.com/GIScience/vue2-leaflet-height-graph
+    version: git@github.com+GIScience/vue2-leaflet-height-graph/d44cc4b7c9b3d46d4b42ff9ae183228c9f5984c2(@types/leaflet@1.9.6)(leaflet@1.9.4)(vue2-leaflet@2.7.1)
   vue2-leaflet-markercluster:
     specifier: ^3.1.0
     version: 3.1.0(leaflet@1.9.4)
@@ -384,7 +384,7 @@ packages:
       '@babel/helpers': 7.23.1
       '@babel/parser': 7.23.0
       '@babel/template': 7.22.15
-      '@babel/traverse': 7.23.0
+      '@babel/traverse': 7.23.2
       '@babel/types': 7.23.0
       convert-source-map: 2.0.0
       debug: 4.3.4(supports-color@8.1.1)
@@ -636,7 +636,7 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/template': 7.22.15
-      '@babel/traverse': 7.23.0
+      '@babel/traverse': 7.23.2
       '@babel/types': 7.23.0
     transitivePeerDependencies:
       - supports-color
@@ -1592,8 +1592,8 @@ packages:
       '@babel/parser': 7.23.0
       '@babel/types': 7.23.0
 
-  /@babel/traverse@7.23.0:
-    resolution: {integrity: sha512-t/QaEvyIoIkwzpiZ7aoSKK8kObQYeF7T2v+dazAYCb8SXtp58zEVkWW7zAnju8FNKNdr4ScAOEDmMItbyOmEYw==}
+  /@babel/traverse@7.23.2:
+    resolution: {integrity: sha512-azpe59SQ48qG6nu2CzcMLbxUudtN+dOM9kDbUqGq3HXUJRlo7i8fvPoxQUzYgLZ4cMVmuZgm8vvBpNeRhd6XSw==}
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/code-frame': 7.22.13
@@ -12373,7 +12373,7 @@ packages:
       '@babel/preset-env': 7.22.20(@babel/core@7.23.0)
       '@babel/preset-react': 7.22.15(@babel/core@7.23.0)
       '@babel/preset-stage-2': 7.8.3
-      '@babel/traverse': 7.23.0
+      '@babel/traverse': 7.23.2
       axios: 0.21.4
       babel-loader: 8.3.0(@babel/core@7.23.0)(webpack@5.88.2)
       babel-plugin-transform-class-properties: 6.24.1
@@ -12476,7 +12476,7 @@ packages:
   /vue2-leaflet-polyline-measure@1.2.1(@types/leaflet@1.9.6)(leaflet@1.9.4)(vue@2.7.14):
     resolution: {integrity: sha512-C4Y6CV4fsfDqguagOjBsYkAIJg7nRkJTm1XrrOj94i2q5Ws+FE35tn6Se1AiZfSrg0VzpEmhHRFX64ECmvP5Eg==}
     dependencies:
-      leaflet.polylinemeasure: git/github.com+ppete2/Leaflet.PolylineMeasure/b85a4b9
+      leaflet.polylinemeasure: git@github.com+ppete2/Leaflet.PolylineMeasure/b85a4b9
       vue2-leaflet: 2.7.1(@types/leaflet@1.9.6)(leaflet@1.9.4)(vue@2.7.14)
     transitivePeerDependencies:
       - '@types/leaflet'
@@ -12982,7 +12982,7 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  git/github.com+GIScience/vue2-leaflet-height-graph/d44cc4b7c9b3d46d4b42ff9ae183228c9f5984c2(@types/leaflet@1.9.6)(leaflet@1.9.4)(vue2-leaflet@2.7.1):
+  git@github.com+GIScience/vue2-leaflet-height-graph/d44cc4b7c9b3d46d4b42ff9ae183228c9f5984c2(@types/leaflet@1.9.6)(leaflet@1.9.4)(vue2-leaflet@2.7.1):
     resolution: {commit: d44cc4b7c9b3d46d4b42ff9ae183228c9f5984c2, repo: git@github.com:GIScience/vue2-leaflet-height-graph.git, type: git}
     id: git@github.com+GIScience/vue2-leaflet-height-graph/d44cc4b7c9b3d46d4b42ff9ae183228c9f5984c2
     name: vue2-leaflet-height-graph
@@ -12999,7 +12999,7 @@ packages:
       vue2-leaflet: 2.7.1(@types/leaflet@1.9.6)(leaflet@1.9.4)(vue@2.7.14)
     dev: false
 
-  git/github.com+ppete2/Leaflet.PolylineMeasure/b85a4b9:
+  git@github.com+ppete2/Leaflet.PolylineMeasure/b85a4b9:
     resolution: {commit: b85a4b9, repo: git@github.com:ppete2/Leaflet.PolylineMeasure.git, type: git}
     name: leaflet.polylinemeasure
     version: 1.0.0
