@@ -219,7 +219,7 @@ dependencies:
     specifier: ^0.1.1
     version: 0.1.1
   vue2-leaflet-height-graph:
-    specifier: https://github.com/GIScience/vue2-leaflet-height-graph
+    specifier: github:GIScience/vue2-leaflet-height-graph
     version: git@github.com+GIScience/vue2-leaflet-height-graph/d44cc4b7c9b3d46d4b42ff9ae183228c9f5984c2(@types/leaflet@1.9.6)(leaflet@1.9.4)(vue2-leaflet@2.7.1)
   vue2-leaflet-markercluster:
     specifier: ^3.1.0
