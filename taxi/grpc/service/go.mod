@@ -5,7 +5,7 @@ go 1.21.0
 require (
 	github.com/caitlinelfring/go-env-default v1.1.0
 	github.com/golang/glog v1.1.2
-	google.golang.org/grpc v1.57.0
+	google.golang.org/grpc v1.57.1
 	google.golang.org/protobuf v1.31.0
 )
 
