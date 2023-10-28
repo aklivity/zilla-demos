@@ -219,7 +219,7 @@ dependencies:
     specifier: ^0.1.1
     version: 0.1.1
   vue2-leaflet-height-graph:
-    specifier: github:GIScience/vue2-leaflet-height-graph
+    specifier: https://github.com/GIScience/vue2-leaflet-height-graph
     version: git@github.com+GIScience/vue2-leaflet-height-graph/d44cc4b7c9b3d46d4b42ff9ae183228c9f5984c2(@types/leaflet@1.9.6)(leaflet@1.9.4)(vue2-leaflet@2.7.1)
   vue2-leaflet-markercluster:
     specifier: ^3.1.0
@@ -3697,8 +3697,9 @@ packages:
       randombytes: 2.1.0
     dev: false
 
-  /browserify-sign@4.2.1:
-    resolution: {integrity: sha512-/vrA5fguVAKKAVTNJjgSm1tRQDHUU6DbwO9IROu/0WAzC8PKhucDSh18J0RMvVeHAn5puMd+QHC2erPRNf8lmg==}
+  /browserify-sign@4.2.2:
+    resolution: {integrity: sha512-1rudGyeYY42Dk6texmv7c4VcQ0EsvVbLwZkA+AQB7SxvXxmcD93jcHie8bzecJ+ChDlmAm2Qyu0+Ccg5uhZXCg==}
+    engines: {node: '>= 4'}
     dependencies:
       bn.js: 5.2.1
       browserify-rsa: 4.1.0
@@ -4852,7 +4853,7 @@ packages:
     resolution: {integrity: sha512-fz4spIh+znjO2VjL+IdhEpRJ3YN6sMzITSBijk6FK2UvTqruSQW+/cCZTSNsMiZNvUeq0CqurF+dAbyiGOY6Wg==}
     dependencies:
       browserify-cipher: 1.0.1
-      browserify-sign: 4.2.1
+      browserify-sign: 4.2.2
       create-ecdh: 4.0.4
       create-hash: 1.2.0
       create-hmac: 1.1.7
