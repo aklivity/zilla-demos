@@ -14,7 +14,7 @@
     "@auth0/auth0-vue": "^1.0.2",
     "@quasar/extras": "^1.0.0",
     "apexcharts": "^3.37.0",
-    "axios": "^1.2.2",
+    "axios": "^1.6.0",
     "buffer": "^6.0.3",
     "core-js": "^3.6.5",
     "jwt-decode": "^3.1.2",
