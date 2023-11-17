@@ -22,7 +22,7 @@ import (
 var (
 	servicePort   = env.GetIntDefault("SERVICE_PORT", 50051)
 	brokerURL     = env.GetDefault("BROKER_HOST", "localhost")
-	brokerPort    = env.GetIntDefault("BROKER_PORT", 1883)
+	brokerPort    = env.GetIntDefault("BROKER_PORT", 7183)
 	printSim      = env.GetBoolDefault("PRINT_SIM_LOGS", false)
 	defaultRoutes = env.GetBoolDefault("DEFAUlT_ROUTES", false)
 	logChannel  = make(chan string)

@@ -1,67 +1,86 @@
 version: "3"
 services:
-  kafka:
-    image: docker.io/bitnami/kafka:3.1.0
-    container_name: kafka
-    restart: unless-stopped
-    ports:
-      - 9092:9092
-      - 29092:9092
-    command:
-      - 'sh'
-      - '-c'
-      - '/opt/bitnami/scripts/kafka/setup.sh && kafka-storage.sh format --config "$${KAFKA_CONF_FILE}" --cluster-id "lkorDA4qT6W1K_dk0LHvtg" --ignore-formatted  && /opt/bitnami/scripts/kafka/run.sh' # Kraft specific initialise
-    environment:
-      ALLOW_PLAINTEXT_LISTENER: "yes"
-      KAFKA_CFG_NODE_ID: "1"
-      KAFKA_CFG_BROKER_ID: "1"
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@127.0.0.1:9093"
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "CLIENT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-      KAFKA_CFG_LOG_DIRS: "/tmp/logs"
-      KAFKA_CFG_PROCESS_ROLES: "broker,controller"
-      KAFKA_CFG_LISTENERS: "CLIENT://:9092,INTERNAL://:29092,CONTROLLER://:9093"
-      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "CLIENT://localhost:9092,INTERNAL://kafka:29092"
-      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
 
-  kafka-init:
-    image: docker.io/bitnami/kafka:latest
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v23.2.16
+    container_name: redpanda
     command:
-      - "/bin/bash"
+      - redpanda start
+      - --smp 1
+      - --overprovisioned
+      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+      # Address the broker advertises to clients that connect to the Kafka API.
+      - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
+      - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082
+      # Address the broker advertises to clients that connect to the HTTP Proxy.
+      - --advertise-pandaproxy-addr internal://redpanda:8082,external://localhost:18082
+      - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
+      # Redpanda brokers use the RPC API to communicate with each other internally.
+      - --rpc-addr redpanda:33145
+      - --advertise-rpc-addr redpanda:33145
+      - --mode dev-container
+    ports:
+      - 18081:18081
+      - 18082:18082
+      - 19092:19092
+      - 19644:9644
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true' || exit 1"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  console:
+    image: docker.redpanda.com/redpandadata/console:v2.3.6
+    entrypoint: /bin/sh
+    command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
+    environment:
+      CONFIG_FILEPATH: /tmp/config.yml
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["redpanda:9092"]
+          schemaRegistry:
+            enabled: true
+            urls: ["http://redpanda:8081"]
+        redpanda:
+          adminApi:
+            enabled: true
+            urls: ["http://redpanda:9644"]
+        connect:
+          enabled: true
+          clusters:
+            - name: local-connect-cluster
+              url: http://connect:8083
+    ports:
+      - 8080:8080
+    depends_on:
+      - redpanda
+
+  redpanda-init:
+    image: docker.redpanda.com/redpandadata/redpanda:latest
+    entrypoint: /bin/sh
+    command:
       - "-c"
       - |
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-route-requests --config cleanup.policy=delete
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-route-replies --config cleanup.policy=delete
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-messages
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-locations --config cleanup.policy=compact
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic taxi-sessions --config cleanup.policy=compact
+        rpk topic create --brokers redpanda:9092 taxi-route-requests
+        rpk topic create --brokers redpanda:9092 taxi-route-replies
+        rpk topic create --brokers redpanda:9092 taxi-messages
+        rpk topic create --brokers redpanda:9092 taxi-locations --config cleanup.policy=compact
+        rpk topic create --brokers redpanda:9092 taxi-sessions --config cleanup.policy=compact
     depends_on:
-      - kafka
+      - redpanda
     init: true
-
-  kafka-ui:
-    container_name: kafka-ui
-    image: provectuslabs/kafka-ui:latest
-    restart: unless-stopped
-    ports:
-      - 8081:8080
-    depends_on:
-      kafka-init:
-        condition: service_completed_successfully
-    environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
 
   zilla:
     image: ghcr.io/aklivity/zilla:latest
     container_name: zilla
     restart: unless-stopped
     depends_on:
-      - kafka
+      - redpanda
     ports:
       - 7114:7114
-      - 1883:1883
+      - 7183:7183
       - 7190:7190
     volumes:
       - ./zilla.yaml:/etc/zilla/zilla.yaml
@@ -69,6 +88,8 @@ services:
     environment:
       TAXI_ROUTE_SERVER_HOST: taxi-service
       TAXI_ROUTE_SERVER_PORT: 50051
+      KAFKA_HOST: redpanda
+      KAFKA_PORT: 9092
     command: start -v -e -Pzilla.engine.worker.capacity=512
 
   taxi-gateway:
@@ -77,10 +98,10 @@ services:
     image: aklivity/taxi-gateway:local
     restart: unless-stopped
     environment:
-      GATEWAY_PORT: 8080
+      GATEWAY_PORT: 8085
       GRPC_SERVER_ENDPOINT: zilla:7114
     ports:
-      - 8080:8080
+      - 8085:8085
 
   taxi-service:
     build: ./grpc/service
@@ -88,7 +109,7 @@ services:
     image: aklivity/taxi-service:local
     restart: unless-stopped
     depends_on:
-      kafka-init:
+      redpanda-init:
         condition: service_completed_successfully
     volumes:
       - ./grpc/service/default_routes.json:/usr/src/app/default_routes.json
@@ -105,12 +126,12 @@ services:
     image: aklivity/taxi-map-ui:local
     restart: unless-stopped
     depends_on:
-      kafka-init:
+      redpanda-init:
         condition: service_completed_successfully
     user: "${UID:-0}:${GID:-0}"
     environment:
       TAXIROUTEAPI: "http://localhost:7114/taxi/locations"
-      TAXILOCATIONAPI: "http://localhost:8080/taxiroute.TaxiRoute/CreateTaxi"
+      TAXILOCATIONAPI: "http://localhost:8085/taxiroute.TaxiRoute/CreateTaxi"
     ports:
       - 80:80
 

@@ -25,7 +25,7 @@ class Simulator:
         with open(settings_file) as json_file:
             config = json.load(json_file)
             broker_url = config.get('BROKER_URL', 'localhost')
-            broker_port = config.get('BROKER_PORT', 1883)
+            broker_port = config.get('BROKER_PORT', 7183)
             broker_protocol = config.get('PROTOCOL_VERSION', 4) # mqtt.MQTTv311
             broker_client_settings = self.read_client_settings(config, default=self.default_client_settings)
             # read each configured topic
