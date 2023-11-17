@@ -193,7 +193,7 @@ class VehicleLocationPlugin {
    */
   constructor (vueInstance) {
     this.vueInstance = vueInstance
-    this.taxiRouteAPI = process.env.TAXIROUTEAPI || 'http://localhost:8080/taxiroute.TaxiRoute/CreateTaxi'
+    this.taxiRouteAPI = process.env.TAXIROUTEAPI || 'http://localhost:8085/taxiroute.TaxiRoute/CreateTaxi'
     this.taxiLocationAPI = process.env.TAXILOCATIONAPI || 'http://localhost:7114/taxi/locations'
     this.timer = null
     this.localMapViewData = new MapViewData()
