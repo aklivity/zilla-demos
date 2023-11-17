@@ -81,3 +81,56 @@ The mqtt-simulation service includes a `default_routes.json` file which starts a
     ```
 
 1. Happy Load Testing!
+
+
+org.agrona.concurrent.AgentTerminationException: java.lang.NumberFormatException: Cannot parse null string
+    at io.aklivity.zilla.runtime.engine@0.9.58/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.doWork(DispatchAgent.java:707)
+    at org.agrona.core/org.agrona.concurrent.AgentRunner.doDutyCycle(AgentRunner.java:291)
+    at org.agrona.core/org.agrona.concurrent.AgentRunner.run(AgentRunner.java:164)
+    at java.base/java.lang.Thread.run(Thread.java:1623)
+Caused by: java.lang.NumberFormatException: Cannot parse null string
+    at java.base/java.lang.Integer.parseInt(Integer.java:627)
+    at java.base/java.lang.Integer.valueOf(Integer.java:992)
+    at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientGroupFactory$DescribeClient.onDecodeDescribeResponse(KafkaClientGroupFactory.java:3055)
+    at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientGroupFactory.decodeDescribeResponse(KafkaClientGroupFactory.java:789)
+    at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientGroupFactory$DescribeClient.decodeNetwork(KafkaClientGroupFactory.java:2926)
+    at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientGroupFactory$DescribeClient.onNetworkData(KafkaClientGroupFactory.java:2562)
+    at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientGroupFactory$DescribeClient.onNetwork(KafkaClientGroupFactory.java:2477)
+    at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientConnectionPool.doData(KafkaClientConnectionPool.java:308)
+    at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientConnectionPool$KafkaClientStream.doStreamData(KafkaClientConnectionPool.java:841)
+    at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientConnectionPool$KafkaClientConnection.onConnectionData(KafkaClientConnectionPool.java:1440)
+    at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientConnectionPool$KafkaClientConnection.onConnectionMessage(KafkaClientConnectionPool.java:1363)
+    at io.aklivity.zilla.runtime.engine@0.9.58/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.handleReadReply(DispatchAgent.java:1244)
+    at io.aklivity.zilla.runtime.engine@0.9.58/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.handleRead(DispatchAgent.java:1045)
+    at io.aklivity.zilla.runtime.engine@0.9.58/io.aklivity.zilla.runtime.engine.internal.concurent.ManyToOneRingBuffer.read(ManyToOneRingBuffer.java:181)
+    at io.aklivity.zilla.runtime.engine@0.9.58/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.doWork(DispatchAgent.java:701)
+    ... 3 more
+    Suppressed: java.lang.Exception: [engine/data#1]        [0x0101000000000084] streams=[consumeAt=0x0000e788 (0x000000000000e788), produceAt=0x0000e788 (0x000000000000e788)]
+            at io.aklivity.zilla.runtime.engine@0.9.58/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.doWork(DispatchAgent.java:705)
+            ... 3 more
+
+ org.agrona.concurrent.AgentTerminationException: java.lang.NumberFormatException: Cannot parse null string
+     at io.aklivity.zilla.runtime.engine@0.9.58/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.doWork(DispatchAgent.java:707)
+     at org.agrona.core/org.agrona.concurrent.AgentRunner.doDutyCycle(AgentRunner.java:291)
+     at org.agrona.core/org.agrona.concurrent.AgentRunner.run(AgentRunner.java:164)
+     at java.base/java.lang.Thread.run(Thread.java:1623)
+ Caused by: java.lang.NumberFormatException: Cannot parse null string
+     at java.base/java.lang.Integer.parseInt(Integer.java:627)
+     at java.base/java.lang.Integer.valueOf(Integer.java:992)
+     at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientGroupFactory$DescribeClient.onDecodeDescribeResponse(KafkaClientGroupFactory.java:3055)
+     at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientGroupFactory.decodeDescribeResponse(KafkaClientGroupFactory.java:789)
+     at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientGroupFactory$DescribeClient.decodeNetwork(KafkaClientGroupFactory.java:2926)
+     at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientGroupFactory$DescribeClient.onNetworkData(KafkaClientGroupFactory.java:2562)
+     at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientGroupFactory$DescribeClient.onNetwork(KafkaClientGroupFactory.java:2477)
+     at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientConnectionPool.doData(KafkaClientConnectionPool.java:308)
+     at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientConnectionPool$KafkaClientStream.doStreamData(KafkaClientConnectionPool.java:841)
+     at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientConnectionPool$KafkaClientConnection.onConnectionData(KafkaClientConnectionPool.java:1440)
+     at io.aklivity.zilla.runtime.binding.kafka@0.9.58/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientConnectionPool$KafkaClientConnection.onConnectionMessage(KafkaClientConnectionPool.java:1363)
+     at io.aklivity.zilla.runtime.engine@0.9.58/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.handleReadReply(DispatchAgent.java:1244)
+     at io.aklivity.zilla.runtime.engine@0.9.58/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.handleRead(DispatchAgent.java:1045)
+     at io.aklivity.zilla.runtime.engine@0.9.58/io.aklivity.zilla.runtime.engine.internal.concurent.ManyToOneRingBuffer.read(ManyToOneRingBuffer.java:181)
+     at io.aklivity.zilla.runtime.engine@0.9.58/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.doWork(DispatchAgent.java:701)
+     ... 3 more
+     Suppressed: java.lang.Exception: [engine/data#1]        [0x0101000000000064] streams=[consumeAt=0x000095a8 (0x00000000000095a8), produceAt=0x000095a8 (0x00000000000095a8)]
+             at io.aklivity.zilla.runtime.engine@0.9.58/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.doWork(DispatchAgent.java:705)
+             ... 3 more
