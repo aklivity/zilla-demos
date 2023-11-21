@@ -193,8 +193,9 @@ class VehicleLocationPlugin {
    */
   constructor (vueInstance) {
     this.vueInstance = vueInstance
-    this.taxiRouteAPI = process.env.TAXIROUTEAPI || 'http://localhost:8080/taxiroute.TaxiRoute/CreateTaxi'
-    this.taxiLocationAPI = process.env.TAXILOCATIONAPI || 'http://localhost:7114/taxi/locations'
+    this.taxiRouteAPI = 'http://localhost:8085/taxiroute.TaxiRoute/CreateTaxi'
+    this.taxiLocationAPI = 'http://localhost:7114/taxi/locations'
+    this.busLocationAPI = 'http://localhost:7114/bus/locations'
     this.timer = null
     this.localMapViewData = new MapViewData()
     this.routeKeyPath = ''
@@ -215,6 +216,8 @@ class VehicleLocationPlugin {
               mapData.places = []
               if(mapData.pois.length == 0) mapData.pois = this.barPlaces
 
+              var busses = await fetch(this.busLocationAPI).then((r) => r.json())
+              locations = [...locations, ...busses]
               locations.forEach(({key, coordinate, icon}) => {
                 if (coordinate[coordinate.length - 1] != -1) {
                   mapData.places.push(new Place(coordinate[0], coordinate[1], key, { icon }))
@@ -271,7 +274,8 @@ class VehicleLocationPlugin {
         body: JSON.stringify(taxiRoute),
       })
       if (res.status == 200) {
-        this.routeKeyPath = `/${taxiRoute.key}`
+        var taxi = await res.json()
+        this.routeKeyPath = `/${taxi.topic}`
       }
     } else {
       this.routeKeyPath = ''

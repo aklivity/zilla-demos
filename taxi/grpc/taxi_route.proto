@@ -8,7 +8,7 @@ import "google/protobuf/struct.proto";
 option go_package = "github.com/aklivity/zilla-demos/taxi/grpc/taxiroute";
 
 service TaxiRoute {
-  rpc CreateTaxi(Route) returns (google.protobuf.Empty) {}
+  rpc CreateTaxi(Route) returns (RouteResponse) {}
 }
 
 message Route {
@@ -17,4 +17,8 @@ message Route {
   double distance = 3;
   double duration = 4;
   repeated google.protobuf.ListValue  coordinates = 5;
+}
+
+message RouteResponse {
+  string topic = 1;
 }

@@ -1,10 +1,9 @@
 {
   "BROKER_URL": "zilla",
-  "BROKER_PORT": 1883,
+  "BROKER_PORT": 7183,
   "PROTOCOL_VERSION": 5,
   "CLEAN_SESSION": false,
   "QOS": 0,
-  "RETAIN": true,
   "TOPICS": [
     {
       "TYPE": "multiple",

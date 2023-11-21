@@ -20,7 +20,7 @@ var (
 	// command-line options:
 	// gRPC server endpoint
 	grpcServerEndpoint = env.GetDefault("GRPC_SERVER_ENDPOINT", "localhost:7114")
-	gatewayPort = env.GetIntDefault("GATEWAY_PORT", 8080)
+	gatewayPort = env.GetIntDefault("GATEWAY_PORT", 8085)
 )
 
 func run() error {

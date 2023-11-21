@@ -1,2 +1,6 @@
 #!/bin/bash
-docker-compose down --remove-orphans
+set -e
+
+NAMESPACE=zilla-taxi
+
+docker-compose -p $NAMESPACE down --remove-orphans

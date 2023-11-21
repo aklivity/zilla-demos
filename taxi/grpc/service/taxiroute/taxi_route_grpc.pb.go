@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -27,7 +26,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TaxiRouteClient interface {
-	CreateTaxi(ctx context.Context, in *Route, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	CreateTaxi(ctx context.Context, in *Route, opts ...grpc.CallOption) (*RouteResponse, error)
 }
 
 type taxiRouteClient struct {
@@ -38,8 +37,8 @@ func NewTaxiRouteClient(cc grpc.ClientConnInterface) TaxiRouteClient {
 	return &taxiRouteClient{cc}
 }
 
-func (c *taxiRouteClient) CreateTaxi(ctx context.Context, in *Route, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *taxiRouteClient) CreateTaxi(ctx context.Context, in *Route, opts ...grpc.CallOption) (*RouteResponse, error) {
+	out := new(RouteResponse)
 	err := c.cc.Invoke(ctx, TaxiRoute_CreateTaxi_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -51,7 +50,7 @@ func (c *taxiRouteClient) CreateTaxi(ctx context.Context, in *Route, opts ...grp
 // All implementations must embed UnimplementedTaxiRouteServer
 // for forward compatibility
 type TaxiRouteServer interface {
-	CreateTaxi(context.Context, *Route) (*emptypb.Empty, error)
+	CreateTaxi(context.Context, *Route) (*RouteResponse, error)
 	mustEmbedUnimplementedTaxiRouteServer()
 }
 
@@ -59,7 +58,7 @@ type TaxiRouteServer interface {
 type UnimplementedTaxiRouteServer struct {
 }
 
-func (UnimplementedTaxiRouteServer) CreateTaxi(context.Context, *Route) (*emptypb.Empty, error) {
+func (UnimplementedTaxiRouteServer) CreateTaxi(context.Context, *Route) (*RouteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateTaxi not implemented")
 }
 func (UnimplementedTaxiRouteServer) mustEmbedUnimplementedTaxiRouteServer() {}

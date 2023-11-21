@@ -16,16 +16,15 @@ import (
 	"github.com/golang/glog"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/encoding/protojson"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 var (
 	servicePort   = env.GetIntDefault("SERVICE_PORT", 50051)
 	brokerURL     = env.GetDefault("BROKER_HOST", "localhost")
-	brokerPort    = env.GetIntDefault("BROKER_PORT", 1883)
+	brokerPort    = env.GetIntDefault("BROKER_PORT", 7183)
 	printSim      = env.GetBoolDefault("PRINT_SIM_LOGS", false)
 	defaultRoutes = env.GetBoolDefault("DEFAUlT_ROUTES", false)
-	logChannel  = make(chan string)
+	logChannel    = make(chan string)
 )
 
 type dataConfig struct {
@@ -48,7 +47,6 @@ type simulatorConfig struct {
 	ProtocolVersion int           `json:"PROTOCOL_VERSION"`
 	CleanSession    bool          `json:"CLEAN_SESSION"`
 	Qos             int           `json:"QOS"`
-	Retain          bool          `json:"RETAIN"`
 	Topics          []topicConfig `json:"TOPICS"`
 }
 
@@ -108,11 +106,11 @@ func runSim(fileName string) {
 			glog.Info("Simulation done deleting: ", fileName)
 			os.Remove(fileName)
 		}
-		
+
 	}()
 }
 
-func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptypb.Empty, error) {
+func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*pb.RouteResponse, error) {
 	defer glog.Flush()
 	file, errs := os.CreateTemp("", fmt.Sprintf("%s-route-*.json", in.GetKey()))
 	if errs != nil {
@@ -129,24 +127,24 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 	endMark = append(endMark, -1)
 	coords.Values = append(coords.Values, endMark)
 
+	routeKey := fmt.Sprintf("taxi/%s/location", in.GetKey())
 	simConfig := simulatorConfig{
 		BrokerURL:       brokerURL,
 		BrokerPort:      brokerPort,
 		ProtocolVersion: 5,
 		CleanSession:    false,
 		Qos:             0,
-		Retain:          true,
 		Topics: []topicConfig{
 			{
 				Type:         "single",
-				Prefix:       in.GetKey(),
+				Prefix:       routeKey,
 				TimeInterval: int(in.GetDuration() / float64(len(coords.Values))),
 				Data: []dataConfig{
 					{
 						Name: "coordinate",
 						PayloadRoot: struct {
 							Key string `json:"key"`
-						}{Key: in.GetKey()},
+						}{Key: routeKey},
 						Type:   "raw_values",
 						Values: coords.Values,
 					},
@@ -169,7 +167,9 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 
 	runSim(file.Name())
 
-	return &emptypb.Empty{}, errs
+	return &pb.RouteResponse{
+		Topic: routeKey,
+	}, errs
 }
 
 func main() {
