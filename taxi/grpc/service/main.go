@@ -24,7 +24,7 @@ var (
 	brokerPort    = env.GetIntDefault("BROKER_PORT", 7183)
 	printSim      = env.GetBoolDefault("PRINT_SIM_LOGS", false)
 	defaultRoutes = env.GetBoolDefault("DEFAUlT_ROUTES", false)
-	logChannel  = make(chan string)
+	logChannel    = make(chan string)
 )
 
 type dataConfig struct {
@@ -47,7 +47,6 @@ type simulatorConfig struct {
 	ProtocolVersion int           `json:"PROTOCOL_VERSION"`
 	CleanSession    bool          `json:"CLEAN_SESSION"`
 	Qos             int           `json:"QOS"`
-	Retain          bool          `json:"RETAIN"`
 	Topics          []topicConfig `json:"TOPICS"`
 }
 
@@ -107,7 +106,7 @@ func runSim(fileName string) {
 			glog.Info("Simulation done deleting: ", fileName)
 			os.Remove(fileName)
 		}
-		
+
 	}()
 }
 
@@ -135,7 +134,6 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*pb.Rou
 		ProtocolVersion: 5,
 		CleanSession:    false,
 		Qos:             0,
-		Retain:          true,
 		Topics: []topicConfig{
 			{
 				Type:         "single",
