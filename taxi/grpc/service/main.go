@@ -16,7 +16,6 @@ import (
 	"github.com/golang/glog"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/encoding/protojson"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 var (
@@ -112,7 +111,7 @@ func runSim(fileName string) {
 	}()
 }
 
-func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptypb.Empty, error) {
+func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*pb.RouteResponse, error) {
 	defer glog.Flush()
 	file, errs := os.CreateTemp("", fmt.Sprintf("%s-route-*.json", in.GetKey()))
 	if errs != nil {
@@ -170,7 +169,9 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 
 	runSim(file.Name())
 
-	return &emptypb.Empty{}, errs
+	return &pb.RouteResponse{
+		Topic: routeKey,
+	}, errs
 }
 
 func main() {

@@ -23,8 +23,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/taxirouteRouteResponse"
             }
           },
           "default": {
@@ -116,6 +115,14 @@
               "type": "object"
             }
           }
+        }
+      }
+    },
+    "taxirouteRouteResponse": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "type": "string"
         }
       }
     }
