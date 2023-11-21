@@ -8,7 +8,7 @@
   "TOPICS": [
     {
       "TYPE": "single",
-      "PREFIX": "OFlaherty_Irish_Pub",
+      "PREFIX": "bus/OFlaherty_Irish_Pub/location",
       "TIME_INTERVAL": 15,
       "DATA": [
         {
@@ -171,7 +171,7 @@
     },
     {
       "TYPE": "single",
-      "PREFIX": "ISO_Beers",
+      "PREFIX": "bus/ISO_Beers/location",
       "TIME_INTERVAL": 10,
       "DATA": [
         {
@@ -344,7 +344,7 @@
     },
     {
       "TYPE": "single",
-      "PREFIX": "True_Brew_San_Jose",
+      "PREFIX": "bus/True_Brew_San_Jose/location",
       "TIME_INTERVAL": 12,
       "DATA": [
         {

@@ -57,11 +57,12 @@ The [Taxi UI](http://localhost/) has a set of bars highlighted in the downtown S
 1. Browse the topics in the [Kafka UI](http://localhost:8080/).
    - The [Redpanda Console](http://localhost:8080/) is available instead if you specified the `--redpanda` flag.
 1. You can browse the log compacted topic `taxi-locations` to see each location update coming in from active taxis.
+   - The `bus-locations` topic is all of the automatic updates that are routed by the zilla config
 1. The [Taxi UI](http://localhost/) pulls the most recent location for all of the unique taxis from Kafka.
 
 ## Load Testing
 
-The mqtt-simulation service includes a `default_routes.json` file, which starts a looping set of routes used in the demo. An additional file, `default_routes_load_test.json`, is available, which leverages the simulator's ability to generate multiple topics. 
+The mqtt-simulation service includes a `default_routes.json` file, which starts a looping set of routes used in the demo. An additional file, `default_routes_load_test.json`, is available, which leverages the simulator's ability to generate multiple topics.
 
 1. You will see in the JSON file the config for managing the number of topics to generate by updating the `"RANGE_END"` value:
 

@@ -50,6 +50,15 @@ bindings:
     routes:
       - when:
           - method: GET
+            path: /bus/locations
+        exit: kafka_cache_client
+        with:
+          capability: fetch
+          topic: bus-locations
+          merge:
+            content-type: application/json
+      - when:
+          - method: GET
             path: /taxi/locations
         exit: kafka_cache_client
         with:
@@ -142,9 +151,29 @@ bindings:
     kind: proxy
     options:
       topics:
-        sessions: taxi-sessions
-        messages: taxi-messages
-        retained: taxi-locations
+        sessions: mqtt-sessions
+        messages: mqtt-messages
+        retained: mqtt-retained
+    clients:
+      - bus/{identity}/#
+      - taxi/{identity}/#
+    routes:
+      - when:
+          - publish:
+              - topic: bus/+/location
+          - subscribe:
+              - topic: bus/+/location
+        with:
+          messages: bus-locations
+        exit: kafka_cache_client
+      - when:
+          - publish:
+              - topic: taxi/+/location
+          - subscribe:
+              - topic: taxi/+/location
+        with:
+          messages: taxi-locations
+        exit: kafka_cache_client
     exit: kafka_cache_client
 
 # Kafka caching layer
@@ -157,8 +186,9 @@ bindings:
     kind: cache_server
     options:
       bootstrap:
+        - bus-locations
         - taxi-locations
-        - taxi-sessions
+        - mqtt-sessions
         - taxi-route-requests
         - taxi-route-replies
     exit: kafka_client

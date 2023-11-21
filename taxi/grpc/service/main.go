@@ -129,6 +129,7 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 	endMark = append(endMark, -1)
 	coords.Values = append(coords.Values, endMark)
 
+	routeKey := fmt.Sprintf("taxi/%s/location", in.GetKey())
 	simConfig := simulatorConfig{
 		BrokerURL:       brokerURL,
 		BrokerPort:      brokerPort,
@@ -139,14 +140,14 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*emptyp
 		Topics: []topicConfig{
 			{
 				Type:         "single",
-				Prefix:       in.GetKey(),
+				Prefix:       routeKey,
 				TimeInterval: int(in.GetDuration() / float64(len(coords.Values))),
 				Data: []dataConfig{
 					{
 						Name: "coordinate",
 						PayloadRoot: struct {
 							Key string `json:"key"`
-						}{Key: in.GetKey()},
+						}{Key: routeKey},
 						Type:   "raw_values",
 						Values: coords.Values,
 					},

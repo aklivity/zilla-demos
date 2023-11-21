@@ -56,9 +56,6 @@ services:
       kafka-init:
         condition: service_completed_successfully
     user: "${UID:-0}:${GID:-0}"
-    environment:
-      TAXIROUTEAPI: "http://localhost:8085/taxiroute.TaxiRoute/CreateTaxi"
-      TAXILOCATIONAPI: "http://localhost:7114/taxi/locations"
     ports:
       - 80:80
 
