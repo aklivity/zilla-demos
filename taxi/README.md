@@ -11,13 +11,14 @@ This demo was created to showcase the MQTT protocol brokered by Zilla. It uses [
 ## Setup
 
 1. Start all of the services using `docker-compose`. The `startup.sh` script will `build` and `start` all the services. This command will also `restart` an existing stack.
-    - You can run this demo with [Redpanda](https://docs.redpanda.com/current/reference/docker-compose/) by adding the `--redpanda` flag
 
-    ```bash
-    ./startup.sh
-    ```
+   - You can run this demo with [Redpanda](https://docs.redpanda.com/current/reference/docker-compose/) by adding the `--redpanda` flag
 
-    > This will take a long time to build the first time it is run since it will need to download maven and npm packages.
+   ```bash
+   ./startup.sh
+   ```
+
+   > This will take a long time to build the first time it is run since it will need to download maven and npm packages.
 
 1. Open the Open Street Maps [Taxi UI](http://localhost/). The map is centered on the San Jose Convention Center.
 1. There is a collection of bars showing on the map; click a bar.
@@ -67,25 +68,25 @@ The mqtt-simulation service includes a `default_routes.json` file, which starts 
 
 1. You will see in the JSON file the config for managing the number of topics to generate by updating the `"RANGE_END"` value:
 
-    ```json
-    "TYPE": "multiple",
-    "RANGE_START": 1,
-    "RANGE_END": 500,
-    ```
+   ```json
+   "TYPE": "multiple",
+   "RANGE_START": 1,
+   "RANGE_END": 500,
+   ```
 
 1. The `taxi-service` in the [docker-compose.yaml](docker-compose.yaml) file mounts the default config. Update the volume mount to map the load_test file.
 
-    ```yaml
-    volumes:
-        - ./grpc/service/default_routes_load_test.json:/usr/src/app/default_routes.json
-    ```
+   ```yaml
+   volumes:
+     - ./grpc/service/default_routes_load_test.json:/usr/src/app/default_routes.json
+   ```
 
 1. Ensure the `DEFAUlT_ROUTES` env var is true so the service will start the sim and the `PRINT_SIM_LOGS` is true so the container will print the simulator output.
 
-    ```yaml
-    environment:
-        DEFAUlT_ROUTES: true
-        PRINT_SIM_LOGS: true
-    ```
+   ```yaml
+   environment:
+     DEFAUlT_ROUTES: true
+     PRINT_SIM_LOGS: true
+   ```
 
 1. Happy Load Testing!
