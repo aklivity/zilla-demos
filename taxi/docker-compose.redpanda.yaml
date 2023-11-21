@@ -62,13 +62,13 @@ services:
     command:
       - "-c"
       - |
-        rpk topic create --brokers redpanda:9092 taxi-route-requests
-        rpk topic create --brokers redpanda:9092 taxi-route-replies
         rpk topic create --brokers redpanda:9092 mqtt-messages
         rpk topic create --brokers redpanda:9092 mqtt-sessions --topic-config cleanup.policy=compact
         rpk topic create --brokers redpanda:9092 mqtt-retained --topic-config cleanup.policy=compact
         rpk topic create --brokers redpanda:9092 taxi-locations --topic-config cleanup.policy=compact
         rpk topic create --brokers redpanda:9092 bus-locations --topic-config cleanup.policy=compact
+        rpk topic create --brokers redpanda:9092 route-requests
+        rpk topic create --brokers redpanda:9092 route-replies
     depends_on:
       redpanda:
         condition: service_healthy

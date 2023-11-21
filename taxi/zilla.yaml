@@ -98,9 +98,9 @@ bindings:
         exit: kafka_cache_client
         with:
           capability: produce
-          topic: taxi-route-requests
+          topic: route-requests
           acks: leader_only
-          reply-to: taxi-route-replies
+          reply-to: route-replies
 
 # gRPC Kafka fanout to a remote server
   taxi_route_remote_server:
@@ -111,8 +111,8 @@ bindings:
       acks: leader_only
     routes:
       - when:
-          - topic: taxi-route-requests
-            reply-to: taxi-route-replies
+          - topic: route-requests
+            reply-to: route-replies
             method: taxiroute.TaxiRoute/*
         with:
           scheme: http
@@ -189,8 +189,8 @@ bindings:
         - bus-locations
         - taxi-locations
         - mqtt-sessions
-        - taxi-route-requests
-        - taxi-route-replies
+        - route-requests
+        - route-replies
     exit: kafka_client
 
 # Connect to local Kafka

@@ -58,6 +58,7 @@ The [Taxi UI](http://localhost/) has a set of bars highlighted in the downtown S
    - The [Redpanda Console](http://localhost:8080/) is available instead if you specified the `--redpanda` flag.
 1. You can browse the log compacted topic `taxi-locations` to see each location update coming in from active taxis.
    - The `bus-locations` topic is all of the automatic updates that are routed by the zilla config
+   - The other topics listed are being used by Zilla to manage the MQTT, and gRPC bindings
 1. The [Taxi UI](http://localhost/) pulls the most recent location for all of the unique taxis from Kafka.
 
 ## Load Testing
