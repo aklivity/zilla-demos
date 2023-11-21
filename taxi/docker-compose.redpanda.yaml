@@ -59,7 +59,7 @@ services:
     command:
       - "-c"
       - |
-        rpk topic create --brokers redpanda:9092 mqtt-messages
+        rpk topic create --brokers redpanda:9092 mqtt-messages || exit 0;
         rpk topic create --brokers redpanda:9092 mqtt-sessions --topic-config cleanup.policy=compact
         rpk topic create --brokers redpanda:9092 mqtt-retained --topic-config cleanup.policy=compact
         rpk topic create --brokers redpanda:9092 taxi-locations --topic-config cleanup.policy=compact
