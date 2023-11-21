@@ -52,11 +52,8 @@ services:
               url: http://connect:8083
     ports:
       - 8080:8080
-    depends_on:
-      kafka-init:
-        condition: service_completed_successfully
 
-  kafka-init:
+  redpanda-init:
     image: docker.redpanda.com/redpandadata/redpanda:latest
     entrypoint: /bin/sh
     command:
@@ -73,3 +70,8 @@ services:
       redpanda:
         condition: service_healthy
     init: true
+
+  taxi-service:
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
