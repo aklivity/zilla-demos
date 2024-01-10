@@ -5,7 +5,7 @@ WORKDIR /opt/client/
 
 # System deps and app setup:
 RUN apk --no-cache add 'build-base>=0.5' 'git>=2.38' \
-    && npm install -g 'pnpm@^8.7'
+    && npm install -g 'pnpm@^8.14'
 
 # Add diretories with necessary config files
 COPY pnpm-lock.yaml package.json /opt/client/
