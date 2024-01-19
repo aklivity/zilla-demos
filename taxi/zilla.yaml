@@ -44,6 +44,7 @@ bindings:
       metrics:
         - http.*
 
+# HTTP proxy service to Kafka topics
   http_kafka_proxy:
     type: http-kafka
     kind: proxy
@@ -138,7 +139,7 @@ bindings:
       host: ${{env.TAXI_ROUTE_SERVER_HOST}}
       port: ${{env.TAXI_ROUTE_SERVER_PORT}}
 
-# MQTT Server With an exit to Kafka
+# MQTT Server definition
   mqtt_server:
     type: mqtt
     kind: server
@@ -146,6 +147,8 @@ bindings:
     telemetry:
       metrics:
         - stream.*
+
+# MQTT proxy service to Kafka topics
   mqtt_kafka_proxy:
     type: mqtt-kafka
     kind: proxy
