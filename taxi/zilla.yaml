@@ -171,9 +171,9 @@ bindings:
         exit: kafka_cache_client
       - when:
           - publish:
-              - topic: taxi/+/location
+              - topic: taxi/#
           - subscribe:
-              - topic: taxi/+/location
+              - topic: taxi/#
         with:
           messages: taxi-locations
         exit: kafka_cache_client

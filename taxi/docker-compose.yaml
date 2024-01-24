@@ -42,7 +42,8 @@ services:
       - ./default_bus_routes.json:/usr/src/app/default_routes.json
     environment:
       PRINT_SIM_LOGS: false
-      DEFAUlT_ROUTES: true
+      DEFAUlT_ROUTES: false
+      REPLICATION: 300
       BROKER_HOST: zilla
     ports:
       - 50051:50051

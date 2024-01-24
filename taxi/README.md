@@ -64,29 +64,19 @@ The [Taxi UI](http://localhost/) highlights downtown San Jose, CA bars. Users ca
 
 ## Load Testing
 
-The mqtt-simulation service includes a `default_routes.json` file, which starts a looping set of routes used in the demo. An additional file, `default_routes_load_test.json`, is available, which leverages the simulator's ability to generate multiple topics.
+There is a `load_test.sh` script included that makes 14 unique requests the same as if the UI was using the "Hail Taxi" button.
 
-1. You will see in the JSON file the config for managing the number of topics to generate by updating the `"RANGE_END"` value:
-
-   ```json
-   "TYPE": "multiple",
-   "RANGE_START": 1,
-   "RANGE_END": 500,
-   ```
-
-1. The `taxi-service` in the [docker-compose.yaml](docker-compose.yaml) file mounts the default config. Update the volume mount to map the load_test file.
-
-   ```yaml
-   volumes:
-     - ./grpc/service/default_routes_load_test.json:/usr/src/app/default_routes.json
-   ```
-
-1. Ensure the `DEFAUlT_ROUTES` env var is `true` so the service will start the sim and the `PRINT_SIM_LOGS` is true so the container will print the simulator output.
+1. The `taxi-service` in the `docker-compose.yaml` has a `REPLICATION` env var that will duplicate the incoming taxi requests to produce the number of connected MQTT clients per request. Here for each new taxi request `10` new unique MQTT clients will be created and publish data.
 
    ```yaml
    environment:
-     DEFAUlT_ROUTES: true
-     PRINT_SIM_LOGS: true
+     REPLICATION: 10
+   ```
+
+1. Run the `load_test.sh` script.
+
+   ```sh
+   ./load_test.sh
    ```
 
 1. Happy Load Testing!

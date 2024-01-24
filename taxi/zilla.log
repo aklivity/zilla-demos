@@ -1,0 +1,778 @@
+2024-01-24 16:20:07 name: zilla-taxi-demo
+2024-01-24 16:20:07 bindings:
+2024-01-24 16:20:07 
+2024-01-24 16:20:07 # Gateway ingress config
+2024-01-24 16:20:07   tcp_server:
+2024-01-24 16:20:07     type: tcp
+2024-01-24 16:20:07     kind: server
+2024-01-24 16:20:07     options:
+2024-01-24 16:20:07       host: 0.0.0.0
+2024-01-24 16:20:07       port:
+2024-01-24 16:20:07         - 7114
+2024-01-24 16:20:07         - 7183
+2024-01-24 16:20:07     routes:
+2024-01-24 16:20:07         - when:
+2024-01-24 16:20:07             - port: 7114
+2024-01-24 16:20:07           exit: http_server
+2024-01-24 16:20:07         - when:
+2024-01-24 16:20:07             - port: 7183
+2024-01-24 16:20:07           exit: mqtt_server
+2024-01-24 16:20:07     telemetry:
+2024-01-24 16:20:07       metrics:
+2024-01-24 16:20:07         - stream.*
+2024-01-24 16:20:07     exit: http_server
+2024-01-24 16:20:07   http_server:
+2024-01-24 16:20:07     type: http
+2024-01-24 16:20:07     kind: server
+2024-01-24 16:20:07     options:
+2024-01-24 16:20:07       access-control:
+2024-01-24 16:20:07         policy: cross-origin
+2024-01-24 16:20:07     routes:
+2024-01-24 16:20:07       - when:
+2024-01-24 16:20:07           - headers:
+2024-01-24 16:20:07               :scheme: http
+2024-01-24 16:20:07               :authority: localhost:7114
+2024-01-24 16:20:07               :path: /taxi/*
+2024-01-24 16:20:07         exit: http_kafka_proxy
+2024-01-24 16:20:07       - when:
+2024-01-24 16:20:07           - headers:
+2024-01-24 16:20:07               :scheme: http
+2024-01-24 16:20:07               :authority: zilla:7114
+2024-01-24 16:20:07         exit: grpc_server
+2024-01-24 16:20:07     exit: http_kafka_proxy
+2024-01-24 16:20:07     telemetry:
+2024-01-24 16:20:07       metrics:
+2024-01-24 16:20:07         - http.*
+2024-01-24 16:20:07 
+2024-01-24 16:20:07 # HTTP proxy service to Kafka topics
+2024-01-24 16:20:07   http_kafka_proxy:
+2024-01-24 16:20:07     type: http-kafka
+2024-01-24 16:20:07     kind: proxy
+2024-01-24 16:20:07     routes:
+2024-01-24 16:20:07       - when:
+2024-01-24 16:20:07           - method: GET
+2024-01-24 16:20:07             path: /bus/locations
+2024-01-24 16:20:07         exit: kafka_cache_client
+2024-01-24 16:20:07         with:
+2024-01-24 16:20:07           capability: fetch
+2024-01-24 16:20:07           topic: bus-locations
+2024-01-24 16:20:07           merge:
+2024-01-24 16:20:07             content-type: application/json
+2024-01-24 16:20:07       - when:
+2024-01-24 16:20:07           - method: GET
+2024-01-24 16:20:07             path: /taxi/locations
+2024-01-24 16:20:07         exit: kafka_cache_client
+2024-01-24 16:20:07         with:
+2024-01-24 16:20:07           capability: fetch
+2024-01-24 16:20:07           topic: taxi-locations
+2024-01-24 16:20:07           merge:
+2024-01-24 16:20:07             content-type: application/json
+2024-01-24 16:20:07       - when:
+2024-01-24 16:20:07           - method: GET
+2024-01-24 16:20:07             path: /taxi/locations/{id}
+2024-01-24 16:20:07         exit: kafka_cache_client
+2024-01-24 16:20:07         with:
+2024-01-24 16:20:07           capability: fetch
+2024-01-24 16:20:07           topic: taxi-locations
+2024-01-24 16:20:07           filters:
+2024-01-24 16:20:07             - key: ${params.id}
+2024-01-24 16:20:07 
+2024-01-24 16:20:07 # gRPC service definition
+2024-01-24 16:20:07   grpc_server:
+2024-01-24 16:20:07     type: grpc
+2024-01-24 16:20:07     kind: server
+2024-01-24 16:20:07     options:
+2024-01-24 16:20:07       services:
+2024-01-24 16:20:07         - proto/taxi_route.proto
+2024-01-24 16:20:07     exit: grpc_kafka
+2024-01-24 16:20:07     telemetry:
+2024-01-24 16:20:07       metrics:
+2024-01-24 16:20:07         - grpc.*
+2024-01-24 16:20:07 
+2024-01-24 16:20:07 # gRPC proxy service to Kafka topics
+2024-01-24 16:20:07   grpc_kafka:
+2024-01-24 16:20:07     type: grpc-kafka
+2024-01-24 16:20:07     kind: proxy
+2024-01-24 16:20:07     routes:
+2024-01-24 16:20:07       - when:
+2024-01-24 16:20:07           - method: taxiroute.TaxiRoute/*
+2024-01-24 16:20:07         exit: kafka_cache_client
+2024-01-24 16:20:07         with:
+2024-01-24 16:20:07           capability: produce
+2024-01-24 16:20:07           topic: route-requests
+2024-01-24 16:20:07           acks: leader_only
+2024-01-24 16:20:07           reply-to: route-replies
+2024-01-24 16:20:07 
+2024-01-24 16:20:07 # gRPC Kafka fanout to a remote server
+2024-01-24 16:20:07   taxi_route_remote_server:
+2024-01-24 16:20:07     type: kafka-grpc
+2024-01-24 16:20:07     kind: remote_server
+2024-01-24 16:20:07     entry: kafka_cache_client
+2024-01-24 16:20:07     options:
+2024-01-24 16:20:07       acks: leader_only
+2024-01-24 16:20:07     routes:
+2024-01-24 16:20:07       - when:
+2024-01-24 16:20:07           - topic: route-requests
+2024-01-24 16:20:07             reply-to: route-replies
+2024-01-24 16:20:07             method: taxiroute.TaxiRoute/*
+2024-01-24 16:20:07         with:
+2024-01-24 16:20:07           scheme: http
+2024-01-24 16:20:07           authority: ${{env.TAXI_ROUTE_SERVER_HOST}}:${{env.TAXI_ROUTE_SERVER_PORT}}
+2024-01-24 16:20:07         exit: taxi_route_server_grpc_client
+2024-01-24 16:20:07 
+2024-01-24 16:20:07 # gRPC RoutGuide server
+2024-01-24 16:20:07   taxi_route_server_grpc_client:
+2024-01-24 16:20:07     type: grpc
+2024-01-24 16:20:07     kind: client
+2024-01-24 16:20:07     exit: taxi_route_server_http_client
+2024-01-24 16:20:07   taxi_route_server_http_client:
+2024-01-24 16:20:07     type: http
+2024-01-24 16:20:07     kind: client
+2024-01-24 16:20:07     options:
+2024-01-24 16:20:07       versions:
+2024-01-24 16:20:07         - h2
+2024-01-24 16:20:07     exit: taxi_route_server_tcp_client
+2024-01-24 16:20:07   taxi_route_server_tcp_client:
+2024-01-24 16:20:07     type: tcp
+2024-01-24 16:20:07     kind: client
+2024-01-24 16:20:07     options:
+2024-01-24 16:20:07       host: ${{env.TAXI_ROUTE_SERVER_HOST}}
+2024-01-24 16:20:07       port: ${{env.TAXI_ROUTE_SERVER_PORT}}
+2024-01-24 16:20:07 
+2024-01-24 16:20:07 # MQTT Server definition
+2024-01-24 16:20:07   mqtt_server:
+2024-01-24 16:20:07     type: mqtt
+2024-01-24 16:20:07     kind: server
+2024-01-24 16:20:07     exit: mqtt_kafka_proxy
+2024-01-24 16:20:07     telemetry:
+2024-01-24 16:20:07       metrics:
+2024-01-24 16:20:07         - stream.*
+2024-01-24 16:20:07 
+2024-01-24 16:20:07 # MQTT proxy service to Kafka topics
+2024-01-24 16:20:07   mqtt_kafka_proxy:
+2024-01-24 16:20:07     type: mqtt-kafka
+2024-01-24 16:20:07     kind: proxy
+2024-01-24 16:20:07     options:
+2024-01-24 16:20:07       topics:
+2024-01-24 16:20:07         sessions: mqtt-sessions
+2024-01-24 16:20:07         messages: mqtt-messages
+2024-01-24 16:20:07         retained: mqtt-retained
+2024-01-24 16:20:07     clients:
+2024-01-24 16:20:07       - bus/{identity}/#
+2024-01-24 16:20:07       - taxi/{identity}/#
+2024-01-24 16:20:07     routes:
+2024-01-24 16:20:07       - when:
+2024-01-24 16:20:07           - publish:
+2024-01-24 16:20:07               - topic: bus/+/location
+2024-01-24 16:20:07           - subscribe:
+2024-01-24 16:20:07               - topic: bus/+/location
+2024-01-24 16:20:07         with:
+2024-01-24 16:20:07           messages: bus-locations
+2024-01-24 16:20:07         exit: kafka_cache_client
+2024-01-24 16:20:07       - when:
+2024-01-24 16:20:07           - publish:
+2024-01-24 16:20:07               - topic: taxi/#
+2024-01-24 16:20:07           - subscribe:
+2024-01-24 16:20:07               - topic: taxi/#
+2024-01-24 16:20:07         with:
+2024-01-24 16:20:07           messages: taxi-locations
+2024-01-24 16:20:07         exit: kafka_cache_client
+2024-01-24 16:20:07     exit: kafka_cache_client
+2024-01-24 16:20:07 
+2024-01-24 16:20:07 # Kafka caching layer
+2024-01-24 16:20:07   kafka_cache_client:
+2024-01-24 16:20:07     type: kafka
+2024-01-24 16:20:07     kind: cache_client
+2024-01-24 16:20:07     exit: kafka_cache_server
+2024-01-24 16:20:07   kafka_cache_server:
+2024-01-24 16:20:07     type: kafka
+2024-01-24 16:20:07     kind: cache_server
+2024-01-24 16:20:07     options:
+2024-01-24 16:20:07       bootstrap:
+2024-01-24 16:20:07         - bus-locations
+2024-01-24 16:20:07         - taxi-locations
+2024-01-24 16:20:07         - mqtt-sessions
+2024-01-24 16:20:07         - route-requests
+2024-01-24 16:20:07         - route-replies
+2024-01-24 16:20:07     exit: kafka_client
+2024-01-24 16:20:07 
+2024-01-24 16:20:07 # Connect to local Kafka
+2024-01-24 16:20:07   kafka_client:
+2024-01-24 16:20:07     type: kafka
+2024-01-24 16:20:07     kind: client
+2024-01-24 16:20:07     exit: kafka_tcp_client
+2024-01-24 16:20:07   kafka_tcp_client:
+2024-01-24 16:20:07     type: tcp
+2024-01-24 16:20:07     kind: client
+2024-01-24 16:20:07     options:
+2024-01-24 16:20:07       host: ${{env.KAFKA_HOST}}
+2024-01-24 16:20:07       port: ${{env.KAFKA_PORT}}
+2024-01-24 16:20:07     routes:
+2024-01-24 16:20:07       - when:
+2024-01-24 16:20:07           - cidr: 0.0.0.0/0
+2024-01-24 16:20:07 
+2024-01-24 16:20:07 telemetry:
+2024-01-24 16:20:07   # Desired metrics to track
+2024-01-24 16:20:07   metrics:
+2024-01-24 16:20:07     - grpc.active.requests
+2024-01-24 16:20:07     - grpc.duration
+2024-01-24 16:20:07     - grpc.request.size
+2024-01-24 16:20:07     - grpc.response.size
+2024-01-24 16:20:07     - grpc.requests.per.rpc
+2024-01-24 16:20:07     - grpc.responses.per.rpc
+2024-01-24 16:20:07     - http.active.requests
+2024-01-24 16:20:07     - http.duration
+2024-01-24 16:20:07     - http.request.size
+2024-01-24 16:20:07     - http.response.size
+2024-01-24 16:20:07     - stream.active.received
+2024-01-24 16:20:07     - stream.active.sent
+2024-01-24 16:20:07     - stream.opens.received
+2024-01-24 16:20:07     - stream.opens.sent
+2024-01-24 16:20:07     - stream.data.received
+2024-01-24 16:20:07     - stream.data.sent
+2024-01-24 16:20:07     - stream.errors.received
+2024-01-24 16:20:07     - stream.errors.sent
+2024-01-24 16:20:07     - stream.closes.received
+2024-01-24 16:20:07     - stream.closes.sent
+2024-01-24 16:20:07 
+2024-01-24 16:20:07   # Prometheus endpoint definition
+2024-01-24 16:20:07   exporters:
+2024-01-24 16:20:07     prometheus_metric_exporter:
+2024-01-24 16:20:07       type: prometheus
+2024-01-24 16:20:07       options:
+2024-01-24 16:20:07         endpoints:
+2024-01-24 16:20:07           - scheme: http
+2024-01-24 16:20:07             path: /metrics
+2024-01-24 16:20:07             port: 7190
+2024-01-24 16:20:07 
+2024-01-24 16:20:08 started
+2024-01-24 16:20:26 stopped
+2024-01-24 16:20:29 name: zilla-taxi-demo
+2024-01-24 16:20:29 bindings:
+2024-01-24 16:20:29 
+2024-01-24 16:20:29 # Gateway ingress config
+2024-01-24 16:20:29   tcp_server:
+2024-01-24 16:20:29     type: tcp
+2024-01-24 16:20:29     kind: server
+2024-01-24 16:20:29     options:
+2024-01-24 16:20:29       host: 0.0.0.0
+2024-01-24 16:20:29       port:
+2024-01-24 16:20:29         - 7114
+2024-01-24 16:20:29         - 7183
+2024-01-24 16:20:29     routes:
+2024-01-24 16:20:29         - when:
+2024-01-24 16:20:29             - port: 7114
+2024-01-24 16:20:29           exit: http_server
+2024-01-24 16:20:29         - when:
+2024-01-24 16:20:29             - port: 7183
+2024-01-24 16:20:29           exit: mqtt_server
+2024-01-24 16:20:29     telemetry:
+2024-01-24 16:20:29       metrics:
+2024-01-24 16:20:29         - stream.*
+2024-01-24 16:20:29     exit: http_server
+2024-01-24 16:20:29   http_server:
+2024-01-24 16:20:29     type: http
+2024-01-24 16:20:29     kind: server
+2024-01-24 16:20:29     options:
+2024-01-24 16:20:29       access-control:
+2024-01-24 16:20:29         policy: cross-origin
+2024-01-24 16:20:29     routes:
+2024-01-24 16:20:29       - when:
+2024-01-24 16:20:29           - headers:
+2024-01-24 16:20:29               :scheme: http
+2024-01-24 16:20:29               :authority: localhost:7114
+2024-01-24 16:20:29               :path: /taxi/*
+2024-01-24 16:20:29         exit: http_kafka_proxy
+2024-01-24 16:20:29       - when:
+2024-01-24 16:20:29           - headers:
+2024-01-24 16:20:29               :scheme: http
+2024-01-24 16:20:29               :authority: zilla:7114
+2024-01-24 16:20:29         exit: grpc_server
+2024-01-24 16:20:29     exit: http_kafka_proxy
+2024-01-24 16:20:29     telemetry:
+2024-01-24 16:20:29       metrics:
+2024-01-24 16:20:29         - http.*
+2024-01-24 16:20:26 org.agrona.concurrent.AgentTerminationException: java.lang.NullPointerException: Cannot read field "initialAck" because "stream" is null
+2024-01-24 16:20:26 at io.aklivity.zilla.runtime.engine@0.9.60/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.doWork(DispatchAgent.java:707)
+2024-01-24 16:20:26 at org.agrona.core/org.agrona.concurrent.AgentRunner.doDutyCycle(AgentRunner.java:291)
+2024-01-24 16:20:26 at org.agrona.core/org.agrona.concurrent.AgentRunner.run(AgentRunner.java:164)
+2024-01-24 16:20:26 at java.base/java.lang.Thread.run(Thread.java:1623)
+2024-01-24 16:20:26 Caused by: java.lang.NullPointerException: Cannot read field "initialAck" because "stream" is null
+2024-01-24 16:20:26 at io.aklivity.zilla.runtime.binding.kafka@0.9.60/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientConnectionPool$KafkaClientConnection.onConnectionWindow(KafkaClientConnectionPool.java:1574)
+2024-01-24 16:20:26 at io.aklivity.zilla.runtime.binding.kafka@0.9.60/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientConnectionPool$KafkaClientConnection.onConnectionMessage(KafkaClientConnectionPool.java:1383)
+2024-01-24 16:20:26 at io.aklivity.zilla.runtime.engine@0.9.60/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.handleReadInitial(DispatchAgent.java:1106)
+2024-01-24 16:20:26 at io.aklivity.zilla.runtime.engine@0.9.60/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.handleRead(DispatchAgent.java:1041)
+2024-01-24 16:20:26 at io.aklivity.zilla.runtime.engine@0.9.60/io.aklivity.zilla.runtime.engine.internal.concurent.ManyToOneRingBuffer.read(ManyToOneRingBuffer.java:181)
+2024-01-24 16:20:26 at io.aklivity.zilla.runtime.engine@0.9.60/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.doWork(DispatchAgent.java:701)
+2024-01-24 16:20:26 ... 3 more
+2024-01-24 16:20:26 Suppressed: java.lang.Exception: [engine/data#3][0x03030000000005a5] streams=[consumeAt=0x0027b688 (0x000000000227b688), produceAt=0x00302eb8 (0x0000000002302eb8)]
+2024-01-24 16:20:26 at io.aklivity.zilla.runtime.engine@0.9.60/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.doWork(DispatchAgent.java:705)
+2024-01-24 16:20:26 ... 3 more
+2024-01-24 16:20:29 
+2024-01-24 16:20:29 # HTTP proxy service to Kafka topics
+2024-01-24 16:20:29   http_kafka_proxy:
+2024-01-24 16:20:29     type: http-kafka
+2024-01-24 16:20:29     kind: proxy
+2024-01-24 16:20:29     routes:
+2024-01-24 16:20:29       - when:
+2024-01-24 16:20:29           - method: GET
+2024-01-24 16:20:29             path: /bus/locations
+2024-01-24 16:20:29         exit: kafka_cache_client
+2024-01-24 16:20:29         with:
+2024-01-24 16:20:29           capability: fetch
+2024-01-24 16:20:29           topic: bus-locations
+2024-01-24 16:20:29           merge:
+2024-01-24 16:20:29             content-type: application/json
+2024-01-24 16:20:29       - when:
+2024-01-24 16:20:29           - method: GET
+2024-01-24 16:20:29             path: /taxi/locations
+2024-01-24 16:20:29         exit: kafka_cache_client
+2024-01-24 16:20:29         with:
+2024-01-24 16:20:29           capability: fetch
+2024-01-24 16:20:29           topic: taxi-locations
+2024-01-24 16:20:29           merge:
+2024-01-24 16:20:29             content-type: application/json
+2024-01-24 16:20:29       - when:
+2024-01-24 16:20:29           - method: GET
+2024-01-24 16:20:29             path: /taxi/locations/{id}
+2024-01-24 16:20:29         exit: kafka_cache_client
+2024-01-24 16:20:29         with:
+2024-01-24 16:20:29           capability: fetch
+2024-01-24 16:20:29           topic: taxi-locations
+2024-01-24 16:20:29           filters:
+2024-01-24 16:20:29             - key: ${params.id}
+2024-01-24 16:20:29 
+2024-01-24 16:20:29 # gRPC service definition
+2024-01-24 16:20:29   grpc_server:
+2024-01-24 16:20:29     type: grpc
+2024-01-24 16:20:29     kind: server
+2024-01-24 16:20:29     options:
+2024-01-24 16:20:29       services:
+2024-01-24 16:20:29         - proto/taxi_route.proto
+2024-01-24 16:20:29     exit: grpc_kafka
+2024-01-24 16:20:29     telemetry:
+2024-01-24 16:20:29       metrics:
+2024-01-24 16:20:29         - grpc.*
+2024-01-24 16:20:29 
+2024-01-24 16:20:29 # gRPC proxy service to Kafka topics
+2024-01-24 16:20:29   grpc_kafka:
+2024-01-24 16:20:29     type: grpc-kafka
+2024-01-24 16:20:29     kind: proxy
+2024-01-24 16:20:29     routes:
+2024-01-24 16:20:29       - when:
+2024-01-24 16:20:29           - method: taxiroute.TaxiRoute/*
+2024-01-24 16:20:29         exit: kafka_cache_client
+2024-01-24 16:20:29         with:
+2024-01-24 16:20:29           capability: produce
+2024-01-24 16:20:29           topic: route-requests
+2024-01-24 16:20:29           acks: leader_only
+2024-01-24 16:20:29           reply-to: route-replies
+2024-01-24 16:20:29 
+2024-01-24 16:20:29 # gRPC Kafka fanout to a remote server
+2024-01-24 16:20:29   taxi_route_remote_server:
+2024-01-24 16:20:29     type: kafka-grpc
+2024-01-24 16:20:29     kind: remote_server
+2024-01-24 16:20:29     entry: kafka_cache_client
+2024-01-24 16:20:29     options:
+2024-01-24 16:20:29       acks: leader_only
+2024-01-24 16:20:29     routes:
+2024-01-24 16:20:29       - when:
+2024-01-24 16:20:29           - topic: route-requests
+2024-01-24 16:20:29             reply-to: route-replies
+2024-01-24 16:20:29             method: taxiroute.TaxiRoute/*
+2024-01-24 16:20:29         with:
+2024-01-24 16:20:29           scheme: http
+2024-01-24 16:20:29           authority: ${{env.TAXI_ROUTE_SERVER_HOST}}:${{env.TAXI_ROUTE_SERVER_PORT}}
+2024-01-24 16:20:29         exit: taxi_route_server_grpc_client
+2024-01-24 16:20:29 
+2024-01-24 16:20:29 # gRPC RoutGuide server
+2024-01-24 16:20:29   taxi_route_server_grpc_client:
+2024-01-24 16:20:29     type: grpc
+2024-01-24 16:20:29     kind: client
+2024-01-24 16:20:29     exit: taxi_route_server_http_client
+2024-01-24 16:20:29   taxi_route_server_http_client:
+2024-01-24 16:20:29     type: http
+2024-01-24 16:20:29     kind: client
+2024-01-24 16:20:29     options:
+2024-01-24 16:20:29       versions:
+2024-01-24 16:20:29         - h2
+2024-01-24 16:20:29     exit: taxi_route_server_tcp_client
+2024-01-24 16:20:29   taxi_route_server_tcp_client:
+2024-01-24 16:20:29     type: tcp
+2024-01-24 16:20:29     kind: client
+2024-01-24 16:20:29     options:
+2024-01-24 16:20:29       host: ${{env.TAXI_ROUTE_SERVER_HOST}}
+2024-01-24 16:20:29       port: ${{env.TAXI_ROUTE_SERVER_PORT}}
+2024-01-24 16:20:29 
+2024-01-24 16:20:29 # MQTT Server definition
+2024-01-24 16:20:29   mqtt_server:
+2024-01-24 16:20:29     type: mqtt
+2024-01-24 16:20:29     kind: server
+2024-01-24 16:20:29     exit: mqtt_kafka_proxy
+2024-01-24 16:20:29     telemetry:
+2024-01-24 16:20:29       metrics:
+2024-01-24 16:20:29         - stream.*
+2024-01-24 16:20:29 
+2024-01-24 16:20:29 # MQTT proxy service to Kafka topics
+2024-01-24 16:20:29   mqtt_kafka_proxy:
+2024-01-24 16:20:29     type: mqtt-kafka
+2024-01-24 16:20:29     kind: proxy
+2024-01-24 16:20:29     options:
+2024-01-24 16:20:29       topics:
+2024-01-24 16:20:29         sessions: mqtt-sessions
+2024-01-24 16:20:29         messages: mqtt-messages
+2024-01-24 16:20:29         retained: mqtt-retained
+2024-01-24 16:20:29     clients:
+2024-01-24 16:20:29       - bus/{identity}/#
+2024-01-24 16:20:29       - taxi/{identity}/#
+2024-01-24 16:20:29     routes:
+2024-01-24 16:20:29       - when:
+2024-01-24 16:20:29           - publish:
+2024-01-24 16:20:29               - topic: bus/+/location
+2024-01-24 16:20:29           - subscribe:
+2024-01-24 16:20:29               - topic: bus/+/location
+2024-01-24 16:20:29         with:
+2024-01-24 16:20:29           messages: bus-locations
+2024-01-24 16:20:29         exit: kafka_cache_client
+2024-01-24 16:20:29       - when:
+2024-01-24 16:20:29           - publish:
+2024-01-24 16:20:29               - topic: taxi/#
+2024-01-24 16:20:29           - subscribe:
+2024-01-24 16:20:29               - topic: taxi/#
+2024-01-24 16:20:29         with:
+2024-01-24 16:20:29           messages: taxi-locations
+2024-01-24 16:20:29         exit: kafka_cache_client
+2024-01-24 16:20:29     exit: kafka_cache_client
+2024-01-24 16:20:29 
+2024-01-24 16:20:29 # Kafka caching layer
+2024-01-24 16:20:29   kafka_cache_client:
+2024-01-24 16:20:29     type: kafka
+2024-01-24 16:20:29     kind: cache_client
+2024-01-24 16:20:29     exit: kafka_cache_server
+2024-01-24 16:20:29   kafka_cache_server:
+2024-01-24 16:20:29     type: kafka
+2024-01-24 16:20:29     kind: cache_server
+2024-01-24 16:20:29     options:
+2024-01-24 16:20:29       bootstrap:
+2024-01-24 16:20:29         - bus-locations
+2024-01-24 16:20:29         - taxi-locations
+2024-01-24 16:20:29         - mqtt-sessions
+2024-01-24 16:20:29         - route-requests
+2024-01-24 16:20:29         - route-replies
+2024-01-24 16:20:29     exit: kafka_client
+2024-01-24 16:20:29 
+2024-01-24 16:20:29 # Connect to local Kafka
+2024-01-24 16:20:29   kafka_client:
+2024-01-24 16:20:29     type: kafka
+2024-01-24 16:20:29     kind: client
+2024-01-24 16:20:29     exit: kafka_tcp_client
+2024-01-24 16:20:29   kafka_tcp_client:
+2024-01-24 16:20:29     type: tcp
+2024-01-24 16:20:29     kind: client
+2024-01-24 16:20:29     options:
+2024-01-24 16:20:29       host: ${{env.KAFKA_HOST}}
+2024-01-24 16:20:29       port: ${{env.KAFKA_PORT}}
+2024-01-24 16:20:29     routes:
+2024-01-24 16:20:29       - when:
+2024-01-24 16:20:29           - cidr: 0.0.0.0/0
+2024-01-24 16:20:29 
+2024-01-24 16:20:29 telemetry:
+2024-01-24 16:20:29   # Desired metrics to track
+2024-01-24 16:20:29   metrics:
+2024-01-24 16:20:29     - grpc.active.requests
+2024-01-24 16:20:29     - grpc.duration
+2024-01-24 16:20:29     - grpc.request.size
+2024-01-24 16:20:29     - grpc.response.size
+2024-01-24 16:20:29     - grpc.requests.per.rpc
+2024-01-24 16:20:29     - grpc.responses.per.rpc
+2024-01-24 16:20:29     - http.active.requests
+2024-01-24 16:20:29     - http.duration
+2024-01-24 16:20:29     - http.request.size
+2024-01-24 16:20:29     - http.response.size
+2024-01-24 16:20:29     - stream.active.received
+2024-01-24 16:20:29     - stream.active.sent
+2024-01-24 16:20:29     - stream.opens.received
+2024-01-24 16:20:29     - stream.opens.sent
+2024-01-24 16:20:29     - stream.data.received
+2024-01-24 16:20:29     - stream.data.sent
+2024-01-24 16:20:29     - stream.errors.received
+2024-01-24 16:20:29     - stream.errors.sent
+2024-01-24 16:20:29     - stream.closes.received
+2024-01-24 16:20:29     - stream.closes.sent
+2024-01-24 16:20:29 
+2024-01-24 16:20:29   # Prometheus endpoint definition
+2024-01-24 16:20:29   exporters:
+2024-01-24 16:20:29     prometheus_metric_exporter:
+2024-01-24 16:20:29       type: prometheus
+2024-01-24 16:20:29       options:
+2024-01-24 16:20:29         endpoints:
+2024-01-24 16:20:29           - scheme: http
+2024-01-24 16:20:29             path: /metrics
+2024-01-24 16:20:29             port: 7190
+2024-01-24 16:20:29 
+2024-01-24 16:20:29 started
+2024-01-24 16:20:34 stopped
+2024-01-24 16:20:36 name: zilla-taxi-demo
+2024-01-24 16:20:36 bindings:
+2024-01-24 16:20:36 
+2024-01-24 16:20:36 # Gateway ingress config
+2024-01-24 16:20:36   tcp_server:
+2024-01-24 16:20:36     type: tcp
+2024-01-24 16:20:36     kind: server
+2024-01-24 16:20:36     options:
+2024-01-24 16:20:36       host: 0.0.0.0
+2024-01-24 16:20:36       port:
+2024-01-24 16:20:36         - 7114
+2024-01-24 16:20:36         - 7183
+2024-01-24 16:20:36     routes:
+2024-01-24 16:20:36         - when:
+2024-01-24 16:20:36             - port: 7114
+2024-01-24 16:20:36           exit: http_server
+2024-01-24 16:20:36         - when:
+2024-01-24 16:20:36             - port: 7183
+2024-01-24 16:20:36           exit: mqtt_server
+2024-01-24 16:20:36     telemetry:
+2024-01-24 16:20:36       metrics:
+2024-01-24 16:20:36         - stream.*
+2024-01-24 16:20:36     exit: http_server
+2024-01-24 16:20:36   http_server:
+2024-01-24 16:20:36     type: http
+2024-01-24 16:20:36     kind: server
+2024-01-24 16:20:36     options:
+2024-01-24 16:20:36       access-control:
+2024-01-24 16:20:36         policy: cross-origin
+2024-01-24 16:20:36     routes:
+2024-01-24 16:20:36       - when:
+2024-01-24 16:20:36           - headers:
+2024-01-24 16:20:36               :scheme: http
+2024-01-24 16:20:36               :authority: localhost:7114
+2024-01-24 16:20:36               :path: /taxi/*
+2024-01-24 16:20:36         exit: http_kafka_proxy
+2024-01-24 16:20:36       - when:
+2024-01-24 16:20:36           - headers:
+2024-01-24 16:20:36               :scheme: http
+2024-01-24 16:20:36               :authority: zilla:7114
+2024-01-24 16:20:36         exit: grpc_server
+2024-01-24 16:20:36     exit: http_kafka_proxy
+2024-01-24 16:20:36     telemetry:
+2024-01-24 16:20:36       metrics:
+2024-01-24 16:20:36         - http.*
+2024-01-24 16:20:36 
+2024-01-24 16:20:36 # HTTP proxy service to Kafka topics
+2024-01-24 16:20:36   http_kafka_proxy:
+2024-01-24 16:20:36     type: http-kafka
+2024-01-24 16:20:36     kind: proxy
+2024-01-24 16:20:36     routes:
+2024-01-24 16:20:36       - when:
+2024-01-24 16:20:36           - method: GET
+2024-01-24 16:20:36             path: /bus/locations
+2024-01-24 16:20:36         exit: kafka_cache_client
+2024-01-24 16:20:36         with:
+2024-01-24 16:20:36           capability: fetch
+2024-01-24 16:20:36           topic: bus-locations
+2024-01-24 16:20:36           merge:
+2024-01-24 16:20:36             content-type: application/json
+2024-01-24 16:20:36       - when:
+2024-01-24 16:20:36           - method: GET
+2024-01-24 16:20:36             path: /taxi/locations
+2024-01-24 16:20:36         exit: kafka_cache_client
+2024-01-24 16:20:36         with:
+2024-01-24 16:20:36           capability: fetch
+2024-01-24 16:20:36           topic: taxi-locations
+2024-01-24 16:20:36           merge:
+2024-01-24 16:20:36             content-type: application/json
+2024-01-24 16:20:36       - when:
+2024-01-24 16:20:36           - method: GET
+2024-01-24 16:20:36             path: /taxi/locations/{id}
+2024-01-24 16:20:36         exit: kafka_cache_client
+2024-01-24 16:20:36         with:
+2024-01-24 16:20:36           capability: fetch
+2024-01-24 16:20:36           topic: taxi-locations
+2024-01-24 16:20:36           filters:
+2024-01-24 16:20:36             - key: ${params.id}
+2024-01-24 16:20:36 
+2024-01-24 16:20:36 # gRPC service definition
+2024-01-24 16:20:36   grpc_server:
+2024-01-24 16:20:36     type: grpc
+2024-01-24 16:20:36     kind: server
+2024-01-24 16:20:36     options:
+2024-01-24 16:20:36       services:
+2024-01-24 16:20:36         - proto/taxi_route.proto
+2024-01-24 16:20:36     exit: grpc_kafka
+2024-01-24 16:20:36     telemetry:
+2024-01-24 16:20:36       metrics:
+2024-01-24 16:20:36         - grpc.*
+2024-01-24 16:20:36 
+2024-01-24 16:20:36 # gRPC proxy service to Kafka topics
+2024-01-24 16:20:36   grpc_kafka:
+2024-01-24 16:20:36     type: grpc-kafka
+2024-01-24 16:20:36     kind: proxy
+2024-01-24 16:20:36     routes:
+2024-01-24 16:20:36       - when:
+2024-01-24 16:20:36           - method: taxiroute.TaxiRoute/*
+2024-01-24 16:20:36         exit: kafka_cache_client
+2024-01-24 16:20:36         with:
+2024-01-24 16:20:36           capability: produce
+2024-01-24 16:20:36           topic: route-requests
+2024-01-24 16:20:36           acks: leader_only
+2024-01-24 16:20:36           reply-to: route-replies
+2024-01-24 16:20:36 
+2024-01-24 16:20:36 # gRPC Kafka fanout to a remote server
+2024-01-24 16:20:36   taxi_route_remote_server:
+2024-01-24 16:20:36     type: kafka-grpc
+2024-01-24 16:20:36     kind: remote_server
+2024-01-24 16:20:36     entry: kafka_cache_client
+2024-01-24 16:20:36     options:
+2024-01-24 16:20:36       acks: leader_only
+2024-01-24 16:20:36     routes:
+2024-01-24 16:20:36       - when:
+2024-01-24 16:20:36           - topic: route-requests
+2024-01-24 16:20:36             reply-to: route-replies
+2024-01-24 16:20:36             method: taxiroute.TaxiRoute/*
+2024-01-24 16:20:36         with:
+2024-01-24 16:20:36           scheme: http
+2024-01-24 16:20:36           authority: ${{env.TAXI_ROUTE_SERVER_HOST}}:${{env.TAXI_ROUTE_SERVER_PORT}}
+2024-01-24 16:20:36         exit: taxi_route_server_grpc_client
+2024-01-24 16:20:36 
+2024-01-24 16:20:36 # gRPC RoutGuide server
+2024-01-24 16:20:36   taxi_route_server_grpc_client:
+2024-01-24 16:20:36     type: grpc
+2024-01-24 16:20:36     kind: client
+2024-01-24 16:20:36     exit: taxi_route_server_http_client
+2024-01-24 16:20:36   taxi_route_server_http_client:
+2024-01-24 16:20:36     type: http
+2024-01-24 16:20:36     kind: client
+2024-01-24 16:20:36     options:
+2024-01-24 16:20:36       versions:
+2024-01-24 16:20:36         - h2
+2024-01-24 16:20:36     exit: taxi_route_server_tcp_client
+2024-01-24 16:20:36   taxi_route_server_tcp_client:
+2024-01-24 16:20:36     type: tcp
+2024-01-24 16:20:36     kind: client
+2024-01-24 16:20:36     options:
+2024-01-24 16:20:36       host: ${{env.TAXI_ROUTE_SERVER_HOST}}
+2024-01-24 16:20:36       port: ${{env.TAXI_ROUTE_SERVER_PORT}}
+2024-01-24 16:20:36 
+2024-01-24 16:20:36 # MQTT Server definition
+2024-01-24 16:20:36   mqtt_server:
+2024-01-24 16:20:36     type: mqtt
+2024-01-24 16:20:36     kind: server
+2024-01-24 16:20:34 org.agrona.concurrent.AgentTerminationException: java.lang.NullPointerException: Cannot read field "initialAck" because "stream" is null
+2024-01-24 16:20:34 at io.aklivity.zilla.runtime.engine@0.9.60/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.doWork(DispatchAgent.java:707)
+2024-01-24 16:20:34 at org.agrona.core/org.agrona.concurrent.AgentRunner.doDutyCycle(AgentRunner.java:291)
+2024-01-24 16:20:34 at org.agrona.core/org.agrona.concurrent.AgentRunner.run(AgentRunner.java:164)
+2024-01-24 16:20:34 at java.base/java.lang.Thread.run(Thread.java:1623)
+2024-01-24 16:20:34 Caused by: java.lang.NullPointerException: Cannot read field "initialAck" because "stream" is null
+2024-01-24 16:20:34 at io.aklivity.zilla.runtime.binding.kafka@0.9.60/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientConnectionPool$KafkaClientConnection.onConnectionWindow(KafkaClientConnectionPool.java:1574)
+2024-01-24 16:20:34 at io.aklivity.zilla.runtime.binding.kafka@0.9.60/io.aklivity.zilla.runtime.binding.kafka.internal.stream.KafkaClientConnectionPool$KafkaClientConnection.onConnectionMessage(KafkaClientConnectionPool.java:1383)
+2024-01-24 16:20:34 at io.aklivity.zilla.runtime.engine@0.9.60/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.handleReadInitial(DispatchAgent.java:1106)
+2024-01-24 16:20:34 at io.aklivity.zilla.runtime.engine@0.9.60/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.handleRead(DispatchAgent.java:1041)
+2024-01-24 16:20:34 at io.aklivity.zilla.runtime.engine@0.9.60/io.aklivity.zilla.runtime.engine.internal.concurent.ManyToOneRingBuffer.read(ManyToOneRingBuffer.java:181)
+2024-01-24 16:20:34 at io.aklivity.zilla.runtime.engine@0.9.60/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.doWork(DispatchAgent.java:701)
+2024-01-24 16:20:34 ... 3 more
+2024-01-24 16:20:34 Suppressed: java.lang.Exception: [engine/data#3][0x03030000000000b7] streams=[consumeAt=0x01c27f10 (0x0000000001c27f10), produceAt=0x01c8a460 (0x0000000001c8a460)]
+2024-01-24 16:20:34 at io.aklivity.zilla.runtime.engine@0.9.60/io.aklivity.zilla.runtime.engine.internal.registry.DispatchAgent.doWork(DispatchAgent.java:705)
+2024-01-24 16:20:34 ... 3 more
+2024-01-24 16:20:36     exit: mqtt_kafka_proxy
+2024-01-24 16:20:36     telemetry:
+2024-01-24 16:20:36       metrics:
+2024-01-24 16:20:36         - stream.*
+2024-01-24 16:20:36 
+2024-01-24 16:20:36 # MQTT proxy service to Kafka topics
+2024-01-24 16:20:36   mqtt_kafka_proxy:
+2024-01-24 16:20:36     type: mqtt-kafka
+2024-01-24 16:20:36     kind: proxy
+2024-01-24 16:20:36     options:
+2024-01-24 16:20:36       topics:
+2024-01-24 16:20:36         sessions: mqtt-sessions
+2024-01-24 16:20:36         messages: mqtt-messages
+2024-01-24 16:20:36         retained: mqtt-retained
+2024-01-24 16:20:36     clients:
+2024-01-24 16:20:36       - bus/{identity}/#
+2024-01-24 16:20:36       - taxi/{identity}/#
+2024-01-24 16:20:36     routes:
+2024-01-24 16:20:36       - when:
+2024-01-24 16:20:36           - publish:
+2024-01-24 16:20:36               - topic: bus/+/location
+2024-01-24 16:20:36           - subscribe:
+2024-01-24 16:20:36               - topic: bus/+/location
+2024-01-24 16:20:36         with:
+2024-01-24 16:20:36           messages: bus-locations
+2024-01-24 16:20:36         exit: kafka_cache_client
+2024-01-24 16:20:36       - when:
+2024-01-24 16:20:36           - publish:
+2024-01-24 16:20:36               - topic: taxi/#
+2024-01-24 16:20:36           - subscribe:
+2024-01-24 16:20:36               - topic: taxi/#
+2024-01-24 16:20:36         with:
+2024-01-24 16:20:36           messages: taxi-locations
+2024-01-24 16:20:36         exit: kafka_cache_client
+2024-01-24 16:20:36     exit: kafka_cache_client
+2024-01-24 16:20:36 
+2024-01-24 16:20:36 # Kafka caching layer
+2024-01-24 16:20:36   kafka_cache_client:
+2024-01-24 16:20:36     type: kafka
+2024-01-24 16:20:36     kind: cache_client
+2024-01-24 16:20:36     exit: kafka_cache_server
+2024-01-24 16:20:36   kafka_cache_server:
+2024-01-24 16:20:36     type: kafka
+2024-01-24 16:20:36     kind: cache_server
+2024-01-24 16:20:36     options:
+2024-01-24 16:20:36       bootstrap:
+2024-01-24 16:20:36         - bus-locations
+2024-01-24 16:20:36         - taxi-locations
+2024-01-24 16:20:36         - mqtt-sessions
+2024-01-24 16:20:36         - route-requests
+2024-01-24 16:20:36         - route-replies
+2024-01-24 16:20:36     exit: kafka_client
+2024-01-24 16:20:36 
+2024-01-24 16:20:36 # Connect to local Kafka
+2024-01-24 16:20:36   kafka_client:
+2024-01-24 16:20:36     type: kafka
+2024-01-24 16:20:36     kind: client
+2024-01-24 16:20:36     exit: kafka_tcp_client
+2024-01-24 16:20:36   kafka_tcp_client:
+2024-01-24 16:20:36     type: tcp
+2024-01-24 16:20:36     kind: client
+2024-01-24 16:20:36     options:
+2024-01-24 16:20:36       host: ${{env.KAFKA_HOST}}
+2024-01-24 16:20:36       port: ${{env.KAFKA_PORT}}
+2024-01-24 16:20:36     routes:
+2024-01-24 16:20:36       - when:
+2024-01-24 16:20:36           - cidr: 0.0.0.0/0
+2024-01-24 16:20:36 
+2024-01-24 16:20:36 telemetry:
+2024-01-24 16:20:36   # Desired metrics to track
+2024-01-24 16:20:36   metrics:
+2024-01-24 16:20:36     - grpc.active.requests
+2024-01-24 16:20:36     - grpc.duration
+2024-01-24 16:20:36     - grpc.request.size
+2024-01-24 16:20:36     - grpc.response.size
+2024-01-24 16:20:36     - grpc.requests.per.rpc
+2024-01-24 16:20:36     - grpc.responses.per.rpc
+2024-01-24 16:20:36     - http.active.requests
+2024-01-24 16:20:36     - http.duration
+2024-01-24 16:20:36     - http.request.size
+2024-01-24 16:20:36     - http.response.size
+2024-01-24 16:20:36     - stream.active.received
+2024-01-24 16:20:36     - stream.active.sent
+2024-01-24 16:20:36     - stream.opens.received
+2024-01-24 16:20:36     - stream.opens.sent
+2024-01-24 16:20:36     - stream.data.received
+2024-01-24 16:20:36     - stream.data.sent
+2024-01-24 16:20:36     - stream.errors.received
+2024-01-24 16:20:36     - stream.errors.sent
+2024-01-24 16:20:36     - stream.closes.received
+2024-01-24 16:20:36     - stream.closes.sent
+2024-01-24 16:20:36 
+2024-01-24 16:20:36   # Prometheus endpoint definition
+2024-01-24 16:20:36   exporters:
+2024-01-24 16:20:36     prometheus_metric_exporter:
+2024-01-24 16:20:36       type: prometheus
+2024-01-24 16:20:36       options:
+2024-01-24 16:20:36         endpoints:
+2024-01-24 16:20:36           - scheme: http
+2024-01-24 16:20:36             path: /metrics
+2024-01-24 16:20:36             port: 7190
+2024-01-24 16:20:36 
+2024-01-24 16:20:37 started
