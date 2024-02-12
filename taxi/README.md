@@ -1,6 +1,6 @@
 # Taxi Demo
 
-This demo to showcases the MQTT protocol brokered by Zilla. It uses [Open Street Maps](https://www.openstreetmap.org/), [Open Route Service](https://openrouteservice.org/), and the [MQTT Simulator](https://github.com/DamascenoRafael/mqtt-simulator) to demonstrate a real-world taxi-hailing and location tracking service.
+This demo showcases the MQTT protocol brokered by Zilla. It uses [Open Street Maps](https://www.openstreetmap.org/), [Open Route Service](https://openrouteservice.org/), and the [MQTT Simulator](https://github.com/DamascenoRafael/mqtt-simulator) to demonstrate a real-world taxi-hailing and location tracking service.
 
 ![zilla-taxi-demo-diagram](.assets/zilla-taxi-demo-diagram@2x.png)
 
@@ -18,12 +18,12 @@ This demo to showcases the MQTT protocol brokered by Zilla. It uses [Open Street
    ./startup.sh
    ```
 
-   > This will take a long time to build the first time it is run since it will need to download maven and npm packages.
+   > This will take a long time to build the first time since it will need to download maven and npm packages.
 
 1. Open the Open Street Maps [Taxi UI](http://localhost/). The map is centered on the San Jose Convention Center.
 1. A collection of bars shows on the map; click a bar.
 1. Click "Hail a Taxi" to set the destination, with the San Jose Convention Center being the origin.
-1. A Taxi marker will appear along the route and travel along it for the duration shown in the popup.
+1. A Taxi marker will appear along the route, and travel along it for the duration shown in the popup.
 1. You can use the "Clear Route" button in the sidebar or click the Aklivity logo to see the full map.
 1. The best setup is to have one tab open with the sidebar and one tab for showing the full map.
 
@@ -57,9 +57,9 @@ The [Taxi UI](http://localhost/) highlights downtown San Jose, CA bars. Users ca
 1. The Kafka topics are created during `startup`.
 1. Browse the topics in the [Kafka UI](http://localhost:8080/).
    - The [Redpanda Console](http://localhost:8080/) is available instead if you specified the `--redpanda` flag.
-1. You can browse the log compacted topic `taxi-locations` to see each location update coming in from active taxis.
+1. You can browse the log compacted topic `taxi-locations` to see each location update from active taxis.
    - The `bus-locations` topic is all of the automatic updates that are routed by the zilla config
-   - Zilla is using the other topics listed to manage the MQTT, and gRPC bindings
+   - Zilla is using the other topics listed to manage the MQTT and gRPC bindings
 1. The [Taxi UI](http://localhost/) pulls the most recent location for all of the unique taxis from Kafka.
 
 ## Load Testing
@@ -81,7 +81,7 @@ The mqtt-simulation service includes a `default_routes.json` file, which starts 
      - ./grpc/service/default_routes_load_test.json:/usr/src/app/default_routes.json
    ```
 
-1. Ensure the `DEFAUlT_ROUTES` env var is true so the service will start the sim and the `PRINT_SIM_LOGS` is true so the container will print the simulator output.
+1. Ensure the `DEFAUlT_ROUTES` env var is `true` so the service will start the sim and the `PRINT_SIM_LOGS` is true so the container will print the simulator output.
 
    ```yaml
    environment:
