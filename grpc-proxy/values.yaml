@@ -1,0 +1,22 @@
+args: ["start", "-v", "-e"]
+
+extraEnv:
+  - name: KAFKA_BOOTSTRAP_SERVER
+    value: "pkc-p11xm.us-east-1.aws.confluent.cloud:9092"
+  - name: KAFKA_API_KEY
+    value: "JC6Q5MQMG7FFXNDC"
+  - name: KAFKA_API_SECRET
+  - name: ROUTE_GUIDE_SERVER_HOST
+    value: "route-guide.zilla-demos.svc.cluster.local"
+  - name: ROUTE_GUIDE_SERVER_PORT
+    value: "50051"
+
+livenessProbePort: 7190
+readinessProbePort: 7190
+
+service:
+  ports:
+    - port: 7151
+      name: grpc
+    - port: 7190
+      name: prometheus

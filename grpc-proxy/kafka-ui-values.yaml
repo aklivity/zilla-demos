@@ -1,0 +1,26 @@
+service:
+  ports:
+    - port: 8080
+      name: ui
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+yamlApplicationConfig:
+  kafka:
+    clusters:
+      - name: zilla-demos
+        bootstrapServers: pkc-p11xm.us-east-1.aws.confluent.cloud:9092
+        readOnly: true
+        properties:
+          security.protocol: SASL_SSL
+          sasl.mechanism: PLAIN
+  auth:
+    type: disabled
+  management:
+    health:
+      ldap:
+        enabled: false
