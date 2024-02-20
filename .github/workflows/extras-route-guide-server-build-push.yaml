@@ -1,0 +1,55 @@
+name: Build and Push route-guide-server image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'extras-containers/route-guide-server/**/*'
+env:
+  IMAGE_NAME: extras-route-guide-server
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: extras-containers/route-guide-server
+
+      - name: Get Short GitHub SHA and Save in Environment Variable
+        run: echo "SHORT_GITHUB_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Build image
+        run: |
+          cd extras-containers/route-guide-server;
+          docker build . --file Dockerfile --tag $IMAGE_NAME --label runnumber"=${GITHUB_RUN_ID}"
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+
+      - name: Push image
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+
+          # This changes all uppercase characters to lowercase.
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # This strips the git ref prefix from the version.
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # This strips the "v" prefix from the tag name.
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # This uses the Docker `latest` tag convention.
+          [ "$VERSION" == "main" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          SHA_SHORT=${{ env.SHORT_GITHUB_SHA }}
+          echo SHA_SHORT=$SHA_SHORT
+          docker tag $IMAGE_NAME $IMAGE_ID:$SHA_SHORT
+          docker push $IMAGE_ID:$SHA_SHORT
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION

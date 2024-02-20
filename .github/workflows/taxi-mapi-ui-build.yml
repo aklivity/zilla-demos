@@ -14,7 +14,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: taxi/map-ui/
 
-      - name: Build
-        run: docker build taxi/map-ui/.
+      - name: Build image
+        run: |
+          cd taxi/map-ui/
+          docker build .
