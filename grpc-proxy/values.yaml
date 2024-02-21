@@ -7,7 +7,7 @@ extraEnv:
     value: "JC6Q5MQMG7FFXNDC"
   - name: KAFKA_API_SECRET
   - name: ROUTE_GUIDE_SERVER_HOST
-    value: "route-guide.zilla-demos.svc.cluster.local"
+    value: "route-guide.grpc-proxy.svc.cluster.local"
   - name: ROUTE_GUIDE_SERVER_PORT
     value: "50051"
 

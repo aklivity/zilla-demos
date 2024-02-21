@@ -2,5 +2,5 @@
 set -e
 
 # Uninstall Zilla
-NAMESPACE=zilla-demos
-helm uninstall zilla-grpc-proxy route-guide --namespace $NAMESPACE
+NAMESPACE=grpc-proxy
+helm uninstall zilla-grpc-proxy route-guide kafka-ui prometheus --namespace $NAMESPACE
