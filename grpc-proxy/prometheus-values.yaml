@@ -16,6 +16,7 @@ server:
     - url: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom/push
       basic_auth:
         username: 1430893
+        password: admin
 
 serverFiles:
   prometheus.yml:

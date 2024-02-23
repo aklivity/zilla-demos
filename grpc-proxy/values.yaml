@@ -2,10 +2,11 @@ args: ["start", "-v", "-e"]
 
 extraEnv:
   - name: KAFKA_BOOTSTRAP_SERVER
-    value: "pkc-p11xm.us-east-1.aws.confluent.cloud:9092"
+    value: "kafka.grpc-proxy.svc.cluster.local:9092"
   - name: KAFKA_API_KEY
-    value: "JC6Q5MQMG7FFXNDC"
+    value: "admin"
   - name: KAFKA_API_SECRET
+    value: "admin"
   - name: ROUTE_GUIDE_SERVER_HOST
     value: "route-guide.grpc-proxy.svc.cluster.local"
   - name: ROUTE_GUIDE_SERVER_PORT

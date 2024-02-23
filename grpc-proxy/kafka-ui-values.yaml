@@ -2,11 +2,12 @@ yamlApplicationConfig:
   kafka:
     clusters:
       - name: zilla-demos
-        bootstrapServers: pkc-p11xm.us-east-1.aws.confluent.cloud:9092
+        bootstrapServers: kafka.grpc-proxy.svc.cluster.local:9092
         readOnly: true
         properties:
           security.protocol: SASL_SSL
           sasl.mechanism: PLAIN
+          sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username="admin" password="admin";
   auth:
     type: disabled
   management:
