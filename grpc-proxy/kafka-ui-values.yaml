@@ -1,14 +1,3 @@
-service:
-  ports:
-    - port: 8080
-      name: ui
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 200m
-    memory: 256Mi
 yamlApplicationConfig:
   kafka:
     clusters:
