@@ -31,3 +31,4 @@ node_modules/
 *.pdf
 .quasar
 __pycache__
+.env
