@@ -2,15 +2,15 @@ name: Build and Push route-guide-server image
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - 'extras-containers/route-guide-server/**/*'
+    # branches:
+    #   - main
+    # paths:
+    #   - 'extras-containers/route-guide-server/**/*'
 env:
   IMAGE_NAME: extras-route-guide-server
 
 jobs:
-  build-push:
+  buildx-push:
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -25,16 +25,33 @@ jobs:
       - name: Get Short GitHub SHA and Save in Environment Variable
         run: echo "SHORT_GITHUB_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-      - name: Build image
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
+          platforms: linux/amd64,linux/arm64
+
+      - name: Build and push to local registry
+        uses: docker/build-push-action@v5
+        with:
+          context: extras-containers/route-guide-server
+          push: false
+          tags: $IMAGE_NAME
+      - name: Inspect
         run: |
-          cd extras-containers/route-guide-server;
-          docker build . --file Dockerfile --tag $IMAGE_NAME --label runnumber"=${GITHUB_RUN_ID}"
+          docker buildx imagetools inspect $IMAGE_NAME
+     
+      # - name: Build image
+      #   run: |
+      #     cd extras-containers/route-guide-server;
+      #     docker build . --file Dockerfile --tag $IMAGE_NAME --label runnumber"=${GITHUB_RUN_ID}"
 
       - name: Log in to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
       - name: Push image
         run: |
+          cd extras-containers/route-guide-server
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
 
           # This changes all uppercase characters to lowercase.
