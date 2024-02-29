@@ -1,0 +1,10 @@
+
+.leaflet-draw-actions li a {
+  background: gray !important;
+  color: white;
+}
+
+.leaflet-draw-custom-actions {
+  margin-right: 10px;
+  color: black !important
+}

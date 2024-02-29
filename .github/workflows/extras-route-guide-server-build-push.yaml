@@ -2,8 +2,8 @@ name: Build and Push route-guide-server image
 
 on:
   push:
-    # paths:
-    #     - 'extras-containers/route-guide-server/**/*'
+    paths:
+      - 'extras-containers/route-guide-server/**/*'
 
 env:
   IMAGE_NAME: extras-route-guide-server
@@ -34,11 +34,11 @@ jobs:
           labels: |
             org.opencontainers.image.title=Zilla Demos ${{ env.IMAGE_NAME }}
             org.opencontainers.image.description=Supporting container for ${{ env.DOCKERFILE_CONTEXT }}
-            org.opencontainers.image.url=https://github.com/${{ github.repository }}/tree/main/${{ env.DOCKERFILE_CONTEXT }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}/tree/main/${{ env.DOCKERFILE_CONTEXT }}
           annotations: |
             manifest:org.opencontainers.image.title=Zilla Demos ${{ env.IMAGE_NAME }}
             manifest:org.opencontainers.image.description=Supporting container for ${{ env.DOCKERFILE_CONTEXT }}
-            manifest:org.opencontainers.image.url=https://github.com/${{ github.repository }}/tree/main/${{ env.DOCKERFILE_CONTEXT }}
+            manifest:org.opencontainers.image.source=https://github.com/${{ github.repository }}/tree/main/${{ env.DOCKERFILE_CONTEXT }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

@@ -1,0 +1,100 @@
+
+.full {
+  width: 100%;
+}
+
+.input-icon {
+  padding-top: 5px;
+  cursor: pointer; float:right
+}
+.append-input-btn {
+  margin-top: -7px;
+  padding-left: 15px;
+}
+
+.suggestions.scrollable {
+  max-height: 220px;
+  overflow-y:scroll;
+}
+
+.suggestions {
+  position: relative;
+  z-index: 6;
+  background: white;
+  width: 100%;
+  overflow: hidden;
+}
+
+.suggestions.multiple-input {
+  margin-left: -34px;
+}
+
+.shadow {
+  -webkit-box-shadow: 0 4px 5px 0 rgba(130,117,130,1);
+  -moz-box-shadow: 0 4px 5px 0 rgba(130,117,130,1);
+  box-shadow: 0 4px 5px 0 rgba(130,117,130,1);
+}
+
+.no-padding {
+  padding: 0;
+}
+.no-margin {
+  margin: 0;
+}
+
+.input-btn:before {
+  content: none !important
+}
+
+.input-btn {
+  float: right;
+  margin: 6px 0 0;
+  padding: 0 0 18px;
+  height: 40px;
+}
+
+/* small class is for md and up resolutions. In small devices, we display bigger buttons to easy the interaction */
+.input-btn.small {
+  margin-top: 10px;
+}
+
+.input-btn-group .v-btn__content {
+  padding: 0;
+}
+
+.input-btn-group .v-btn {
+  min-width: 0;
+}
+
+.input-pop-up-list .v-btn__content {
+  padding: 0;
+}
+
+.suggestions >>> .v-list__tile__content {
+  border-bottom: 1px solid #ededed;
+}
+
+.input-pop-up-list .v-btn {
+  min-width: 0;
+}
+
+.input-pop-up-list >>> a.v-list__tile {
+  padding: 5px;
+}
+
+.input-pop-up-list >>> .v-list__tile__title {
+  height: 50px;
+}
+
+.floating-menu-activator {
+  margin-right: 0;
+}
+
+.suggestions >>> .v-list__tile__sub-title {
+  font-size: 12px !important;
+}
+
+.approximate-distance {
+  font-weight: 600;
+  font-style: italic;
+}
