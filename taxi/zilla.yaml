@@ -37,6 +37,12 @@ bindings:
       - when:
           - headers:
               :scheme: http
+              :authority: localhost:7114
+              :path: /bus/*
+        exit: http_kafka_proxy
+      - when:
+          - headers:
+              :scheme: http
               :authority: zilla:7114
         exit: grpc_server
     exit: http_kafka_proxy
