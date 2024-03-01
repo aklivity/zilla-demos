@@ -24,6 +24,7 @@ var (
 	brokerPort    = env.GetIntDefault("BROKER_PORT", 7183)
 	printSim      = env.GetBoolDefault("PRINT_SIM_LOGS", false)
 	defaultRoutes = env.GetBoolDefault("DEFAUlT_ROUTES", false)
+	replication   = env.GetIntDefault("REPLICATION", 1)
 	logChannel    = make(chan string)
 )
 
@@ -36,6 +37,8 @@ type dataConfig struct {
 
 type topicConfig struct {
 	Type         string       `json:"TYPE"`
+	RangeStart   int          `json:"RANGE_START"`
+	RangeEnd     int          `json:"RANGE_END"`
 	Prefix       string       `json:"PREFIX"`
 	TimeInterval int          `json:"TIME_INTERVAL"`
 	Data         []dataConfig `json:"DATA"`
@@ -127,7 +130,7 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*pb.Rou
 	endMark = append(endMark, -1)
 	coords.Values = append(coords.Values, endMark)
 
-	routeKey := fmt.Sprintf("taxi/%s/location", in.GetKey())
+	routeKey := fmt.Sprintf("taxi/%s", in.GetKey())
 	simConfig := simulatorConfig{
 		BrokerURL:       brokerURL,
 		BrokerPort:      brokerPort,
@@ -136,7 +139,9 @@ func (s *taxiRouteServer) CreateTaxi(ctx context.Context, in *pb.Route) (*pb.Rou
 		Qos:             0,
 		Topics: []topicConfig{
 			{
-				Type:         "single",
+				Type:         "multiple",
+				RangeStart:   1,
+				RangeEnd:     replication,
 				Prefix:       routeKey,
 				TimeInterval: int(in.GetDuration() / float64(len(coords.Values))),
 				Data: []dataConfig{
