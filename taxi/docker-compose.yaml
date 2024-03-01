@@ -12,7 +12,7 @@ services:
       - 7190:7190
     volumes:
       - ./zilla.yaml:/etc/zilla/zilla.yaml
-      - ./grpc/taxi_route.proto:/etc/zilla/proto/taxi_route.proto
+      - ./taxi_route.proto:/etc/zilla/proto/taxi_route.proto
     environment:
       TAXI_ROUTE_SERVER_HOST: taxi-service
       TAXI_ROUTE_SERVER_PORT: 50051
@@ -21,9 +21,8 @@ services:
     command: start -v -e -Pzilla.engine.worker.capacity=512
 
   taxi-gateway:
-    build: ./grpc/gateway
+    image: ghcr.io/aklivity/extras-taxi-gateway:sha-5ac7a9c
     container_name: taxi-gateway
-    image: aklivity/taxi-gateway:local
     restart: unless-stopped
     depends_on:
       - zilla
@@ -34,14 +33,13 @@ services:
       - 8085:8085
 
   taxi-service:
-    build: ./grpc/service
+    image: ghcr.io/aklivity/extras-taxi-service:sha-5ac7a9c
     container_name: taxi-service
-    image: aklivity/taxi-service:local
     restart: unless-stopped
     depends_on:
       - zilla
     volumes:
-      - ./grpc/service/default_routes.json:/usr/src/app/default_routes.json
+      - ./default_bus_routes.json:/usr/src/app/default_routes.json
     environment:
       PRINT_SIM_LOGS: false
       DEFAUlT_ROUTES: true
@@ -50,9 +48,8 @@ services:
       - 50051:50051
 
   taxi-map-ui:
-    build: ./map-ui
+    image: ghcr.io/aklivity/extras-taxi-map-ui:sha-5ac7a9c
     container_name: taxi-map-ui
-    image: aklivity/taxi-map-ui:local
     restart: unless-stopped
     depends_on:
       - zilla
