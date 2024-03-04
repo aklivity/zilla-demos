@@ -1,3 +1,3 @@
 tcp:
-  7151: "grpc-proxy/zilla:7151"
-  8080: "grpc-proxy/kafka-ui:80"
+  7114: "taxi-demo/zilla:7114"
+  7183: "taxi-demo/zilla:7183"

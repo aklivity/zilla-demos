@@ -14,3 +14,7 @@ yamlApplicationConfig:
     health:
       ldap:
         enabled: false
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  host: "kafka.localhost"

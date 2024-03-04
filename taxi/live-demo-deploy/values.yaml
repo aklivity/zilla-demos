@@ -2,14 +2,18 @@ args: ["start", "-v", "-e"]
 
 extraEnv:
   - name: KAFKA_BOOTSTRAP_SERVER
-    value: "kafka.grpc-proxy.svc.cluster.local:9092"
+    value: "kafka.taxi-demo.svc.cluster.local:9092"
   - name: KAFKA_API_KEY
     value: "admin"
   - name: KAFKA_API_SECRET
     value: "admin"
-  - name: ROUTE_GUIDE_SERVER_HOST
-    value: "route-guide.grpc-proxy.svc.cluster.local"
-  - name: ROUTE_GUIDE_SERVER_PORT
+  - name: KAFKA_BOOTSTRAP_HOST
+    value: "kafka.taxi-demo.svc.cluster.local"
+  - name: KAFKA_BOOTSTRAP_PORT
+    value: "9092"
+  - name: TAXI_ROUTE_SERVER_HOST
+    value: "hailing-service.taxi-demo.svc.cluster.local"
+  - name: TAXI_ROUTE_SERVER_PORT
     value: "50051"
 
 livenessProbePort: 7190
@@ -19,5 +23,7 @@ service:
   ports:
     - port: 7151
       name: grpc
+    - port: 7183
+      name: mqtt
     - port: 7190
       name: prometheus

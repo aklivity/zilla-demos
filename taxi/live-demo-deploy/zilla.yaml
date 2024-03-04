@@ -194,22 +194,37 @@ bindings:
         - mqtt-sessions
         - route-requests
         - route-replies
-    exit: kafka_client
+    exit: south_kafka_client
 
 # Connect to local Kafka
-  kafka_client:
+  south_kafka_client:
     type: kafka
     kind: client
-    exit: kafka_tcp_client
-  kafka_tcp_client:
+    options:
+      # servers:
+      #   - ${{env.KAFKA_BOOTSTRAP_SERVER}}
+      sasl:
+        mechanism: plain
+        username: ${{env.KAFKA_API_KEY}}
+        password: ${{env.KAFKA_API_SECRET}}
+    exit: south_tls_client
+  south_tls_client:
+    type: tls
+    kind: client
+    # options:
+    #   trustcacerts: true
+    #   sni:
+    #     - ${{env.KAFKA_BOOTSTRAP_HOST}}
+    exit: south_tcp_client
+  south_tcp_client:
     type: tcp
     kind: client
     options:
-      host: ${{env.KAFKA_HOST}}
-      port: ${{env.KAFKA_PORT}}
-    routes:
-      - when:
-          - cidr: 0.0.0.0/0
+      host: ${{env.KAFKA_BOOTSTRAP_HOST}}
+      port: ${{env.KAFKA_BOOTSTRAP_PORT}}
+    telemetry:
+      metrics:
+        - stream.*
 
 telemetry:
   # Desired metrics to track

@@ -53,9 +53,8 @@ services:
     restart: unless-stopped
     depends_on:
       - zilla
-    user: "${UID:-0}:${GID:-0}"
     ports:
-      - 80:80
+      - 80:8080
 
 networks:
   default:
