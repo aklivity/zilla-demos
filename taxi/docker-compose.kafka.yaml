@@ -2,7 +2,7 @@ version: "3"
 services:
 
   kafka:
-    image: bitnami/kafka:3.2
+    image: bitnami/kafka:3.5
     container_name: kafka
     restart: unless-stopped
     ports:
@@ -10,6 +10,7 @@ services:
       - 9092:9092
     environment:
       ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
       KAFKA_CFG_NODE_ID: "1"
       KAFKA_CFG_BROKER_ID: "1"
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@127.0.0.1:9093"
@@ -52,8 +53,8 @@ services:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
 
-  taxi-service:
-    depends_on:
-      kafka-init:
-        condition: service_completed_successfully
+  # taxi-service:
+  #   depends_on:
+  #     kafka-init:
+  #       condition: service_completed_successfully
 

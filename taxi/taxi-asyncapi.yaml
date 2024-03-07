@@ -1,0 +1,77 @@
+asyncapi: 3.0.0
+info:
+  title: Zilla Petstore - AsyncAPI 3.0
+  description: Zilla implements the Petstore Kafka spec
+  version: 1.0.0
+  license:
+    name: Aklivity Community License
+  contact:
+    name: Aklivity Community
+    url: https://www.aklivity.io/slack
+  externalDocs:
+    description: Find out more about Zilla
+    url: https://docs.aklivity.io/
+defaultContentType: application/json
+servers:
+  local-connections:
+    host: "kafka:9092"
+    protocol: kafka
+    description: Local broker
+channels:
+  bus-location:
+    address: "taxi-locations"
+    messages:
+      locationUpdate:
+        $ref: "#/components/messages/locationUpdate"
+    description: The topic on which bus locations may be produced and consumed.
+  taxi-location:
+    address: "bus-locations"
+    messages:
+      locationUpdate:
+        $ref: "#/components/messages/locationUpdate"
+    description: The topic on which taxi locations may be produced and consumed.
+operations:
+  getTaxiLocations:
+    action: receive
+    channel:
+      $ref: "#/channels/taxi-location"
+    summary: List taxi locations.
+    messages:
+      - $ref: "#/channels/taxi-location/messages/locationUpdate"
+  getTaxiLocationById:
+    action: receive
+    channel:
+      $ref: "#/channels/taxi-location"
+    summary: List a taxi location by ID.
+    messages:
+      - $ref: "#/channels/taxi-location/messages/locationUpdate"
+  getBusLocations:
+    action: receive
+    channel:
+      $ref: "#/channels/bus-location"
+    summary: List all bus locations.
+    messages:
+      - $ref: "#/channels/bus-location/messages/locationUpdate"
+components:
+  messages:
+    locationUpdate:
+      name: locationUpdate
+      title: Location Update
+      summary: Info the current location for a vehicle with a list of lat long coordinates.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/locationPayload"
+  schemas:
+    locationPayload:
+      required:
+        - key
+      properties:
+        key:
+          type: string
+        icon:
+          type: string
+        coordinates:
+          type: array
+          items:
+            type: integer
+            format: int32
