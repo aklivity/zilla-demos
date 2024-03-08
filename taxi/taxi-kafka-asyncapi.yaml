@@ -14,44 +14,67 @@ info:
 defaultContentType: application/json
 servers:
   local-connections:
-    host: "kafka:9092"
+    host: kafka:9092
     protocol: kafka
     description: Local broker
 channels:
-  bus-location:
-    address: "taxi-locations"
-    messages:
-      locationUpdate:
-        $ref: "#/components/messages/locationUpdate"
-    description: The topic on which bus locations may be produced and consumed.
-  taxi-location:
-    address: "bus-locations"
+  taxiLocations:
+    address: taxi-locations
     messages:
       locationUpdate:
         $ref: "#/components/messages/locationUpdate"
     description: The topic on which taxi locations may be produced and consumed.
+  busLocations:
+    address: bus-locations
+    messages:
+      locationUpdate:
+        $ref: "#/components/messages/locationUpdate"
+    description: The topic on which bus locations may be produced and consumed.
+  mqttSessions:
+    description: This channel contains MQTT sessions.
+    address: mqtt-sessions
+  mqttMessages:
+    description: This channel contains MQTT messages.
+    address: mqtt-messages
+  mqttRetained:
+    description: This channel contains MQTT retained messages.
+    address: mqtt-retained
 operations:
+  sendTaxiUpdate:
+    action: send
+    channel:
+      $ref: "#/channels/taxiLocations"
+    summary: Update a taxis locations.
+    messages:
+      - $ref: "#/channels/taxiLocations/messages/locationUpdate"
   getTaxiLocations:
     action: receive
     channel:
-      $ref: "#/channels/taxi-location"
+      $ref: "#/channels/taxiLocations"
     summary: List taxi locations.
     messages:
-      - $ref: "#/channels/taxi-location/messages/locationUpdate"
+      - $ref: "#/channels/taxiLocations/messages/locationUpdate"
   getTaxiLocationById:
     action: receive
     channel:
-      $ref: "#/channels/taxi-location"
+      $ref: "#/channels/taxiLocations"
     summary: List a taxi location by ID.
     messages:
-      - $ref: "#/channels/taxi-location/messages/locationUpdate"
+      - $ref: "#/channels/taxiLocations/messages/locationUpdate"
+  sendBusUpdate:
+    action: send
+    channel:
+      $ref: "#/channels/busLocations"
+    summary: Update a buses locations.
+    messages:
+      - $ref: "#/channels/busLocations/messages/locationUpdate"
   getBusLocations:
     action: receive
     channel:
-      $ref: "#/channels/bus-location"
+      $ref: "#/channels/busLocations"
     summary: List all bus locations.
     messages:
-      - $ref: "#/channels/bus-location/messages/locationUpdate"
+      - $ref: "#/channels/busLocations/messages/locationUpdate"
 components:
   messages:
     locationUpdate:

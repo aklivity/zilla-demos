@@ -8,10 +8,11 @@ services:
     restart: unless-stopped
     ports:
       - 7114:7114
-      # - 7183:7183
+      - 7183:7183
       # - 7190:7190
     volumes:
-      - ./taxi-asyncapi.yaml:/etc/zilla/taxi-asyncapi.yaml
+      - ./taxi-kafka-asyncapi.yaml:/etc/zilla/taxi-kafka-asyncapi.yaml
+      - ./taxi-mqtt-asyncapi.yaml:/etc/zilla/taxi-mqtt-asyncapi.yaml
       - ./taxi-openapi.yaml:/etc/zilla/taxi-openapi.yaml
       - ./taxi-zilla.yaml:/etc/zilla/zilla.yaml
       # - ./taxi_route.proto:/etc/zilla/proto/taxi_route.proto
