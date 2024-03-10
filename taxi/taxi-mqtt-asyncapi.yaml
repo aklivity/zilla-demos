@@ -51,7 +51,6 @@ components:
   parameters:
     vehicleId:
       description: Unique Vehicle ID based on its destination
-      location: $message.header#/id
   messages:
     locationUpdate:
       name: locationUpdate

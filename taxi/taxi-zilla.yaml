@@ -1,28 +1,29 @@
 ---
 name: taxi-openapi-asyncapi
 bindings:
-  # openapi_server:
-  #   type: openapi
-  #   kind: server
-  #   options:
-  #     specs:
-  #       openapi-taxi-spec: taxi-openapi.yaml
-  #   exit: openapi_asyncapi_proxy
-  # openapi_asyncapi_proxy:
-  #   type: openapi-asyncapi
-  #   kind: proxy
-  #   options:
-  #     specs:
-  #       openapi:
-  #         openapi-taxi-spec: taxi-openapi.yaml
-  #       asyncapi:
-  #         kafka-taxi-spec: taxi-kafka-asyncapi.yaml
-  #   routes:
-  #     - when:
-  #         - api-id: openapi-taxi-spec
-  #       exit: asyncapi_kafka
-  #       with:
-  #         api-id: kafka-taxi-spec
+  openapi_server:
+    type: openapi
+    kind: server
+    options:
+      specs:
+        openapi-taxi-spec: taxi-openapi.yaml
+    exit: openapi_asyncapi_proxy
+  openapi_asyncapi_proxy:
+    type: openapi-asyncapi
+    kind: proxy
+    options:
+      specs:
+        openapi:
+          openapi-taxi-spec: taxi-openapi.yaml
+        asyncapi:
+          kafka-taxi-spec: taxi-kafka-asyncapi.yaml
+    routes:
+      - when:
+          - api-id: openapi-taxi-spec
+        exit: asyncapi_kafka
+        with:
+          api-id: kafka-taxi-spec
+
   asyncapi_mqtt:
     type: asyncapi
     kind: server
@@ -30,6 +31,10 @@ bindings:
       specs:
         mqtt-taxi-spec: taxi-mqtt-asyncapi.yaml
     exit: asyncapi_proxy
+    telemetry:
+      metrics:
+        - stream.*
+
   asyncapi_proxy:
     type: asyncapi
     kind: proxy
@@ -57,9 +62,26 @@ bindings:
         with:
           api-id: kafka-taxi-spec
           operation-id: sendBusUpdate
+
   asyncapi_kafka:
     type: asyncapi
     kind: client
     options:
       specs:
         kafka-taxi-spec: taxi-kafka-asyncapi.yaml
+      tcp:
+        host: ${{env.KAFKA_BOOTSTRAP_HOST}}
+        port:
+          - ${{env.KAFKA_BOOTSTRAP_PORT}}
+      kafka:
+        sasl:
+          mechanism: plain
+          username: ${{env.KAFKA_USER}}
+          password: ${{env.KAFKA_PASS}}
+      tls:
+        trustcacerts: true
+        sni:
+          - ${{env.KAFKA_BOOTSTRAP_HOST}}
+    telemetry:
+      metrics:
+        - stream.*
