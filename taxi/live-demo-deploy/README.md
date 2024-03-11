@@ -3,49 +3,45 @@
 This demo deploys a gRPC proxy with Zilla to a K8s cluster with a public endpoint. The storage layer is a SASL/SCRAM auth Kafka provider. Metrcis are scrapped and pushed to a public prometheus instance.
 
 ```mermaid
-flowchart TD
+flowchart
 
-    subgraph Routing Legend
-        direction LR
-        a -..- |App managed| b
-        a ---- |K8s managed| b
+    tmuisr[\Web UI/] -.- |HTTP| har
+    tmuisr -.- |HTTP| ztos
+        
+    subgraph Taxi Hailing
+
+        subgraph service/hailing-app
+            har[Web APP]
+        end
+
+        subgraph service/zilla-hailing
+            har --- zhgs{{gRPC service}}
+            zhgs --- zhp[pods]
+            zhp --- zheg{{egress CC}}
+            zhp --- zhig{{ingress CC}}
+        end
     end
 
-    u[\Users/] -->|Public DNS| in(ingress-nginx)
-
-    subgraph k8s
-        in --- zsr
-        in --- ksr
-
-        subgraph service/zilla
-            zsr{{service router}} --- zspa[pod]
-            zsr{{service router}} --- zspb[pod]
-            zsr{{service router}} --- zspc[pod]
+    subgraph Taxi Tracking
+        subgraph service/zilla-tracking
+            ztos{{OpenAPI REST}}
+            ztos --- ztp[pods]
+            ztas{{AsyncAPI MQTT}} --- ztp[pod]
+            ztp[pods] --- zteg{{egress CC}}
         end
-        subgraph service/kafka-ui
-            ksr{{service router}} --- kspa[pod]
-        end
-        subgraph service/route_guide
-            rgsr{{service router}} --- rgpa[pod]
-            zspa -.- rgsr
-            zspb -.- rgsr
-            zspc -.- rgsr
-        end
-        subgraph service/prometheus
-            psr{{service router}}---pspa[pod]
+        subgraph service/taxi-tracking
+            zhgs --> |gRPC| tsgrpc{{Hailing service}}
+            tsgrpc --> tsiot[IoT Devices]
+            tsiot --> |MQTT| ztas
         end
     end
 
     subgraph Confluent Cloud
-        cc[[Kafka]] -..- kspa
-        cc -..- zspa
-        cc -..- zspb
-        cc -..- zspc
+        cck[[Kafka]]
+        zteg -.- cck
+        zheg -.- cck
+        zhig -.- cck
     end
-    subgraph Graphana Cloud
-        pspa -.- GC[[Prometheus]]
-    end
-
 ```
 
 ## Installing
