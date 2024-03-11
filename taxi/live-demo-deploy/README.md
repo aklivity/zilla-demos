@@ -3,44 +3,45 @@
 This demo deploys a gRPC proxy with Zilla to a K8s cluster with a public endpoint. The storage layer is a SASL/SCRAM auth Kafka provider. Metrcis are scrapped and pushed to a public prometheus instance.
 
 ```mermaid
-flowchart
+flowchart LR
 
     tmuisr[\Web UI/] -.- |HTTP| har
     tmuisr -.- |HTTP| ztos
         
     subgraph Taxi Hailing
 
-        subgraph service/hailing-app
+        subgraph hailing-app
             har[Web APP]
         end
 
-        subgraph service/zilla-hailing
-            har --- zhgs{{gRPC service}}
-            zhgs --- zhp[pods]
-            zhp --- zheg{{egress CC}}
-            zhp --- zhig{{ingress CC}}
+        subgraph zilla-dispatch
+            har --- |gRPC| zhgs{{gRPC service}}
+            zhgs --- zhig[consume]
+            zhgs --- zheg[produce]
         end
     end
 
     subgraph Taxi Tracking
-        subgraph service/zilla-tracking
-            ztos{{OpenAPI REST}}
-            ztos --- ztp[pods]
-            ztas{{AsyncAPI MQTT}} --- ztp[pod]
-            ztp[pods] --- zteg{{egress CC}}
+        subgraph zilla-tracking
+            ztos{{OpenAPI REST}} --- ztoc[consume]
+            ztas{{AsyncAPI MQTT}} --- ztapc[pub/sub]
         end
-        subgraph service/taxi-tracking
-            zhgs --> |gRPC| tsgrpc{{Hailing service}}
-            tsgrpc --> tsiot[IoT Devices]
-            tsiot --> |MQTT| ztas
-        end
+        zhig -.-> |gRPC| tsgrpc[Dispatch Service]
+        tsgrpc --> tsiot[Taxi]
+        tsgrpc --> tsiotb[Taxi]
+        tsgrpc --> tsiotc[Taxi]
+        tsiot --> |MQTT| ztas
+        tsiotb --> |MQTT| ztas
+        tsiotc --> |MQTT| ztas
     end
 
     subgraph Confluent Cloud
-        cck[[Kafka]]
-        zteg -.- cck
-        zheg -.- cck
-        zhig -.- cck
+        cciot[[IOT Kafka Cluster]]
+        ztapc -.- cciot
+        ztoc -.- cciot
+        ccsm[[gRPC Service Mesh Kafka Cluster]]
+        zheg -.- ccsm
+        zhig -.- ccsm
     end
 ```
 
