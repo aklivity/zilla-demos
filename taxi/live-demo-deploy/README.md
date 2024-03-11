@@ -5,41 +5,32 @@ This demo deploys a gRPC proxy with Zilla to a K8s cluster with a public endpoin
 ```mermaid
 flowchart LR
 
-    tmuisr[\Web UI/] -.- |HTTP| har
+    tmuisr[\Web APP/] -.- |gRPC| zhgs
     tmuisr -.- |HTTP| ztos
-        
-    subgraph Taxi Hailing
 
-        subgraph hailing-app
-            har[Web APP]
-        end
-
-        subgraph zilla-dispatch
-            har --- |gRPC| zhgs{{gRPC service}}
+    subgraph Zilla Taxi Hailing
+            zhgs{{Protobuf Dispatch Service}}
             zhgs --- zhig[consume]
             zhgs --- zheg[produce]
-        end
     end
 
-    subgraph Taxi Tracking
-        subgraph zilla-tracking
+    subgraph Zilla Taxi Tracking
             ztos{{OpenAPI REST}} --- ztoc[consume]
             ztas{{AsyncAPI MQTT}} --- ztapc[pub/sub]
-        end
-        zhig -.-> |gRPC| tsgrpc[Dispatch Service]
-        tsgrpc --> tsiot[Taxi]
-        tsgrpc --> tsiotb[Taxi]
-        tsgrpc --> tsiotc[Taxi]
-        tsiot --> |MQTT| ztas
-        tsiotb --> |MQTT| ztas
-        tsiotc --> |MQTT| ztas
     end
+        zhig -.-> |gRPC| tsgrpc[Dispatch Service]
+        tsgrpc --> tsiot[Taxi 1]
+        tsgrpc --> tsiotb[Taxi 2]
+        tsgrpc --> tsiotc[Taxi 3]
+        tsiotc -.-> |MQTT| ztas
+        tsiotb -.-> |MQTT| ztas
+        tsiot -.-> |MQTT| ztas
 
     subgraph Confluent Cloud
-        cciot[[IOT Kafka Cluster]]
+        cciot[[Tracking Kafka Cluster]]
         ztapc -.- cciot
         ztoc -.- cciot
-        ccsm[[gRPC Service Mesh Kafka Cluster]]
+        ccsm[[Hailing Kafka Cluster]]
         zheg -.- ccsm
         zhig -.- ccsm
     end
