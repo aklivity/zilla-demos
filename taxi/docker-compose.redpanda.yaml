@@ -71,7 +71,7 @@ services:
         condition: service_healthy
     init: true
 
-  taxi-service:
+  taxi-tracking-service:
     depends_on:
       redpanda-init:
         condition: service_completed_successfully

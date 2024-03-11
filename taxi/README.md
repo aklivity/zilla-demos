@@ -74,7 +74,7 @@ The mqtt-simulation service includes a `default_routes.json` file, which starts 
    "RANGE_END": 500,
    ```
 
-1. The `taxi-service` in the [docker-compose.yaml](docker-compose.yaml) file mounts the default config. Update the volume mount to map the load_test file.
+1. The `taxi-tracking-service` in the [docker-compose.yaml](docker-compose.yaml) file mounts the default config. Update the volume mount to map the load_test file.
 
    ```yaml
    volumes:

@@ -14,7 +14,7 @@ info:
 defaultContentType: application/json
 servers:
   local-connections:
-    host: pkc-p11xm.us-east-1.aws.confluent.cloud:9092
+    host: kafka:9092
     protocol: kafka
     description: Local broker
 channels:
