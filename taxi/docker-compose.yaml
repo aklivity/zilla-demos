@@ -1,77 +1,77 @@
 version: "3"
 services:
 
-  zilla-taxi:
+  zilla-taxi-tracking:
     image: ghcr.io/aklivity/zilla:latest
-    container_name: zilla-taxi
+    container_name: zilla-taxi-tracking
     pull_policy: always
     restart: unless-stopped
     ports:
       - 7114:7114
       - 7183:7183
-      # - 7190:7190
     volumes:
-      - ./taxi-kafka-asyncapi.yaml:/etc/zilla/taxi-kafka-asyncapi.yaml
-      - ./taxi-mqtt-asyncapi.yaml:/etc/zilla/taxi-mqtt-asyncapi.yaml
-      - ./taxi-openapi.yaml:/etc/zilla/taxi-openapi.yaml
-      - ./taxi-zilla.yaml:/etc/zilla/zilla.yaml
+      - ./tracking-kafka-asyncapi.yaml:/etc/zilla/tracking-kafka-asyncapi.yaml
+      - ./tracking-mqtt-asyncapi.yaml:/etc/zilla/tracking-mqtt-asyncapi.yaml
+      - ./tracking-openapi.yaml:/etc/zilla/tracking-openapi.yaml
+      - ./tracking-zilla.yaml:/etc/zilla/zilla.yaml
     environment:
       KAFKA_BOOTSTRAP_SERVER: kafka:9092
       ZILLA_INCUBATOR_ENABLED: true
       JAVA_OPTIONS: "-Dzilla.binding.kafka.debug=true"
-    command: start -v -e -Pzilla.engine.worker.capacity=512
+    command: start -v -e -Pzilla.engine.worker.capacity=512 -Pzilla.binding.kafka.client.connection.pool=false
 
-  zilla-hailing:
+  zilla-taxi-hailing:
     image: ghcr.io/aklivity/zilla:latest
-    container_name: zilla-hailing
+    container_name: zilla-taxi-hailing
     pull_policy: always
     restart: unless-stopped
     ports:
       - 7151:7151
-      # - 7190:7190
+      - 7190:7190
     volumes:
       - ./hailing-zilla.yaml:/etc/zilla/zilla.yaml
       - ./taxi_route.proto:/etc/zilla/proto/taxi_route.proto
     environment:
-      TAXI_ROUTE_SERVER_HOST: taxi-tracking-service
-      TAXI_ROUTE_SERVER_PORT: 50051
       KAFKA_BOOTSTRAP_SERVER: kafka:9092
+      DISPATCH_SERVICE_HOST: dispatch-service
+      DISPATCH_SERVICE_PORT: 50051
       JAVA_OPTIONS: "-Dzilla.binding.kafka.debug=true"
-    command: start -v -e
+    command: start -v -e -Pzilla.binding.kafka.client.connection.pool=false
 
   hailing-app:
     image: ghcr.io/aklivity/extras-taxi-gateway:sha-5ac7a9c
     container_name: hailing-app
     restart: unless-stopped
     depends_on:
-      - zilla-hailing
+      - zilla-taxi-hailing
     environment:
       GATEWAY_PORT: 8085
-      GRPC_SERVER_ENDPOINT: zilla-hailing:7151
+      GRPC_SERVER_ENDPOINT: zilla-taxi-hailing:7151
     ports:
       - 8085:8085
 
-  taxi-tracking-service:
+  dispatch-service:
     image: ghcr.io/aklivity/extras-taxi-service:sha-5ac7a9c
-    container_name: taxi-tracking-service
+    container_name: dispatch-service
     restart: unless-stopped
     depends_on:
-      - zilla-taxi
+      - zilla-taxi-tracking
     volumes:
       - ./default_bus_routes.json:/usr/src/app/default_routes.json
     environment:
-      PRINT_SIM_LOGS: false
+      PRINT_SIM_LOGS: true
       DEFAUlT_ROUTES: true
-      BROKER_HOST: zilla-taxi
+      BROKER_HOST: zilla-taxi-tracking
+      BROKER_PORT: 7183
     ports:
       - 50051:50051
 
-  taxi-map-ui:
+  hailing-ui:
     image: ghcr.io/aklivity/extras-taxi-map-ui:live-demo-deploy
-    container_name: taxi-map-ui
+    container_name: hailing-ui
     restart: unless-stopped
     depends_on:
-      - zilla-taxi
+      - zilla-taxi-tracking
     ports:
       - 80:8080
 

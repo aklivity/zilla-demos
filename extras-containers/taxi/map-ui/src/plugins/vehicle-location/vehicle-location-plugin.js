@@ -219,14 +219,14 @@ class VehicleLocationPlugin {
               var busses = await fetch(this.busLocationAPI).then((r) => r.json())
               locations = [...locations, ...busses]
               locations.forEach(({key, coordinate, icon}) => {
-                if (coordinate[coordinate.length - 1] != -1) {
+                if (coordinate.length && coordinate[coordinate.length - 1] != -1) {
                   mapData.places.push(new Place(coordinate[0], coordinate[1], key, { icon }))
                 }
               })
             } else {
               mapData.pois = []
               var coordinate = locations.coordinate
-              if (coordinate[coordinate.length - 1] != -1 && mapData.places.length >= 2) {
+              if (coordinate.length && coordinate[coordinate.length - 1] != -1 && mapData.places.length >= 2) {
                 mapData.places = [
                   mapData.places[0],
                   new Place(coordinate[0], coordinate[1], locations.key),

@@ -1,77 +1,86 @@
 ---
-name: taxi-openapi-asyncapi
+name: zilla-taxi-tracking
 bindings:
-  openapi_server:
+
+# REST endpoints
+  north_rest_server:
     type: openapi
     kind: server
     options:
       specs:
-        openapi-taxi-spec: taxi-openapi.yaml
-    exit: openapi_asyncapi_proxy
-  openapi_asyncapi_proxy:
+        rest-tracking-spec: tracking-openapi.yaml
+    exit: north_rest_kafka_proxy
+  north_rest_kafka_proxy:
     type: openapi-asyncapi
     kind: proxy
     options:
       specs:
         openapi:
-          openapi-taxi-spec: taxi-openapi.yaml
+          rest-tracking-spec: tracking-openapi.yaml
         asyncapi:
-          kafka-taxi-spec: taxi-kafka-asyncapi.yaml
+          kafka-tracking-spec: tracking-kafka-asyncapi.yaml
     routes:
       - when:
-          - api-id: openapi-taxi-spec
-        exit: asyncapi_kafka
+          - api-id: rest-tracking-spec
+        exit: south_kafka_client
         with:
-          api-id: kafka-taxi-spec
+          api-id: kafka-tracking-spec
 
-  asyncapi_mqtt:
+# MQTT endpoints
+  mqtt_server:
     type: asyncapi
     kind: server
     options:
       specs:
-        mqtt-taxi-spec: taxi-mqtt-asyncapi.yaml
-    exit: asyncapi_proxy
+        mqtt-tracking-spec: tracking-mqtt-asyncapi.yaml
+    exit: mqtt_kafka_proxy
     telemetry:
       metrics:
         - stream.*
-
-  asyncapi_proxy:
+  mqtt_kafka_proxy:
     type: asyncapi
     kind: proxy
     options:
       specs:
-        mqtt-taxi-spec: taxi-mqtt-asyncapi.yaml
-        kafka-taxi-spec: taxi-kafka-asyncapi.yaml
+        mqtt-tracking-spec: tracking-mqtt-asyncapi.yaml
+        kafka-tracking-spec: tracking-kafka-asyncapi.yaml
       mqtt-kafka:
-        clients:
-          - bus/{identity}/#
-          - taxi/{identity}/#
         channels:
           sessions: mqttSessions
           retained: mqttRetained
           messages: mqttMessages
     routes:
       - when:
-          - api-id: mqtt-taxi-spec
+          - api-id: mqtt-tracking-spec
             operation-id: sendTaxiUpdate
-        exit: asyncapi_kafka
+        exit: south_kafka_client
         with:
-          api-id: kafka-taxi-spec
+          api-id: kafka-tracking-spec
           operation-id: sendTaxiUpdate
       - when:
-          - api-id: mqtt-taxi-spec
+          - api-id: mqtt-tracking-spec
             operation-id: sendBusUpdate
-        exit: asyncapi_kafka
+        exit: south_kafka_client
         with:
-          api-id: kafka-taxi-spec
+          api-id: kafka-tracking-spec
           operation-id: sendBusUpdate
 
-  asyncapi_kafka:
+# Connection to Kafka
+  south_kafka_client:
     type: asyncapi
     kind: client
     options:
       specs:
-        kafka-taxi-spec: taxi-kafka-asyncapi.yaml
+        kafka-tracking-spec: tracking-kafka-asyncapi.yaml
+      kafka:
+        sasl:
+          mechanism: plain
+          username: ${{env.KAFKA_USER}}
+          password: ${{env.KAFKA_PASS}}
+      tls:
+        trustcacerts: true
+        sni:
+          - ${{env.KAFKA_BOOTSTRAP_HOST}}
     telemetry:
       metrics:
         - stream.*

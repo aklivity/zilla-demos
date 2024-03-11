@@ -1,4 +1,4 @@
-name: zilla-taxi-demo
+name: zilla-taxi-hailing
 bindings:
 
   north_grpc_tcp_server:
@@ -42,9 +42,9 @@ bindings:
         exit: south_kafka_cache_client
         with:
           capability: produce
-          topic: route-requests
+          topic: dispatch-requests
           acks: leader_only
-          reply-to: route-replies
+          reply-to: dispatch-replies
 
 # gRPC Kafka fanout to a remote server
   west_taxi_route_remote_server:
@@ -55,12 +55,12 @@ bindings:
       acks: leader_only
     routes:
       - when:
-          - topic: route-requests
-            reply-to: route-replies
+          - topic: dispatch-requests
+            reply-to: dispatch-replies
             method: taxiroute.TaxiRoute/*
         with:
           scheme: http
-          authority: ${{env.TAXI_ROUTE_SERVER_HOST}}:${{env.TAXI_ROUTE_SERVER_PORT}}
+          authority: ${{env.DISPATCH_SERVICE_HOST}}:${{env.DISPATCH_SERVICE_PORT}}
         exit: west_taxi_route_server_grpc_client
 
 # gRPC TaxiRoute server
@@ -79,8 +79,8 @@ bindings:
     type: tcp
     kind: client
     options:
-      host: ${{env.TAXI_ROUTE_SERVER_HOST}}
-      port: ${{env.TAXI_ROUTE_SERVER_PORT}}
+      host: ${{env.DISPATCH_SERVICE_HOST}}
+      port: ${{env.DISPATCH_SERVICE_PORT}}
 
 # Kafka caching layer
   south_kafka_cache_client:
@@ -92,8 +92,8 @@ bindings:
     kind: cache_server
     options:
       bootstrap:
-        - route-requests
-        - route-replies
+        - dispatch-requests
+        - dispatch-replies
     exit: south_kafka_client
 
 # Connect to Kafka
@@ -103,10 +103,24 @@ bindings:
     options:
       servers:
         - ${{env.KAFKA_BOOTSTRAP_SERVER}}
-    exit: south_kafka_tcp_client
-  south_kafka_tcp_client:
+      sasl:
+        mechanism: plain
+        username: ${{env.KAFKA_USER}}
+        password: ${{env.KAFKA_PASS}}
+    exit: south_tls_client
+  south_tls_client:
+    type: tls
+    kind: client
+    telemetry:
+      metrics:
+        - stream.*
+    exit: south_tcp_client
+  south_tcp_client:
     type: tcp
     kind: client
+    telemetry:
+      metrics:
+        - stream.*
 
 telemetry:
   # Desired metrics to track

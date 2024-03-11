@@ -1,6 +1,6 @@
 openapi: "3.0.0"
 info:
-  title: Taxi Hailing Demo
+  title: Zilla Taxi Hailing REST spec
   description: This demo showcases the MQTT protocol brokered by Zilla. It uses [Open Street Maps](https://www.openstreetmap.org/), [Open Route Service](https://openrouteservice.org/), and the [MQTT Simulator](https://github.com/DamascenoRafael/mqtt-simulator) to demonstrate a real-world taxi-hailing and location tracking service.
   version: 1.0.0
   license:
