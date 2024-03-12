@@ -2,8 +2,8 @@ replicaCount: 1
 
 image:
   registry: ghcr.io
-  repository: aklivity/extras-taxi-dispatch-service
-  pullPolicy: IfNotPresent
+  repository: aklivity/extras-taxi-service
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 

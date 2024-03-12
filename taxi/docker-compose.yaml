@@ -55,7 +55,7 @@ services:
       - 50051:50051
 
   hailing-ui:
-    image: ghcr.io/aklivity/extras-taxi-map-ui:live-demo-deploy
+    image: ghcr.io/aklivity/extras-taxi-map-ui:sha-8233ad9
     container_name: hailing-ui
     restart: unless-stopped
     depends_on:

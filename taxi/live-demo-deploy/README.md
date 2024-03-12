@@ -36,11 +36,31 @@ flowchart LR
     end
 ```
 
-helm upgrade --install zilla-taxi-hailing oci://ghcr.io/aklivity/charts/zilla --version 0.9.70 --wait \
-    --set-file zilla\\.yaml=taxi-hailing-zilla.yaml
+```mermaid
+flowchart LR
 
-helm upgrade --install zilla-taxi-tracking oci://ghcr.io/aklivity/charts/zilla --version 0.9.70 --wait \
-    --set-file zilla\\.yaml=taxi-tracking-zilla.yaml
+    tmuisr[\Web APP/] -.- |gRPC| zhgs
+    tmuisr -.- |HTTP| ztos
+
+
+    subgraph Zilla Taxi Tracking
+            ztos{{OpenAPI REST}} --- ztoc[consume]
+            ztas{{AsyncAPI MQTT}} --- ztapc[pub/sub]
+    end
+        zhgs -.-> tsgrpc[Dispatch Service]
+        tsgrpc --> tsiot[Taxi 1]
+        tsgrpc --> tsiotb[Taxi 2]
+        tsgrpc --> tsiotc[Taxi 3]
+        tsiotc -.-> |MQTT| ztas
+        tsiotb -.-> |MQTT| ztas
+        tsiot -.-> |MQTT| ztas
+
+    subgraph Confluent Cloud
+        cciot[[Tracking Kafka Cluster]]
+        ztapc -.- cciot
+        ztoc -.- cciot
+    end
+```
 
 ## Installing
 

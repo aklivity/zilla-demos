@@ -1,4 +1,5 @@
+
 ingress:
   enabled: true
   ingressClassName: nginx
-  host: "map.localhost"
+  host: "app.localhost"

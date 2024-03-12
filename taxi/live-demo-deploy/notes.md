@@ -14,6 +14,7 @@ chmod 700 get_helm.sh
 helm:
 
 - zilla.yaml checksum
+- zilla.yaml configmap name
 - env var map extraEnvMap
 - ingress/serviceAccount option
 - dedicated local file configmap options

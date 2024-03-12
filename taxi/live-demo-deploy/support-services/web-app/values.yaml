@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   registry: ghcr.io
-  repository: aklivity/extras-taxi-map-ui
+  repository: aklivity/extras-taxi-gateway
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -40,7 +40,7 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 80
+  port: 8085
   # In case of service type LoadBalancer, you can specify reserved static IP
   # loadBalancerIP: 10.11.12.13
   # if you want to force a specific nodePort. Must be use with service.type=NodePort
