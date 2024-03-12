@@ -1,0 +1,253 @@
+---
+name: zilla-taxi-tracking
+bindings:
+
+# REST endpoints
+  north_rest_server:
+    type: openapi
+    kind: server
+    options:
+      specs:
+        rest-tracking-spec: tracking-openapi.yaml
+    exit: north_rest_kafka_proxy
+  north_rest_kafka_proxy:
+    type: openapi-asyncapi
+    kind: proxy
+    options:
+      specs:
+        openapi:
+          rest-tracking-spec: tracking-openapi.yaml
+        asyncapi:
+          kafka-tracking-spec: tracking-kafka-asyncapi.yaml
+    routes:
+      - when:
+          - api-id: rest-tracking-spec
+        exit: south_kafka_client
+        with:
+          api-id: kafka-tracking-spec
+
+# MQTT endpoints
+  mqtt_server:
+    type: asyncapi
+    kind: server
+    options:
+      specs:
+        mqtt-tracking-spec: tracking-mqtt-asyncapi.yaml
+    exit: mqtt_kafka_proxy
+    telemetry:
+      metrics:
+        - stream.*
+  mqtt_kafka_proxy:
+    type: asyncapi
+    kind: proxy
+    options:
+      specs:
+        mqtt-tracking-spec: tracking-mqtt-asyncapi.yaml
+        kafka-tracking-spec: tracking-kafka-asyncapi.yaml
+      mqtt-kafka:
+        channels:
+          sessions: mqttSessions
+          retained: mqttRetained
+          messages: mqttMessages
+    routes:
+      - when:
+          - api-id: mqtt-tracking-spec
+            operation-id: sendTaxiUpdate
+        exit: south_kafka_client
+        with:
+          api-id: kafka-tracking-spec
+          operation-id: sendTaxiUpdate
+      - when:
+          - api-id: mqtt-tracking-spec
+            operation-id: sendBusUpdate
+        exit: south_kafka_client
+        with:
+          api-id: kafka-tracking-spec
+          operation-id: sendBusUpdate
+
+# Connection to Kafka
+  south_kafka_client:
+    type: asyncapi
+    kind: client
+    options:
+      specs:
+        kafka-tracking-spec: tracking-kafka-asyncapi.yaml
+    telemetry:
+      metrics:
+        - stream.*
+
+telemetry:
+  # Desired metrics to track
+  metrics:
+    - http.active.requests
+    - http.duration
+    - http.request.size
+    - http.response.size
+    - stream.active.received
+    - stream.active.sent
+    - stream.opens.received
+    - stream.opens.sent
+    - stream.data.received
+    - stream.data.sent
+    - stream.errors.received
+    - stream.errors.sent
+    - stream.closes.received
+    - stream.closes.sent
+
+  # Prometheus endpoint definition
+  exporters:
+    prometheus_metric_exporter:
+      type: prometheus
+      options:
+        endpoints:
+          - scheme: http
+            path: /metrics
+            port: 7190
+
+---
+name: zilla-taxi-hailing
+bindings:
+
+  north_grpc_tcp_server:
+    type: tcp
+    kind: server
+    options:
+      host: 0.0.0.0
+      port:
+        - 7151
+    telemetry:
+      metrics:
+        - stream.*
+    exit: north_grpc_http_server
+  north_grpc_http_server:
+    type: http
+    kind: server
+    exit: north_grpc_server
+    telemetry:
+      metrics:
+        - http.*
+
+# gRPC service definition
+  north_grpc_server:
+    type: grpc
+    kind: server
+    options:
+      services:
+        - proto/taxi_route.proto
+    exit: north_grpc_kafka_proxy
+    telemetry:
+      metrics:
+        - grpc.*
+
+# gRPC proxy service to Kafka topics
+  north_grpc_kafka_proxy:
+    type: grpc-kafka
+    kind: proxy
+    routes:
+      - when:
+          - method: taxiroute.TaxiRoute/*
+        exit: south_kafka_cache_client
+        with:
+          capability: produce
+          topic: dispatch-requests
+          acks: leader_only
+          reply-to: dispatch-replies
+
+# gRPC Kafka fanout to a remote server
+  west_taxi_route_remote_server:
+    type: kafka-grpc
+    kind: remote_server
+    entry: south_kafka_cache_client
+    options:
+      acks: leader_only
+    routes:
+      - when:
+          - topic: dispatch-requests
+            reply-to: dispatch-replies
+            method: taxiroute.TaxiRoute/*
+        with:
+          scheme: http
+          authority: ${{env.DISPATCH_SERVICE_HOST}}:${{env.DISPATCH_SERVICE_PORT}}
+        exit: west_taxi_route_server_grpc_client
+
+# gRPC TaxiRoute server
+  west_taxi_route_server_grpc_client:
+    type: grpc
+    kind: client
+    exit: west_taxi_route_server_http_client
+  west_taxi_route_server_http_client:
+    type: http
+    kind: client
+    options:
+      versions:
+        - h2
+    exit: west_taxi_route_server_tcp_client
+  west_taxi_route_server_tcp_client:
+    type: tcp
+    kind: client
+    options:
+      host: ${{env.DISPATCH_SERVICE_HOST}}
+      port: ${{env.DISPATCH_SERVICE_PORT}}
+
+# Kafka caching layer
+  south_kafka_cache_client:
+    type: kafka
+    kind: cache_client
+    exit: south_kafka_cache_server
+  south_kafka_cache_server:
+    type: kafka
+    kind: cache_server
+    options:
+      bootstrap:
+        - dispatch-requests
+        - dispatch-replies
+    exit: south_kafka_client
+
+# Connect to Kafka
+  south_kafka_client:
+    type: kafka
+    kind: client
+    options:
+      servers:
+        - ${{env.KAFKA_BOOTSTRAP_SERVER}}
+    exit: south_tcp_client
+  south_tcp_client:
+    type: tcp
+    kind: client
+    telemetry:
+      metrics:
+        - stream.*
+
+telemetry:
+  # Desired metrics to track
+  metrics:
+    - grpc.active.requests
+    - grpc.duration
+    - grpc.request.size
+    - grpc.response.size
+    - grpc.requests.per.rpc
+    - grpc.responses.per.rpc
+    - http.active.requests
+    - http.duration
+    - http.request.size
+    - http.response.size
+    - stream.active.received
+    - stream.active.sent
+    - stream.opens.received
+    - stream.opens.sent
+    - stream.data.received
+    - stream.data.sent
+    - stream.errors.received
+    - stream.errors.sent
+    - stream.closes.received
+    - stream.closes.sent
+
+  # Prometheus endpoint definition
+  exporters:
+    prometheus_metric_exporter:
+      type: prometheus
+      options:
+        endpoints:
+          - scheme: http
+            path: /metrics
+            port: 7191

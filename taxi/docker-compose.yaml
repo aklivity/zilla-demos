@@ -9,44 +9,32 @@ services:
     ports:
       - 7114:7114
       - 7183:7183
+      - 7151:7151
+      - 7190:7190
+      - 7191:7191
     volumes:
+      - ./taxi_route.proto:/etc/zilla/proto/taxi_route.proto
       - ./tracking-kafka-asyncapi.yaml:/etc/zilla/tracking-kafka-asyncapi.yaml
       - ./tracking-mqtt-asyncapi.yaml:/etc/zilla/tracking-mqtt-asyncapi.yaml
       - ./tracking-openapi.yaml:/etc/zilla/tracking-openapi.yaml
-      - ./tracking-zilla.yaml:/etc/zilla/zilla.yaml
-    environment:
-      KAFKA_BOOTSTRAP_SERVER: kafka:9092
-      ZILLA_INCUBATOR_ENABLED: true
-      JAVA_OPTIONS: "-Dzilla.binding.kafka.debug=true"
-    command: start -v -e -Pzilla.engine.worker.capacity=512 -Pzilla.binding.kafka.client.connection.pool=false
-
-  zilla-taxi-hailing:
-    image: ghcr.io/aklivity/zilla:latest
-    container_name: zilla-taxi-hailing
-    pull_policy: always
-    restart: unless-stopped
-    ports:
-      - 7151:7151
-      - 7190:7190
-    volumes:
-      - ./hailing-zilla.yaml:/etc/zilla/zilla.yaml
-      - ./taxi_route.proto:/etc/zilla/proto/taxi_route.proto
+      - ./zilla.yaml:/etc/zilla/zilla.yaml
     environment:
       KAFKA_BOOTSTRAP_SERVER: kafka:9092
       DISPATCH_SERVICE_HOST: dispatch-service
       DISPATCH_SERVICE_PORT: 50051
+      ZILLA_INCUBATOR_ENABLED: true
       JAVA_OPTIONS: "-Dzilla.binding.kafka.debug=true"
-    command: start -v -e -Pzilla.binding.kafka.client.connection.pool=false
+    command: start -v -e -Pzilla.engine.worker.capacity=512 -Pzilla.binding.kafka.client.connection.pool=false
 
   hailing-app:
     image: ghcr.io/aklivity/extras-taxi-gateway:sha-5ac7a9c
     container_name: hailing-app
     restart: unless-stopped
     depends_on:
-      - zilla-taxi-hailing
+      - zilla-taxi-tracking
     environment:
       GATEWAY_PORT: 8085
-      GRPC_SERVER_ENDPOINT: zilla-taxi-hailing:7151
+      GRPC_SERVER_ENDPOINT: zilla-taxi-tracking:7151
     ports:
       - 8085:8085
 
