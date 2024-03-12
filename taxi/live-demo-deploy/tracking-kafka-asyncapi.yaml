@@ -13,10 +13,14 @@ info:
     url: https://docs.aklivity.io/
 defaultContentType: application/json
 servers:
-  local-connections:
-    host: kafka:9092
-    protocol: kafka
+  cc-sasl:
+    host: pkc-p11xm.us-east-1.aws.confluent.cloud:9092
+    protocol: kafka-secure
     description: Local broker
+  # local-connections:
+  #   host: kafka:9092
+  #   protocol: kafka
+  #   description: Local broker
 channels:
   taxiLocations:
     address: taxi-locations

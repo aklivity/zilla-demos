@@ -1,4 +1,7 @@
+image:
+  tag: "live-demo-deploy"
+
 ingress:
   enabled: true
-  ingressClassName: nginx
+  ingressClassName: zilla-taxi-hailing-nginx
   host: "map.localhost"

@@ -1,3 +1,4 @@
 tcp:
-  7114: "taxi-demo/zilla:7114"
-  7183: "taxi-demo/zilla:7183"
+  7151: "taxi-demo/zilla-taxi-hailing:7151"
+  7114: "taxi-demo/zilla-taxi-tracking:7114"
+  7183: "taxi-demo/zilla-taxi-tracking:7183"

@@ -36,6 +36,12 @@ flowchart LR
     end
 ```
 
+helm upgrade --install zilla-taxi-hailing oci://ghcr.io/aklivity/charts/zilla --version 0.9.70 --wait \
+    --set-file zilla\\.yaml=taxi-hailing-zilla.yaml
+
+helm upgrade --install zilla-taxi-tracking oci://ghcr.io/aklivity/charts/zilla --version 0.9.70 --wait \
+    --set-file zilla\\.yaml=taxi-tracking-zilla.yaml
+
 ## Installing
 
 - Create a `.env` file or export the below variables.

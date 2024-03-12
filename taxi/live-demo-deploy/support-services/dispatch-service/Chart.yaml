@@ -1,0 +1,8 @@
+apiVersion: v2
+name: dispatch-service
+description: Zilla Taxi demo Map UI supporting service
+version: 1.0.0
+type: application
+appVersion: "live-demo-deploy"
+sources:
+  - https://github.com/aklivity/zilla-demos/extras-containers/taxi/dispatch-service
