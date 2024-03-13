@@ -60,14 +60,12 @@ spec:
               protocol: TCP
           livenessProbe:
             tcpSocket:
-              path: /
               port: http
             initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 10
           readinessProbe:
             tcpSocket:
-              path: /
               port: http
           tty: true
           resources:

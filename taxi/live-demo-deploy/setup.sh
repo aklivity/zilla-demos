@@ -30,6 +30,7 @@ echo "PROM_PASS=$PROM_PASS"
 
 # Ingress controller
 helm upgrade --install ingress-nginx ingress-nginx --namespace $NAMESPACE --create-namespace --repo https://kubernetes.github.io/ingress-nginx --wait \
+    --set-string controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-type"="nlb" \
     --set tcp.7114="taxi-demo/zilla:7114" \
     --set tcp.7183="taxi-demo/zilla:7183" \
     --set tcp.7151="taxi-demo/zilla:7151"
@@ -47,23 +48,23 @@ helm upgrade --install zilla oci://ghcr.io/aklivity/charts/zilla --version 0.9.7
     --set extraEnv[1].value="$KAFKA_USER",extraEnv[2].value="$KAFKA_PASS" \
     --values values.yaml
 
-# Public UI for Kafka
-helm upgrade --install kafka-ui kafka-ui --version 0.7.5 --namespace $NAMESPACE --repo https://provectus.github.io/kafka-ui-charts --values kafka-ui-values.yaml \
-    --set yamlApplicationConfig.kafka.clusters[0].name="$NAMESPACE" \
-    --set yamlApplicationConfig.kafka.clusters[0].bootstrapServers="$KAFKA_BOOTSTRAP" \
-    --set yamlApplicationConfig.kafka.clusters[0].properties.sasl\\.jaas\\.config="$SASL_JAAS"
-
 # Taxi Demo Web APP UI
 helm upgrade --install map-ui ./support-services/map-ui --namespace $NAMESPACE --values map-ui-values.yaml \
+    --set image.tag="live-demo-deploy"
+
+# Web app backend
+helm upgrade --install web-app ./support-services/web-app --namespace $NAMESPACE --values web-app-values.yaml \
     --set image.tag="live-demo-deploy"
 
 # gRPC dispatch-service
 helm upgrade --install dispatch-service ./support-services/dispatch-service --namespace $NAMESPACE \
     --set image.tag="sha-5ac7a9c"
 
-# Web app backend
-helm upgrade --install web-app ./support-services/web-app --namespace $NAMESPACE --values web-app-values.yaml \
-    --set image.tag="live-demo-deploy"
+# Public UI for Kafka
+helm upgrade --install kafka-ui kafka-ui --version 0.7.5 --namespace $NAMESPACE --repo https://provectus.github.io/kafka-ui-charts --values kafka-ui-values.yaml \
+    --set yamlApplicationConfig.kafka.clusters[0].name="$NAMESPACE" \
+    --set yamlApplicationConfig.kafka.clusters[0].bootstrapServers="$KAFKA_BOOTSTRAP" \
+    --set yamlApplicationConfig.kafka.clusters[0].properties.sasl\\.jaas\\.config="$SASL_JAAS"
 
 # Prometheus metrics collector
 helm upgrade --install prometheus prometheus --version 25.13.0 --namespace $NAMESPACE --repo https://prometheus-community.github.io/helm-charts --values prometheus-values.yaml \

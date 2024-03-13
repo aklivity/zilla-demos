@@ -17,4 +17,7 @@ yamlApplicationConfig:
 ingress:
   enabled: true
   ingressClassName: nginx
-  host: "kafka.localhost"
+  path: /kafka
+envs:
+  config:
+    SERVER_SERVLET_CONTEXT_PATH: /kafka

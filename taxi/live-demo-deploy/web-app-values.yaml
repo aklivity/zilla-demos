@@ -2,7 +2,7 @@
 ingress:
   enabled: true
   ingressClassName: nginx
-  host: "app.localhost"
+  path: /taxiroute.TaxiRoute
   # Annotations for the Ingress
   annotations:
     nginx.ingress.kubernetes.io/enable-cors: "true"
