@@ -274,8 +274,7 @@ class VehicleLocationPlugin {
         body: JSON.stringify(taxiRoute),
       })
       if (res.status == 200) {
-        var taxi = await res.json()
-        this.routeKeyPath = `/${taxi.topic}`
+        this.routeKeyPath = `/${taxiRoute.key}`
       }
     } else {
       this.routeKeyPath = ''

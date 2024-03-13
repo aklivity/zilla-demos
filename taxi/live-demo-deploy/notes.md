@@ -18,6 +18,7 @@ helm:
 - env var map extraEnvMap
 - ingress/serviceAccount option
 - dedicated local file configmap options
+- remove `$` in logs
 
 mqtt:
 
