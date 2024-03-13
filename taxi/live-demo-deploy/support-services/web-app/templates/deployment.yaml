@@ -45,17 +45,24 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: {{ include "web-app.imageName" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: GRPC_SERVER_ENDPOINT
+              value: "zilla.taxi-demo.svc.cluster.local:7151"
           ports:
-            - containerPort: {{ .Values.service.port }}
+            - name: http
+              containerPort: 8085
+              protocol: TCP
           livenessProbe:
             tcpSocket:
-              port: {{ .Values.service.port }}
+              path: /
+              port: http
             initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 10
           readinessProbe:
             tcpSocket:
-              port: {{ .Values.service.port }}
+              path: /
+              port: http
             initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 10

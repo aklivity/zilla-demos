@@ -45,20 +45,30 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: {{ include "dispatch-service.imageName" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: PRINT_SIM_LOGS
+              value: "true"
+            - name: DEFAUlT_ROUTES
+              value: "true"
+            - name: BROKER_HOST
+              value: "zilla.taxi-demo.svc.cluster.local"
+            - name: BROKER_PORT
+              value: "7183"
           ports:
-            - containerPort: {{ .Values.service.port }}
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
           livenessProbe:
             tcpSocket:
-              port: {{ .Values.service.port }}
+              path: /
+              port: http
             initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 10
           readinessProbe:
             tcpSocket:
-              port: {{ .Values.service.port }}
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            timeoutSeconds: 10
+              path: /
+              port: http
           tty: true
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

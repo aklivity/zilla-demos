@@ -63,7 +63,7 @@ helm upgrade --install dispatch-service ./support-services/dispatch-service --na
 
 # Web app backend
 helm upgrade --install web-app ./support-services/web-app --namespace $NAMESPACE --values web-app-values.yaml \
-    --set image.tag="sha-5ac7a9c"
+    --set image.tag="live-demo-deploy"
 
 # Prometheus metrics collector
 helm upgrade --install prometheus prometheus --version 25.13.0 --namespace $NAMESPACE --repo https://prometheus-community.github.io/helm-charts --values prometheus-values.yaml \

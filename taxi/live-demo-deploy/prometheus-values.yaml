@@ -24,4 +24,4 @@ serverFiles:
       - job_name: zilla
         scrape_interval: 5s
         static_configs:
-          - targets: ['zilla.grpc-proxy.svc.cluster.local:7190']
+          - targets: ['zilla.taxi-demo.svc.cluster.local:7190', 'zilla.taxi-demo.svc.cluster.local:7191']
