@@ -1,16 +1,20 @@
 aws eks update-kubeconfig --name zilla-demos
 
+
+k config use-context docker-desktop
+
+k logs -f -l app.kubernetes.io/instance=dispatch-service --all-containers -n taxi-demo
+k logs -f -l app.kubernetes.io/instance=zilla --all-containers -n taxi-demo
+k logs -f -l app.kubernetes.io/instance=web-app --all-containers -n taxi-demo
+k logs -f -l app.kubernetes.io/managed-by=Helm --all-containers -n taxi-demo --max-log-requests=10
+
+
 - might need for public protection
 kubectl apply -f https://raw.githubusercontent.com/nginxinc/kubernetes-ingress/v3.4.3/deploy/crds.yaml
 
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 chmod 700 get_helm.sh
 ./get_helm.sh
-
-k logs -f -l app.kubernetes.io/instance=dispatch-service --all-containers -n taxi-demo
-k logs -f -l app.kubernetes.io/instance=zilla --all-containers -n taxi-demo
-k logs -f -l app.kubernetes.io/instance=web-app --all-containers -n taxi-demo
-k logs -f -l app.kubernetes.io/managed-by=Helm --all-containers -n taxi-demo --max-log-requests=10
 
 ## Improvements
 
@@ -43,4 +47,6 @@ mqtt:
 - same openapi picture for petstore
 - DNS
 - London bars
-- record example
+- record example demo walkthrough
+- add resource links to the map ui
+- review and update documentation
