@@ -1,5 +1,7 @@
 # Zilla Architecture Diagram
 
+Taxi Demo:
+
 ```mermaid
 flowchart LR
     style app1 stroke:#0d9b76,stroke-width:4px
@@ -31,5 +33,24 @@ flowchart LR
         cciot[[Tracking Kafka Cluster]]
         ztapc -.- cciot
         ztoc -.- cciot
+    end
+```
+
+## Pet Store
+
+```mermaid
+flowchart LR
+    style app1 stroke:#0d9b76,stroke-width:4px
+
+    ui[\Web/] -.- |HTTP| zpsos
+
+    subgraph app1 [Zilla Pet Store]
+            zpsos{{OpenAPI REST}} --- zpp[produce] & zpc[consume]
+    end
+
+    subgraph cc [Confluent Cloud]
+        ccps[[Pet Store Kafka Cluster]]
+        zpp -.- ccps
+        zpc -.- ccps
     end
 ```

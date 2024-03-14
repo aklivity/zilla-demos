@@ -1,5 +1,7 @@
 # Alternate Architecture Diagram
 
+## Taxi Demo
+
 ```mermaid
 flowchart LR
     style app1 stroke-dasharray: 5 5,stroke-width:4px
@@ -36,5 +38,25 @@ flowchart LR
         ksource -.- cciot
         ksync -.- cciot
         ttpc -.- cciot
+    end
+```
+
+## Pet Store
+
+```mermaid
+flowchart LR
+    style app1 stroke-dasharray: 5 5,stroke-width:4px
+
+    ui[\Web/] -.- |HTTP| psws
+
+    subgraph app1 [Pet Store Backend]
+            psws{{OpenAPI Web Server}} --- | basic auth | krp
+            krp{{Kafka REST Proxy}} --- krpp[produce] & krpc[consume]
+    end
+
+    subgraph cc [Confluent Cloud]
+        ccps[[Pet Store Kafka Cluster]]
+        krpp -.- ccps
+        krpc -.- ccps
     end
 ```
