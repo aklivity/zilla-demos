@@ -68,7 +68,7 @@ spec:
             - name: PRINT_SIM_LOGS
               value: "false"
             - name: DEFAUlT_ROUTES
-              value: "true"
+              value: {{ printf "\"%t\"" .Values.defaultRoutes.enabled }}
             - name: BROKER_HOST
               value: "zilla.taxi-demo.svc.cluster.local"
             - name: BROKER_PORT

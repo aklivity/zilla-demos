@@ -56,9 +56,13 @@ helm upgrade --install map-ui ./support-services/map-ui --namespace $NAMESPACE -
 helm upgrade --install web-app ./support-services/web-app --namespace $NAMESPACE --values web-app-values.yaml \
     --set image.tag="live-demo-deploy"
 
-# gRPC dispatch-service
+# gRPC dispatch-services
 helm upgrade --install dispatch-service ./support-services/dispatch-service --namespace $NAMESPACE \
-    --set image.tag="sha-5ac7a9c"
+    --set replicaCount=3 \
+    --set image.tag="live-demo-deploy"
+helm upgrade --install dispatch-service-busses ./support-services/dispatch-service --namespace $NAMESPACE \
+    --set defaultRoutes.enabled=true \
+    --set image.tag="live-demo-deploy"
 
 # Public UI for Kafka
 helm upgrade --install kafka-ui kafka-ui --version 0.7.5 --namespace $NAMESPACE --repo https://provectus.github.io/kafka-ui-charts --values kafka-ui-values.yaml \

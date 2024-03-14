@@ -1,5 +1,8 @@
 replicaCount: 1
 
+defaultRoutes:
+  enabled: false
+
 image:
   registry: ghcr.io
   repository: aklivity/extras-taxi-service
