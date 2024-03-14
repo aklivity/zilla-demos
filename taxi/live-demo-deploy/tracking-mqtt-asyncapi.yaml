@@ -12,7 +12,7 @@ info:
     url: https://docs.aklivity.io/
 servers:
   local-connection:
-    host: localhost:7183
+    host: taxi.aklivity.io:7183
     protocol: mqtt
 defaultContentType: application/json
 

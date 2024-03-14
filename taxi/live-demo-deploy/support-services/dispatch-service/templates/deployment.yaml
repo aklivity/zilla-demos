@@ -1,3 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dispatch-service.fullname" . }}-default-routes
+  labels:
+    {{- include "dispatch-service.labels" . | nindent 4 }}
+data:
+  default_routes.json: |-
+{{ .Files.Get "default_bus_routes.json" | indent 4 }}
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -27,6 +38,7 @@ spec:
         {{- if .Values.podLabels }}
         {{- toYaml .Values.podLabels | nindent 8 }}
         {{- end }}
+
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -39,6 +51,13 @@ spec:
       serviceAccountName: {{ include "dispatch-service.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: default-routes
+          configMap:
+            name: {{ include "dispatch-service.fullname" . }}-default-routes
+            items:
+              - key: default_routes.json
+                path: default_routes.json
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -70,8 +89,11 @@ spec:
           tty: true
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- if .Values.volumeMounts}}
           volumeMounts:
+            - name: default-routes
+              mountPath: /usr/src/app/default_routes.json
+              subPath: default_routes.json
+          {{- if .Values.volumeMounts}}
             {{- with .Values.volumeMounts }} 
               {{- toYaml . | nindent 12 }}
             {{- end }}

@@ -12,7 +12,7 @@ externalDocs:
   description: Find out more about Zilla
   url: https://docs.aklivity.io/
 servers:
-  - url: http://localhost:7114
+  - url: http://taxi.aklivity.io:7114
     description: local Zilla server
 tags:
   - name: Taxi
