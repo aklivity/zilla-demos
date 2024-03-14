@@ -10,6 +10,7 @@ chmod 700 get_helm.sh
 ## Improvements
 
 - don't validate on fetch
+- metrics in multi namespace zilla files
 
 helm:
 

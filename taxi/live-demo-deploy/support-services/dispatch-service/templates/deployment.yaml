@@ -47,7 +47,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: PRINT_SIM_LOGS
-              value: "true"
+              value: "false"
             - name: DEFAUlT_ROUTES
               value: "true"
             - name: BROKER_HOST

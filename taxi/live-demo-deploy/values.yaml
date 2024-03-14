@@ -1,3 +1,5 @@
+replicaCount: 3
+
 args: ["start", "-v", "-e", "-Pzilla.engine.worker.capacity=512", "-Pzilla.binding.kafka.client.connection.pool=false"]
 
 extraEnv:
@@ -13,8 +15,8 @@ extraEnv:
     value: "50051"
   - name: ZILLA_INCUBATOR_ENABLED
     value: "true"
-  - name: JAVA_OPTIONS
-    value: "-Dzilla.binding.kafka.debug=true"
+  # - name: JAVA_OPTIONS
+  #   value: "-Dzilla.binding.kafka.debug=true"
 
 livenessProbePort: 7190
 readinessProbePort: 7190

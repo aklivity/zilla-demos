@@ -1,3 +1,5 @@
+replicaCount: 2
+
 yamlApplicationConfig:
   kafka:
     clusters:
