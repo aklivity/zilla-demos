@@ -29,16 +29,16 @@ echo "PROM_PASS=$PROM_PASS"
 ## Installing services
 
 # Ingress controller
-helm upgrade --install ingress-nginx ingress-nginx --namespace $NAMESPACE --create-namespace --repo https://kubernetes.github.io/ingress-nginx --wait \
-    --set-string controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-type"="nlb" \
-    --set tcp.7114="taxi-demo/zilla:7114" \
-    --set tcp.7183="taxi-demo/zilla:7183" \
-    --set tcp.7151="taxi-demo/zilla:7151"
+# helm upgrade --install ingress-nginx ingress-nginx --namespace $NAMESPACE --create-namespace --repo https://kubernetes.github.io/ingress-nginx --wait \
+#     --set-string controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-type"="nlb" \
+#     --set tcp.7114="taxi-demo/zilla:7114" \
+#     --set tcp.7183="taxi-demo/zilla:7183" \
+#     --set tcp.7151="taxi-demo/zilla:7151"
 
 # Print public ports
 echo "==== $NAMESPACE Ingress controller is serving ports: $(kubectl get svc --namespace $NAMESPACE ingress-nginx-controller --template "{{ range .spec.ports }}{{.port}} {{ end }}")"
 # Zilla Taxi Demo
-helm upgrade --install zilla oci://ghcr.io/aklivity/charts/zilla --version 0.9.70 --namespace $NAMESPACE --wait \
+helm upgrade --install zilla oci://ghcr.io/aklivity/charts/zilla --version 0.9.71 --namespace $NAMESPACE --wait \
     --set-file configMaps.proto.data.taxi_route\\.proto=taxi_route.proto \
     --set-file configMaps.specs.data.tracking-kafka-asyncapi\\.yaml=tracking-kafka-asyncapi.yaml \
     --set-file configMaps.specs.data.tracking-mqtt-asyncapi\\.yaml=tracking-mqtt-asyncapi.yaml \
@@ -64,16 +64,16 @@ helm upgrade --install dispatch-service-busses ./support-services/dispatch-servi
     --set defaultRoutes.enabled=true \
     --set image.tag="live-demo-deploy"
 
-# Public UI for Kafka
-helm upgrade --install kafka-ui kafka-ui --version 0.7.5 --namespace $NAMESPACE --repo https://provectus.github.io/kafka-ui-charts --values kafka-ui-values.yaml \
-    --set yamlApplicationConfig.kafka.clusters[0].name="$NAMESPACE" \
-    --set yamlApplicationConfig.kafka.clusters[0].bootstrapServers="$KAFKA_BOOTSTRAP" \
-    --set yamlApplicationConfig.kafka.clusters[0].properties.sasl\\.jaas\\.config="$SASL_JAAS"
+# # Public UI for Kafka
+# helm upgrade --install kafka-ui kafka-ui --version 0.7.5 --namespace $NAMESPACE --repo https://provectus.github.io/kafka-ui-charts --values kafka-ui-values.yaml \
+#     --set yamlApplicationConfig.kafka.clusters[0].name="$NAMESPACE" \
+#     --set yamlApplicationConfig.kafka.clusters[0].bootstrapServers="$KAFKA_BOOTSTRAP" \
+#     --set yamlApplicationConfig.kafka.clusters[0].properties.sasl\\.jaas\\.config="$SASL_JAAS"
 
-# Prometheus metrics collector
-helm upgrade --install prometheus prometheus --version 25.13.0 --namespace $NAMESPACE --repo https://prometheus-community.github.io/helm-charts --values prometheus-values.yaml \
-    --set server.remoteWrite[0].basic_auth.password="$PROM_PASS"
+# # Prometheus metrics collector
+# helm upgrade --install prometheus prometheus --version 25.13.0 --namespace $NAMESPACE --repo https://prometheus-community.github.io/helm-charts --values prometheus-values.yaml \
+#     --set server.remoteWrite[0].basic_auth.password="$PROM_PASS"
 
-# Prometheus metrics collector
-helm upgrade --install prometheus prometheus --version 25.13.0 --namespace $NAMESPACE --repo https://prometheus-community.github.io/helm-charts --values prometheus-values.yaml \
-    --set server.remoteWrite[0].basic_auth.password="$PROM_PASS"
+# # Prometheus metrics collector
+# helm upgrade --install prometheus prometheus --version 25.13.0 --namespace $NAMESPACE --repo https://prometheus-community.github.io/helm-charts --values prometheus-values.yaml \
+#     --set server.remoteWrite[0].basic_auth.password="$PROM_PASS"

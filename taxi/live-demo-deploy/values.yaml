@@ -1,6 +1,6 @@
 replicaCount: 3
 
-args: ["start", "-v", "-e", "-Pzilla.engine.worker.capacity=512", "-Pzilla.binding.kafka.client.connection.pool=false"]
+args: ["start", "-v", "-e", "-Pzilla.engine.worker.capacity=512"]
 
 extraEnv:
   - name: KAFKA_BOOTSTRAP_SERVER
