@@ -1,0 +1,8 @@
+apiVersion: v2
+name: web-app
+description: Zilla Taxi demo Map UI supporting service
+version: 1.0.0
+type: application
+appVersion: "latest"
+sources:
+  - https://github.com/aklivity/zilla-demos/extras-containers/taxi/web-app

@@ -1,0 +1,87 @@
+openapi: "3.0.0"
+info:
+  title: Zilla Taxi Hailing REST spec
+  description: This demo showcases the MQTT protocol brokered by Zilla. It uses [Open Street Maps](https://www.openstreetmap.org/), [Open Route Service](https://openrouteservice.org/), and the [MQTT Simulator](https://github.com/DamascenoRafael/mqtt-simulator) to demonstrate a real-world taxi-hailing and location tracking service.
+  version: 1.0.0
+  license:
+    name: Aklivity Community License
+  contact:
+    name: Aklivity Community
+    url: https://www.aklivity.io/slack
+externalDocs:
+  description: Find out more about Zilla
+  url: https://docs.aklivity.io/
+servers:
+  - url: http://localhost:7114
+    description: local Zilla server
+tags:
+  - name: Taxi
+    description: Fetching Taxi info.
+  - name: Bus
+    description: Fetching Bus info.
+paths:
+  /taxi/locations:
+    get:
+      operationId: getTaxiLocations
+      description: Fetch all taxi locations.
+      tags:
+        - Taxi
+      responses:
+        "200":
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Locations"
+  /taxi/locations/{id}:
+    get:
+      operationId: getTaxiLocationById
+      description: Fetch one taxi location by its ID.
+      tags:
+        - Taxi
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Location"
+  /bus/locations:
+    get:
+      operationId: getBusLocations
+      description: Fetch all bus locations.
+      tags:
+        - Bus
+      responses:
+        "200":
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Locations"
+components:
+  schemas:
+    Location:
+      required:
+        - key
+      properties:
+        key:
+          type: string
+        icon:
+          type: string
+        coordinates:
+          type: array
+          items:
+            type: integer
+            format: int32
+    Locations:
+      type: array
+      maxItems: 500
+      items:
+        $ref: "#/components/schemas/Location"

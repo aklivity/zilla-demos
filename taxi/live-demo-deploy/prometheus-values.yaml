@@ -1,0 +1,27 @@
+alertmanager:
+  enabled: false
+prometheus-pushgateway:
+  enabled: false
+
+server:
+  storagePath: "/data"
+  persistentVolume:
+    enabled: false
+  statefulSet:
+    enabled: true
+  extraFlags:
+    - web.enable-lifecycle
+    - storage.tsdb.wal-compression
+  remoteWrite:
+    - url: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom/push
+      basic_auth:
+        username: 1430893
+        password: admin
+
+serverFiles:
+  prometheus.yml:
+    scrape_configs:
+      - job_name: zilla
+        scrape_interval: 5s
+        static_configs:
+          - targets: ['zilla.taxi-demo.svc.cluster.local:7190', 'zilla.taxi-demo.svc.cluster.local:7191']

@@ -1,0 +1,100 @@
+asyncapi: 3.0.0
+info:
+  title: Zilla Taxi Hailing Kafka Spec
+  description: Zilla implements the Petstore Kafka spec
+  version: 1.0.0
+  license:
+    name: Aklivity Community License
+  contact:
+    name: Aklivity Community
+    url: https://www.aklivity.io/slack
+  externalDocs:
+    description: Find out more about Zilla
+    url: https://docs.aklivity.io/
+defaultContentType: application/json
+servers:
+  cc-sasl:
+    host: pkc-p11xm.us-east-1.aws.confluent.cloud:9092
+    protocol: kafka-secure
+    description: Local broker
+channels:
+  taxiLocations:
+    address: taxi-locations
+    messages:
+      locationUpdate:
+        $ref: "#/components/messages/locationUpdate"
+    description: The topic on which taxi locations may be produced and consumed.
+  busLocations:
+    address: bus-locations
+    messages:
+      locationUpdate:
+        $ref: "#/components/messages/locationUpdate"
+    description: The topic on which bus locations may be produced and consumed.
+  mqttSessions:
+    description: This channel contains MQTT sessions.
+    address: mqtt-sessions
+  mqttMessages:
+    description: This channel contains MQTT messages.
+    address: mqtt-messages
+  mqttRetained:
+    description: This channel contains MQTT retained messages.
+    address: mqtt-retained
+operations:
+  sendTaxiUpdate:
+    action: send
+    channel:
+      $ref: "#/channels/taxiLocations"
+    summary: Update a taxis locations.
+    messages:
+      - $ref: "#/channels/taxiLocations/messages/locationUpdate"
+  getTaxiLocations:
+    action: receive
+    channel:
+      $ref: "#/channels/taxiLocations"
+    summary: List taxi locations.
+    messages:
+      - $ref: "#/channels/taxiLocations/messages/locationUpdate"
+  getTaxiLocationById:
+    action: receive
+    channel:
+      $ref: "#/channels/taxiLocations"
+    summary: List a taxi location by ID.
+    messages:
+      - $ref: "#/channels/taxiLocations/messages/locationUpdate"
+  sendBusUpdate:
+    action: send
+    channel:
+      $ref: "#/channels/busLocations"
+    summary: Update a buses locations.
+    messages:
+      - $ref: "#/channels/busLocations/messages/locationUpdate"
+  getBusLocations:
+    action: receive
+    channel:
+      $ref: "#/channels/busLocations"
+    summary: List all bus locations.
+    messages:
+      - $ref: "#/channels/busLocations/messages/locationUpdate"
+components:
+  messages:
+    locationUpdate:
+      name: locationUpdate
+      title: Location Update
+      summary: Info the current location for a vehicle with a list of lat long coordinates.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/locationPayload"
+  schemas:
+    locationPayload:
+      required:
+        - key
+      properties:
+        key:
+          type: string
+        icon:
+          type: string
+        coordinates:
+          type: array
+          items:
+            type: integer
+            format: int32

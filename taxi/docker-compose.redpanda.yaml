@@ -64,14 +64,14 @@ services:
         rpk topic create --brokers redpanda:9092 mqtt-retained --topic-config cleanup.policy=compact
         rpk topic create --brokers redpanda:9092 taxi-locations --topic-config cleanup.policy=compact
         rpk topic create --brokers redpanda:9092 bus-locations --topic-config cleanup.policy=compact
-        rpk topic create --brokers redpanda:9092 route-requests
-        rpk topic create --brokers redpanda:9092 route-replies
+        rpk topic create --brokers redpanda:9092 dispatch-requests
+        rpk topic create --brokers redpanda:9092 dispatch-replies
     depends_on:
       redpanda:
         condition: service_healthy
     init: true
 
-  taxi-service:
+  dispatch-service:
     depends_on:
       redpanda-init:
         condition: service_completed_successfully

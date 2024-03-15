@@ -1,0 +1,12 @@
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  path: /taxiroute.TaxiRoute
+  # Annotations for the Ingress
+  annotations:
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "*"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "false"

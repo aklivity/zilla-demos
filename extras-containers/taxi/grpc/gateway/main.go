@@ -20,7 +20,7 @@ var (
 	// command-line options:
 	// gRPC server endpoint
 	grpcServerEndpoint = env.GetDefault("GRPC_SERVER_ENDPOINT", "localhost:7114")
-	gatewayPort = env.GetIntDefault("GATEWAY_PORT", 8085)
+	gatewayPort        = env.GetIntDefault("GATEWAY_PORT", 8085)
 )
 
 func run() error {
@@ -45,8 +45,10 @@ func run() error {
 		},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: false,
+		// Enable Debugging for testing, consider disabling in production
+		Debug: true,
 	}).Handler(mux)
-  
+
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
 	glog.Info("running on :", gatewayPort)
 	return http.ListenAndServe(fmt.Sprintf(":%d", gatewayPort), handler)

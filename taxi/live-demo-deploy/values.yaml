@@ -1,0 +1,35 @@
+replicaCount: 3
+
+args: ["start", "-v", "-e", "-Pzilla.engine.worker.capacity=512"]
+
+extraEnv:
+  - name: KAFKA_BOOTSTRAP_SERVER
+    value: "kafka.taxi-demo.svc.cluster.local:9092"
+  - name: KAFKA_USER
+    value: "admin"
+  - name: KAFKA_PASS
+    value: "admin"
+  - name: DISPATCH_SERVICE_HOST
+    value: "dispatch-service.taxi-demo.svc.cluster.local"
+  - name: DISPATCH_SERVICE_PORT
+    value: "50051"
+  - name: ZILLA_INCUBATOR_ENABLED
+    value: "true"
+  # - name: JAVA_OPTIONS
+  #   value: "-Dzilla.binding.kafka.debug=true"
+
+livenessProbePort: 7190
+readinessProbePort: 7190
+
+service:
+  ports:
+    - port: 7114
+      name: http
+    - port: 7183
+      name: mqtt
+    - port: 7151
+      name: grpc
+    - port: 7190
+      name: tracking
+    - port: 7191
+      name: hailing

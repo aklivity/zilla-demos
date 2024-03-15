@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-NAMESPACE=zilla-taxi
+NAMESPACE=zilla-taxi-demo
 BROKER=kafka
 
 

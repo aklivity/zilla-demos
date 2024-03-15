@@ -1,5 +1,5 @@
 {
-  "BROKER_URL": "zilla",
+  "BROKER_URL": "zilla-taxi-tracking",
   "BROKER_PORT": 7183,
   "PROTOCOL_VERSION": 5,
   "CLEAN_SESSION": false,

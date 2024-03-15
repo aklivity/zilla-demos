@@ -1,0 +1,75 @@
+asyncapi: 3.0.0
+info:
+  title: Zilla Taxi Hailing MQTT spec
+  version: 1.0.0
+  license:
+    name: Aklivity Community License
+  contact:
+    name: Aklivity Community
+    url: https://www.aklivity.io/slack
+  externalDocs:
+    description: Find out more about Zilla
+    url: https://docs.aklivity.io/
+servers:
+  local-connection:
+    host: taxi.aklivity.io:7183
+    protocol: mqtt
+defaultContentType: application/json
+
+channels:
+  taxiLocationUpdate:
+    address: "taxi/{taxiId}/location"
+    title: MQTT Topic to produce & consume topic.
+    parameters:
+      taxiId:
+        $ref: "#/components/parameters/vehicleId"
+    messages:
+      locationUpdate:
+        $ref: "#/components/messages/locationUpdate"
+  busLocationUpdate:
+    address: "bus/{busId}/location"
+    title: MQTT Topic to produce & consume topic.
+    parameters:
+      busId:
+        $ref: "#/components/parameters/vehicleId"
+    messages:
+      locationUpdate:
+        $ref: "#/components/messages/locationUpdate"
+
+operations:
+  sendTaxiUpdate:
+    action: send
+    channel:
+      $ref: "#/channels/taxiLocationUpdate"
+
+  sendBusUpdate:
+    action: send
+    channel:
+      $ref: "#/channels/busLocationUpdate"
+
+components:
+  parameters:
+    vehicleId:
+      description: Unique Vehicle ID based on its destination
+  messages:
+    locationUpdate:
+      name: locationUpdate
+      title: Location Update
+      summary: A vehicle sending in a new location
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/locationUpdate"
+  schemas:
+    locationUpdate:
+      required:
+        - key
+      properties:
+        key:
+          type: string
+        icon:
+          type: string
+        coordinates:
+          type: array
+          items:
+            type: integer
+            format: int32

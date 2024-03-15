@@ -71,7 +71,7 @@ bindings:
         - route-guide-responses
     exit: south_kafka_client
 
-# Connect to local Kafka
+# Connect to Kafka
   south_kafka_client:
     type: kafka
     kind: client
