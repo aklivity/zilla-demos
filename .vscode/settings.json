@@ -1,5 +1,0 @@
-{
-    "yaml.schemas": {
-        "https://www.asyncapi.com/schema-store/all.schema-store.json": "file:///Users/adanelz/Code/zilla-demos/taxi/taxi-asyncapi.yaml"
-    }
-}

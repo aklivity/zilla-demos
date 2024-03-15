@@ -2,7 +2,7 @@ version: "3"
 services:
 
   zilla-taxi-tracking:
-    image: ghcr.io/aklivity/zilla:latest
+    image: ghcr.io/aklivity/zilla:0.9.71
     container_name: zilla-taxi-tracking
     pull_policy: always
     restart: unless-stopped
@@ -23,8 +23,7 @@ services:
       DISPATCH_SERVICE_HOST: dispatch-service
       DISPATCH_SERVICE_PORT: 50051
       ZILLA_INCUBATOR_ENABLED: true
-      JAVA_OPTIONS: "-Dzilla.binding.kafka.debug=true"
-    command: start -v -e -Pzilla.engine.worker.capacity=512 -Pzilla.binding.kafka.client.connection.pool=false
+    command: start -v -e -Pzilla.engine.worker.capacity=512
 
   hailing-app:
     image: ghcr.io/aklivity/extras-taxi-gateway:sha-5ac7a9c
@@ -47,7 +46,7 @@ services:
     volumes:
       - ./default_bus_routes.json:/usr/src/app/default_routes.json
     environment:
-      PRINT_SIM_LOGS: true
+      PRINT_SIM_LOGS: false
       DEFAUlT_ROUTES: true
       BROKER_HOST: zilla-taxi-tracking
       BROKER_PORT: 7183

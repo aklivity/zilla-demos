@@ -10,7 +10,6 @@ fi
 
 # Uninstall services and namespace
 NAMESPACE="${NAMESPACE:-taxi-demo}"
-kubectl delete all -n $NAMESPACE --all
-kubectl delete namespace $NAMESPACE
-
-
+# uncomment when resources are seperated in different namespaces
+# kubectl delete all -n $NAMESPACE --all
+# kubectl delete namespace $NAMESPACE
