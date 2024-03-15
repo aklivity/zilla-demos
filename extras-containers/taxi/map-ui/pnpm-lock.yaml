@@ -2992,7 +2992,7 @@ packages:
   /axios@0.21.4:
     resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
     dependencies:
-      follow-redirects: 1.15.4(debug@4.3.4)
+      follow-redirects: 1.15.6(debug@4.3.4)
     transitivePeerDependencies:
       - debug
     dev: false
@@ -3000,7 +3000,7 @@ packages:
   /axios@0.27.2(debug@4.3.4):
     resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
     dependencies:
-      follow-redirects: 1.15.4(debug@4.3.4)
+      follow-redirects: 1.15.6(debug@4.3.4)
       form-data: 4.0.0
     transitivePeerDependencies:
       - debug
@@ -3009,7 +3009,7 @@ packages:
   /axios@1.6.5:
     resolution: {integrity: sha512-Ii012v05KEVuUoFWmMW/UQv9aRIc3ZwkWDcM+h5Il8izZCtRVpDUfwpoFf7eOtajT3QiGR4yDUx7lPqHJULgbg==}
     dependencies:
-      follow-redirects: 1.15.4(debug@4.3.4)
+      follow-redirects: 1.15.6(debug@4.3.4)
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -6704,8 +6704,8 @@ packages:
     deprecated: flatten is deprecated in favor of utility frameworks such as lodash.
     dev: false
 
-  /follow-redirects@1.15.4(debug@4.3.4):
-    resolution: {integrity: sha512-Cr4D/5wlrb0z9dgERpUL3LrmPKVDsETIJhaCMeDfuFYcqa5bldGV6wBsAN6X/vxlXQtFBMrXdXxdL8CbDTGniw==}
+  /follow-redirects@1.15.6(debug@4.3.4):
+    resolution: {integrity: sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
@@ -7369,7 +7369,7 @@ packages:
     engines: {node: '>=8.0.0'}
     dependencies:
       eventemitter3: 4.0.7
-      follow-redirects: 1.15.4(debug@4.3.4)
+      follow-redirects: 1.15.6(debug@4.3.4)
       requires-port: 1.0.0
     transitivePeerDependencies:
       - debug
@@ -12494,7 +12494,7 @@ packages:
   /vue2-leaflet-polyline-measure@1.2.1(@types/leaflet@1.9.8)(leaflet@1.9.4)(vue@2.7.16):
     resolution: {integrity: sha512-C4Y6CV4fsfDqguagOjBsYkAIJg7nRkJTm1XrrOj94i2q5Ws+FE35tn6Se1AiZfSrg0VzpEmhHRFX64ECmvP5Eg==}
     dependencies:
-      leaflet.polylinemeasure: github.com/ppete2/Leaflet.PolylineMeasure/b85a4b9
+      leaflet.polylinemeasure: git@github.com+ppete2/Leaflet.PolylineMeasure/b85a4b9
       vue2-leaflet: 2.7.1(@types/leaflet@1.9.8)(leaflet@1.9.4)(vue@2.7.16)
     transitivePeerDependencies:
       - '@types/leaflet'
@@ -13000,6 +13000,12 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
+  git@github.com+ppete2/Leaflet.PolylineMeasure/b85a4b9:
+    resolution: {commit: b85a4b9, repo: git@github.com:ppete2/Leaflet.PolylineMeasure.git, type: git}
+    name: leaflet.polylinemeasure
+    version: 1.0.0
+    dev: false
+
   github.com/GIScience/vue2-leaflet-height-graph/d44cc4b7c9b3d46d4b42ff9ae183228c9f5984c2(@types/leaflet@1.9.8)(leaflet@1.9.4)(vue2-leaflet@2.7.1):
     resolution: {tarball: https://codeload.github.com/GIScience/vue2-leaflet-height-graph/tar.gz/d44cc4b7c9b3d46d4b42ff9ae183228c9f5984c2}
     id: github.com/GIScience/vue2-leaflet-height-graph/d44cc4b7c9b3d46d4b42ff9ae183228c9f5984c2
@@ -13015,11 +13021,4 @@ packages:
       leaflet: 1.9.4
       leaflet.heightgraph: 1.4.0
       vue2-leaflet: 2.7.1(@types/leaflet@1.9.8)(leaflet@1.9.4)(vue@2.7.16)
-    dev: false
-    bundledDependencies: false
-
-  github.com/ppete2/Leaflet.PolylineMeasure/b85a4b9:
-    resolution: {tarball: https://codeload.github.com/ppete2/Leaflet.PolylineMeasure/tar.gz/b85a4b9}
-    name: leaflet.polylinemeasure
-    version: 1.0.0
     dev: false
