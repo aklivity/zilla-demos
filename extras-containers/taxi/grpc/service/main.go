@@ -101,6 +101,8 @@ func runSim(fileName string) {
 				glog.Info("Exit Status: ", exiterr.ExitCode())
 				glog.Fatal("Simulation Error: ", err)
 			}
+			glog.Flush()
+			panic(err)
 		}
 		if fileName != "" {
 			glog.Info("Simulation done deleting: ", fileName)
