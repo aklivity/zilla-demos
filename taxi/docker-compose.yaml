@@ -4,7 +4,6 @@ services:
   zilla-taxi-tracking:
     image: ghcr.io/aklivity/zilla:0.9.71
     container_name: zilla-taxi-tracking
-    pull_policy: always
     restart: unless-stopped
     ports:
       - 7114:7114

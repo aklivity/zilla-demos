@@ -46,7 +46,7 @@ bindings:
                 authorization: Bearer {credentials}
       specs:
         petstore-rest-spec: specs/petstore-openapi.yaml
-    exit: openapi_asyncapi_proxy
+    exit: north_rest_kafka_proxy
   north_rest_kafka_proxy:
     type: openapi-asyncapi
     kind: proxy
@@ -59,7 +59,7 @@ bindings:
     routes:
       - when:
           - api-id: petstore-rest-spec
-        exit: asyncapi_client
+        exit: south_kafka_client
         with:
           api-id: petstore-kafka-spec
   south_kafka_client:

@@ -2,15 +2,15 @@ args: ["start", "-v", "-e"]
 
 extraEnv:
   - name: KAFKA_BOOTSTRAP_SERVER
-    value: "kafka.taxi-demo.svc.cluster.local:9092"
+    value: "kafka.petstore.svc.cluster.local:9092"
   - name: KAFKA_USER
     value: "admin"
   - name: KAFKA_PASS
     value: "admin"
   - name: ZILLA_INCUBATOR_ENABLED
     value: "true"
-  # - name: JAVA_OPTIONS
-  #   value: "-Dzilla.binding.kafka.debug=true"
+  - name: JAVA_OPTIONS
+    value: "-Dzilla.binding.kafka.debug=true"
 
 livenessProbePort: 7190
 readinessProbePort: 7190
