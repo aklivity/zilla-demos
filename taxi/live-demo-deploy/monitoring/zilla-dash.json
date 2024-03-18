@@ -25,32 +25,6 @@
     "liveNow": false,
     "panels": [
       {
-        "collapsed": false,
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "gridPos": {
-          "h": 1,
-          "w": 24,
-          "x": 0,
-          "y": 0
-        },
-        "id": 17,
-        "panels": [],
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "refId": "A"
-          }
-        ],
-        "title": "Host Info",
-        "type": "row"
-      },
-      {
         "datasource": {
           "type": "prometheus",
           "uid": "prometheus"
@@ -92,7 +66,7 @@
           "h": 7,
           "w": 3,
           "x": 0,
-          "y": 1
+          "y": 0
         },
         "id": 15,
         "maxDataPoints": 100,
@@ -172,7 +146,7 @@
           "h": 4,
           "w": 3,
           "x": 3,
-          "y": 1
+          "y": 0
         },
         "id": 35,
         "maxDataPoints": 100,
@@ -199,12 +173,13 @@
               "type": "prometheus",
               "uid": "prometheus"
             },
-            "expr": "count(count(node_cpu_seconds_total{instance=~\"$node\", mode='system'}) by (cpu))",
+            "editorMode": "code",
+            "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{container=\"zilla\"}) * 1000",
             "instant": true,
             "refId": "A"
           }
         ],
-        "title": "CPU Cores",
+        "title": "Zilla Milicores",
         "type": "stat"
       },
       {
@@ -254,7 +229,7 @@
           "h": 7,
           "w": 6,
           "x": 6,
-          "y": 1
+          "y": 0
         },
         "id": 31,
         "maxDataPoints": 100,
@@ -334,7 +309,7 @@
           "h": 3,
           "w": 3,
           "x": 3,
-          "y": 5
+          "y": 4
         },
         "id": 37,
         "maxDataPoints": 100,
@@ -363,13 +338,13 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum(container_memory_working_set_bytes{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", namespace=\"taxi-demo\",container!=\"\", image!=\"\"})",
+            "expr": "sum(container_memory_working_set_bytes{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", namespace=\"taxi-demo\",container=\"zilla\"})",
             "instant": true,
             "range": false,
             "refId": "A"
           }
         ],
-        "title": "Host Memory",
+        "title": "Zilla Memory",
         "type": "stat"
       },
       {
@@ -420,7 +395,7 @@
           "h": 6,
           "w": 6,
           "x": 0,
-          "y": 8
+          "y": 7
         },
         "id": 4,
         "maxDataPoints": 100,
@@ -454,7 +429,7 @@
             "step": 10
           }
         ],
-        "title": "Memory usage",
+        "title": "Cluster Memory usage",
         "type": "gauge"
       },
       {
@@ -506,7 +481,7 @@
           "h": 6,
           "w": 6,
           "x": 6,
-          "y": 8
+          "y": 7
         },
         "id": 6,
         "maxDataPoints": 100,
@@ -532,16 +507,18 @@
               "type": "prometheus",
               "uid": "prometheus"
             },
-            "expr": "100 - (avg(irate(node_cpu_seconds_total{instance=~\"$node\",mode=\"idle\"}[5m])) * 100)",
+            "editorMode": "code",
+            "expr": "100 - (avg(irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
             "format": "time_series",
             "interval": "1m",
             "intervalFactor": 1,
             "legendFormat": "",
+            "range": true,
             "refId": "A",
             "step": 10
           }
         ],
-        "title": "CPU usage",
+        "title": "Cluster CPU usage",
         "type": "gauge"
       }
     ],
@@ -554,171 +531,7 @@
       "cadvisor"
     ],
     "templating": {
-      "list": [
-        {
-          "auto": false,
-          "auto_count": 30,
-          "auto_min": "10s",
-          "current": {
-            "selected": false,
-            "text": "10m",
-            "value": "10m"
-          },
-          "hide": 0,
-          "label": "interval",
-          "name": "interval",
-          "options": [
-            {
-              "selected": false,
-              "text": "1m",
-              "value": "1m"
-            },
-            {
-              "selected": true,
-              "text": "10m",
-              "value": "10m"
-            },
-            {
-              "selected": false,
-              "text": "30m",
-              "value": "30m"
-            },
-            {
-              "selected": false,
-              "text": "1h",
-              "value": "1h"
-            },
-            {
-              "selected": false,
-              "text": "6h",
-              "value": "6h"
-            },
-            {
-              "selected": false,
-              "text": "12h",
-              "value": "12h"
-            },
-            {
-              "selected": false,
-              "text": "1d",
-              "value": "1d"
-            },
-            {
-              "selected": false,
-              "text": "7d",
-              "value": "7d"
-            },
-            {
-              "selected": false,
-              "text": "14d",
-              "value": "14d"
-            },
-            {
-              "selected": false,
-              "text": "30d",
-              "value": "30d"
-            }
-          ],
-          "query": "1m,10m,30m,1h,6h,12h,1d,7d,14d,30d",
-          "queryValue": "",
-          "refresh": 2,
-          "skipUrlSync": false,
-          "type": "interval"
-        },
-        {
-          "current": {
-            "selected": true,
-            "text": [
-              "All"
-            ],
-            "value": [
-              "$__all"
-            ]
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "definition": "label_values(node_exporter_build_info{name=~'$name'},instance)",
-          "hide": 0,
-          "includeAll": true,
-          "label": "IP",
-          "multi": true,
-          "name": "node",
-          "options": [],
-          "query": "label_values(node_exporter_build_info{name=~'$name'},instance)",
-          "refresh": 2,
-          "regex": "",
-          "skipUrlSync": false,
-          "sort": 1,
-          "tagValuesQuery": "",
-          "tagsQuery": "",
-          "type": "query",
-          "useTags": false
-        },
-        {
-          "current": {
-            "selected": true,
-            "text": [
-              "All"
-            ],
-            "value": [
-              "$__all"
-            ]
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "definition": "label_values(node_exporter_build_info,env)",
-          "hide": 0,
-          "includeAll": true,
-          "label": "Env",
-          "multi": true,
-          "name": "env",
-          "options": [],
-          "query": "label_values(node_exporter_build_info,env)",
-          "refresh": 2,
-          "regex": "",
-          "skipUrlSync": false,
-          "sort": 0,
-          "tagValuesQuery": "",
-          "tagsQuery": "",
-          "type": "query",
-          "useTags": false
-        },
-        {
-          "current": {
-            "selected": true,
-            "text": [
-              "All"
-            ],
-            "value": [
-              "$__all"
-            ]
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "definition": "label_values(node_exporter_build_info{env=~'$env'},name)",
-          "hide": 0,
-          "includeAll": true,
-          "label": "CPU Name",
-          "multi": true,
-          "name": "name",
-          "options": [],
-          "query": "label_values(node_exporter_build_info{env=~'$env'},name)",
-          "refresh": 2,
-          "regex": "",
-          "skipUrlSync": false,
-          "sort": 0,
-          "tagValuesQuery": "",
-          "tagsQuery": "",
-          "type": "query",
-          "useTags": false
-        }
-      ]
+      "list": []
     },
     "time": {
       "from": "now-5m",
@@ -752,6 +565,6 @@
     "timezone": "browser",
     "title": "Zilla Monitoring",
     "uid": "64nrElFmkasdf",
-    "version": 3,
+    "version": 6,
     "weekStart": ""
   }
