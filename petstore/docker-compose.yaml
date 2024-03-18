@@ -67,8 +67,8 @@ services:
     volumes:
       - ./zilla.yaml:/etc/zilla/zilla.yaml
       - ./tls/localhost.p12:/etc/zilla/localhost.p12
-      - ./specs/openapi.yaml:/etc/zilla/openapi.yaml
-      - ./specs/asyncapi.yaml:/etc/zilla/asyncapi.yaml
+      - ./petstore-openapi.yaml:/etc/zilla/specs/petstore-openapi.yaml
+      - ./petstore-kafka-asyncapi.yaml:/etc/zilla/specs/petstore-kafka-asyncapi.yaml
     command: start -v -e -Pzilla.engine.verbose.composites
 
 networks:
