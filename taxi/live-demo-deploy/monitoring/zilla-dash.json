@@ -361,7 +361,11 @@
               "type": "prometheus",
               "uid": "prometheus"
             },
-            "expr": "node_memory_MemTotal_bytes{instance=~\"$node\"}",
+            "editorMode": "code",
+            "exemplar": false,
+            "expr": "sum(container_memory_working_set_bytes{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", namespace=\"taxi-demo\",container!=\"\", image!=\"\"})",
+            "instant": true,
+            "range": false,
             "refId": "A"
           }
         ],
