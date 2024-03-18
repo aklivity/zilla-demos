@@ -10,6 +10,10 @@ bindings:
       specs:
         rest-tracking-spec: specs/tracking-openapi.yaml
     exit: north_rest_kafka_proxy
+    telemetry:
+      metrics:
+        - stream.*
+        - http.*
   north_rest_kafka_proxy:
     type: openapi-asyncapi
     kind: proxy
@@ -25,7 +29,9 @@ bindings:
         exit: south_kafka_client
         with:
           api-id: kafka-tracking-spec
-
+    telemetry:
+      metrics:
+        - stream.*
 # MQTT endpoints
   mqtt_server:
     type: asyncapi
@@ -64,7 +70,9 @@ bindings:
         with:
           api-id: kafka-tracking-spec
           operation-id: sendBusUpdate
-
+    telemetry:
+      metrics:
+        - stream.*
 # Connection to Kafka
   south_kafka_client:
     type: asyncapi
@@ -84,6 +92,42 @@ bindings:
     telemetry:
       metrics:
         - stream.*
+
+telemetry:
+  # Desired metrics to track
+  metrics:
+    - grpc.active.requests
+    - grpc.duration
+    - grpc.request.size
+    - grpc.requests.per.rpc
+    - grpc.response.size
+    - grpc.responses.per.rpc
+    - http.active.requests
+    - http.duration
+    - http.request.size
+    - http.response.size
+    - stream.active.received
+    - stream.active.sent
+    - stream.closes.received
+    - stream.closes.sent
+    - stream.data.received
+    - stream.data.sent
+    - stream.errors.received
+    - stream.errors.sent
+    - stream.opens.received
+    - stream.opens.sent
+
+  # Prometheus endpoint definition
+  exporters:
+    prometheus_metric_exporter:
+      type: prometheus
+      options:
+        endpoints:
+          - scheme: http
+            path: /metrics
+            port: 7190
+    stdout_exporter:
+      type: stdout
 
 ---
 name: zilla-taxi-hailing
@@ -209,39 +253,3 @@ bindings:
     telemetry:
       metrics:
         - stream.*
-
-telemetry:
-  # Desired metrics to track
-  metrics:
-    - grpc.active.requests
-    - grpc.duration
-    - grpc.request.size
-    - grpc.requests.per.rpc
-    - grpc.response.size
-    - grpc.responses.per.rpc
-    - http.active.requests
-    - http.duration
-    - http.request.size
-    - http.response.size
-    - stream.active.received
-    - stream.active.sent
-    - stream.closes.received
-    - stream.closes.sent
-    - stream.data.received
-    - stream.data.sent
-    - stream.errors.received
-    - stream.errors.sent
-    - stream.opens.received
-    - stream.opens.sent
-
-  # Prometheus endpoint definition
-  exporters:
-    prometheus_metric_exporter:
-      type: prometheus
-      options:
-        endpoints:
-          - scheme: http
-            path: /metrics
-            port: 7190
-    stdout_exporter:
-      type: stdout
