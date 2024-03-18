@@ -1,27 +1,58 @@
 # Taxi Demo
 
-This demo showcases the MQTT protocol brokered by Zilla. It uses [Open Street Maps](https://www.openstreetmap.org/), [Open Route Service](https://openrouteservice.org/), and the [MQTT Simulator](https://github.com/DamascenoRafael/mqtt-simulator) to demonstrate a real-world taxi-hailing and location tracking service.
+[Live Demo](https://taxi.aklivity.io/)
+
+This demo showcases the MQTT and REST protocols proxied to Kafka by Zilla. Zilla is using [OpenAPI](https://www.openapis.org/) and [AsyncAPI](https://www.asyncapi.com/en) spec definitions to generate the necessary proxy config. The demo uses [Open Street Maps](https://www.openstreetmap.org/), [Open Route Service](https://openrouteservice.org/), and the [MQTT Simulator](https://github.com/DamascenoRafael/mqtt-simulator) to demonstrate a real-world taxi-hailing and location tracking service.
 
 ![zilla-taxi-demo-diagram](.assets/zilla-taxi-demo-diagram@2x.png)
 
+## Using the Taxi UI
+
+The [Taxi Map UI](https://taxi.aklivity.io/) highlights downtown San Jose, CA bars. You can hail a taxi to simulate traveling to each destination. Some shuttle buses also run routes to the bars and make permanent round trips.
+
+- Clicking on one of the bar markers lets you hail a taxi
+- The hailed taxi will "pick up" the passenger at the San Jose, CA Convention center
+- The taxi will then proceed to the designated location on the map and stop sending location updates
+
+![demo](.assets/taxi-demo.gif)
+
+## Using the Demo
+
+1. This demo has multiple taxi/bus IoT clients publishing location updates to Kafka using Zilla as the MQTT broker.
+1. The red Bar markers indicate destinations and the green Vehicle markers represent the taxi/bus IoT clients.
+1. Use the [Taxi Map UI](https://taxi.aklivity.io/) and click on a bar icon to "Hail a Taxi".
+1. The map will show the route and the hailed taxi following it. You can use the "Clear Route" button in the sidebar or click the Aklivity logo to see the full map.
+1. Open the [Kafka UI](https://taxi.aklivity.io/kafka/ui/clusters/taxi-demo/all-topics/taxi-locations/messages?seekDirection=TAILING&seekType=LATEST) in `live` mode to see the taxi locations updates.
+   1. Notice the MQTT topic includes the bar name in the key: `taxi/Fox_Tale_Ferm-86439137/location`.
+   1. Each message is an individual location update with a new Lat Long coord.
+   1. Once the taxi gets to the destination, it will stop sending new updates.
+1. The demo architecture is streamlined with Zilla.
+   - No MQTT broker
+   - No Kafka Connect
+   - No web server
+1. Zilla is proxying the MQTT and REST calls to the native Kafka protocol.
+1. The Zilla config is generated from [OpenAPI](https://www.openapis.org/) and [AsyncAPI](https://www.asyncapi.com/en) specs
+   - [Kafka AsyncAPI](./tracking-kafka-asyncapi.yaml)
+   - [MATT AsyncAPI](./tracking-mqtt-asyncapi.yaml)
+   - [Taxi REST OpenAPI](./tracking-openapi.yaml)
+1. Now you know how Zilla's Design-first, API-native approach to integration will:
+   - Reduce architecture and DevOps complexity
+   - Accelerate developer velocity
+   - Maximize the investment in Kafka
+
+## Run the Demo
+
+Demo architecture:
+
 ```mermaid
 flowchart LR
-    style app1 stroke:#0d9b76,stroke-width:4px
-    style app2 stroke:#0d9b76,stroke-width:4px
+    style zilla1 stroke:#0d9b76,stroke-width:4px
 
-    tmuisr[\Web APP/] -.- |gRPC| zhgs
-    subgraph app1 [Zilla Taxi Hailing]
-            zhgs{{Protobuf Dispatch Service}}
-            zhgs --- zhig[consume]
-            zhgs --- zheg[produce]
-    end
+    tsgrpc[Dispatch Service] --> ttiot[Taxi 1] & ttiotb[Taxi 2] & ttiotc[Taxi 3]
 
-    zhig -.-> |gRPC| tsgrpc[Dispatch Service]
-    tsgrpc --> ttiot[Taxi 1] & ttiotb[Taxi 2] & ttiotc[Taxi 3]
+    tmuisr[\Web/] -.- |HTTP| ztos
 
-    tmuisr -.- |HTTP| ztos
-
-    subgraph app2 [Zilla Taxi Tracking]
+    subgraph zilla1 [Zilla Taxi Tracking]
             ztos{{OpenAPI REST}} --- ztoc[consume]
             ztas{{AsyncAPI MQTT}} --- ztapc[pub/sub]
     end
@@ -29,20 +60,17 @@ flowchart LR
     ttiot & ttiotb & ttiotc -.-> |MQTT| ztas
 
     subgraph cc [Confluent Cloud]
-        ccsm[[Hailing Kafka Cluster]]
-        zheg -.- ccsm
-        zhig -.- ccsm
         cciot[[Tracking Kafka Cluster]]
         ztapc -.- cciot
         ztoc -.- cciot
     end
 ```
 
-## Requirements
+### Requirements
 
 - [Docker Compose](https://docs.docker.com/compose/gettingstarted/)
 
-## Setup
+### Setup
 
 1. Start all of the services using `docker-compose`. The `startup.sh` script will `build` and `start` all the services. This command will also `restart` an existing stack.
 
@@ -52,41 +80,9 @@ flowchart LR
    ./startup.sh
    ```
 
-   > This will take a long time to build the first time since it will need to download maven and npm packages.
+1. Use the local [Taxi UI](http://localhost/) for the demo.
 
-1. Open the Open Street Maps [Taxi UI](http://localhost/). The map is centered on the San Jose Convention Center.
-1. A collection of bars shows on the map; click a bar.
-1. Click "Hail a Taxi" to set the destination, with the San Jose Convention Center being the origin.
-1. A Taxi marker will appear along the route, and travel along it for the duration shown in the popup.
-1. You can use the "Clear Route" button in the sidebar or click the Aklivity logo to see the full map.
-1. The best setup is to have one tab open with the sidebar and one tab for showing the full map.
-
-## Using the Taxi UI
-
-The [Taxi UI](http://localhost/) highlights downtown San Jose, CA bars. Users can hail taxis to take them to these locations. Some shuttle buses also run routes to the bars and make permanent round trips.
-
-- Clicking on one of the bar markers lets you hail a taxi
-- The hailed taxi will "pick up" the passenger at the San Jose, CA Convention center
-- The taxi will then proceed to the designated location on the map and stop sending location updates
-
-![demo](.assets/taxi-demo.gif)
-
-## Run through
-
-1. Introduce the taxi demo. It has multiple taxi clients publishing location updates to Kafka using Zilla as an MQTT broker.
-1. Walkthrough architecture slide
-   1. Cover all different parts of the setup
-      - Use the Diagram to describe the architecture
-      - Describe the data flow through Zilla using the MQTT protocol
-   1. Highlight what to note as running through the demo
-      - Moving taxi/bus icons
-      - Ask for input to select a new route
-1. Show the demo explaining what is happening at each step
-   1. Map UI and Hail a Taxi function
-   1. Show the `taxi-location` topic in the [Kafka UI](http://localhost:8080/) with the latest message key being a destination
-1. End the demo by bringing up the architecture slide summarizing outcomes and highlighting Zilla benefits.
-
-## Data on Kafka / Redpanda
+### Data on Kafka / Redpanda
 
 1. The Kafka topics are created during `startup`.
 1. Browse the topics in the [Kafka UI](http://localhost:8080/).
@@ -96,7 +92,7 @@ The [Taxi UI](http://localhost/) highlights downtown San Jose, CA bars. Users ca
    - Zilla is using the other topics listed to manage the MQTT and gRPC bindings
 1. The [Taxi UI](http://localhost/) pulls the most recent location for all of the unique taxis from Kafka.
 
-## Load Testing
+### Load Testing
 
 The mqtt-simulation service includes a `default_routes.json` file, which starts a looping set of routes used in the demo. An additional file, `default_routes_load_test.json`, is available, which leverages the simulator's ability to generate multiple topics.
 

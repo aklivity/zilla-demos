@@ -1,5 +1,7 @@
 aws eks update-kubeconfig --name zilla-demos
 
+kubectl exec --stdin --tty zilla-5c7fc889bf-qbtln -n taxi-demo -- /bin/bash
+
 k config use-context docker-desktop
 
 k logs -f -l app.kubernetes.io/instance=dispatch-service --all-containers -n taxi-demo

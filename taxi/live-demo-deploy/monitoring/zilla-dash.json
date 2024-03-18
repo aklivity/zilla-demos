@@ -94,7 +94,7 @@
               "uid": "prometheus"
             },
             "editorMode": "code",
-            "expr": "time() - container_start_time_seconds{container=\"zilla\"}",
+            "expr": "time() - container_start_time_seconds{namespace=\"taxi-demo\", container=\"zilla\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "range": true,
@@ -174,7 +174,7 @@
               "uid": "prometheus"
             },
             "editorMode": "code",
-            "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{container=\"zilla\"}) * 1000",
+            "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace=\"taxi-demo\", container=\"zilla\"}) * 1000",
             "instant": true,
             "refId": "A"
           }
@@ -257,7 +257,7 @@
               "uid": "prometheus"
             },
             "editorMode": "code",
-            "expr": "{__name__=\"stream_active_sent\", binding=\"mqtt_server\"}",
+            "expr": "{__name__=\"stream_active_sent\", binding=\"mqtt_server\", namespace=\"zilla-taxi-tracking\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "range": true,
@@ -338,7 +338,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum(container_memory_working_set_bytes{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", namespace=\"taxi-demo\",container=\"zilla\"})",
+            "expr": "sum(container_memory_working_set_bytes{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", namespace=\"taxi-demo\", container=\"zilla\"})",
             "instant": true,
             "range": false,
             "refId": "A"
@@ -565,6 +565,6 @@
     "timezone": "browser",
     "title": "Zilla Monitoring",
     "uid": "64nrElFmkasdf",
-    "version": 6,
+    "version": 8,
     "weekStart": ""
   }
