@@ -1,0 +1,74 @@
+---
+name: zilla-petstore
+guards:
+  petstore_auth:
+    type: jwt
+    options:
+      issuer: https://auth.example.com
+      audience: https://api.example.com
+      keys:
+        - kty: RSA
+          n: qqEu50hX+43Bx4W1UYWnAVKwFm+vDbP0kuIOSLVNa+HKQdHTf+3Sei5UCnkskn796izA29D0DdCy3ET9oaKRHIJyKbqFl0rv6f516QzOoXKC6N01sXBHBE/ovs0wwDvlaW+gFGPgkzdcfUlyrWLDnLV7LcuQymhTND2uH0oR3wJnNENN/OFgM1KGPPDOe19YsIKdLqARgxrhZVsh06OurEviZTXOBFI5r+yac7haDwOQhLHXNv+Y9MNvxs5QLWPFIM3bNUWfYrJnLrs4hGJS+y/KDM9Si+HL30QAFXy4YNO33J8DHjZ7ddG5n8/FqplOKvRtUgjcKWlxoGY4VdVaDQ==
+          e: AQAB
+          alg: RS256
+          kid: example
+vaults:
+  pet_server:
+    type: filesystem
+    options:
+      keys:
+        store: localhost.p12
+        type: pkcs12
+        password: ${{env.KEYSTORE_PASSWORD}}
+telemetry:
+  exporters:
+    stdout0:
+      type: stdout
+bindings:
+  openapi_server:
+    type: openapi
+    kind: server
+    vault: pet_server
+    options:
+      tls:
+        keys:
+        - localhost
+        sni:
+          - localhost
+        alpn:
+          - http/1.1
+          - h2
+      http:
+        authorization:
+          zilla-petstore:petstore_auth:
+            credentials:
+              headers:
+                authorization: Bearer {credentials}
+      specs:
+        pet-openapi-spec: openapi.yaml
+    exit: openapi_asyncapi_proxy
+  openapi_asyncapi_proxy:
+    type: openapi-asyncapi
+    kind: proxy
+    options:
+      specs:
+        openapi:
+          pet-openapi-spec: openapi.yaml
+        asyncapi:
+          pet-asyncapi-spec: asyncapi.yaml
+    routes:
+      - when:
+          - api-id: pet-openapi-spec
+        exit: asyncapi_client
+        with:
+          api-id: pet-asyncapi-spec
+  asyncapi_client:
+    type: asyncapi
+    kind: client
+    options:
+      specs:
+        pet-asyncapi-spec: asyncapi.yaml
+      tcp:
+        host: kafka
+        port:
+          - 29092
