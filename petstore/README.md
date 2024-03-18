@@ -11,7 +11,7 @@ This demo demonstrate how to use openapi and asyncapi and map them together
 ### Generate jwt token
 
 ```bash
-jwt encode \                                                                                                                                           130 ↵ ──(Mon,Mar18)─┘
+jwt encode \
     --alg "RS256" \
     --kid "example" \
     --iss "https://auth.example.com" \

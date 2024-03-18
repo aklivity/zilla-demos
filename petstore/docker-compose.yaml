@@ -54,22 +54,22 @@ services:
       KAFKA_CLUSTERS_0_NAME: localhost
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
 
-#  zilla:
-#    image: ghcr.io/aklivity/zilla:develop-SNAPSHOT
-#    container_name: zilla
-#    restart: unless-stopped
-#    depends_on:
-#      - kafka
-#    ports:
-#      - "7143:7143"
-#    environment:
-#      KEYSTORE_PASSWORD: generated
-#    volumes:
-#      - ./zilla.yaml:/etc/zilla/zilla.yaml
-#      - ./tls/localhost.p12:/etc/zilla/localhost.p12
-#      - ./specs/openapi.yaml:/etc/zilla/openapi.yaml
-#      - ./specs/asyncapi.yaml:/etc/zilla/asyncapi.yaml
-#    command: start -v -e -Pzilla.engine.verbose.composites
+  zilla:
+    image: ghcr.io/aklivity/zilla:develop-SNAPSHOT
+    container_name: zilla
+    restart: unless-stopped
+    depends_on:
+      - kafka
+    ports:
+      - "7143:7143"
+    environment:
+      KEYSTORE_PASSWORD: generated
+    volumes:
+      - ./zilla.yaml:/etc/zilla/zilla.yaml
+      - ./tls/localhost.p12:/etc/zilla/localhost.p12
+      - ./specs/openapi.yaml:/etc/zilla/openapi.yaml
+      - ./specs/asyncapi.yaml:/etc/zilla/asyncapi.yaml
+    command: start -v -e -Pzilla.engine.verbose.composites
 
 networks:
   default:
