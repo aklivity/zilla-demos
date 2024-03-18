@@ -1,7 +1,12 @@
 ingress:
   enabled: true
   ingressClassName: nginx
+  host: taxi.aklivity.io
+  tls:
+    enabled: true
+    secretName: grafana-prod-tls
   annotations:
+    # cert-manager.io/issuer: "letsencrypt-staging"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-origin: "*"
     nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"

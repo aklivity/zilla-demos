@@ -1,0 +1,79 @@
+alertmanager:
+  enabled: false
+# prometheus-pushgateway:
+#   enabled: false
+grafana:
+  enabled: true
+  adminPassword: aklivity
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - taxi.aklivity.io
+    tls:
+      - hosts:
+          - taxi.aklivity.io
+        secretName: grafana-prod-tls
+    annotations:
+      # cert-manager.io/issuer: "letsencrypt-prod"
+    path: /grafana
+  grafana.ini:
+    server:
+      domain: taxi.aklivity.io
+      root_url: "%(protocol)s://%(domain)s:%(http_port)s/grafana/"
+      serve_from_sub_path: true
+  # additionalDataSources:
+  #   - name: Loki
+  #     type: loki
+  #     url: loki.monitoring.svc.cluster.local:3100
+  #   - name: Prometheus
+  #     type: prometheus
+  #     url: http://prometheus-stack-kube-prom-prometheus.monitoring:9090/
+  #   - name: Alertmanager
+  #     type: alertmanager
+  #     url: http://prometheus-stack-kube-prom-alertmanager.monitoring:9093/
+  # - name: prometheus-sample
+  #   access: proxy
+  #   basicAuth: true
+  #   basicAuthPassword: pass
+  #   basicAuthUser: daco
+  #   editable: false
+  #   jsonData:
+  #       tlsSkipVerify: true
+  #   orgId: 1
+  #   type: prometheus
+  #   url: https://{{ printf "%s-prometheus.svc" .Release.Name }}:9090
+  #   version: 1
+
+prometheus:
+  prometheusSpec:
+    replicaExternalLabelName: "__replica__"
+    externalLabels: { cluster: "zilla-demos" }
+    storagePath: "/data"
+    persistentVolume:
+      enabled: false
+    statefulSet:
+      enabled: true
+    extraFlags:
+      - web.enable-lifecycle
+      - storage.tsdb.wal-compression
+    remoteWrite:
+      # - url: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom/push
+      #   basic_auth:
+      #     username: 1430893
+      #     password: admin
+    #   basicAuth:
+    #       username:
+    #         name: kubepromsecret
+    #         key: username
+    #       password:
+    #         name: kubepromsecret
+    #         key: password
+
+    additionalScrapeConfigs:
+      - job_name: zilla
+        scrape_interval: 5s
+        static_configs:
+          - targets: ["zilla.taxi-demo.svc.cluster.local:7190"]

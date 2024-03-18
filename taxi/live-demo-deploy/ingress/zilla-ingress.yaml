@@ -1,0 +1,40 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zilla
+  namespace: taxi-demo
+  labels:
+    app.kubernetes.io/name: zilla
+    app.kubernetes.io/instance: zilla
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    # cert-manager.io/issuer: letsencrypt-staging
+    nginx.ingress.kubernetes.io/cors-allow-headers: '*'
+    nginx.ingress.kubernetes.io/cors-allow-methods: PUT, GET, POST, OPTIONS
+    nginx.ingress.kubernetes.io/cors-allow-origin: '*'
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+spec:
+  tls:
+    - hosts:
+        - taxi.aklivity.io
+      secretName: grafana-prod-tls
+  ingressClassName: nginx
+  rules:
+    - host: taxi.aklivity.io
+      http:
+        paths:
+          - backend:
+              service:
+                name: zilla
+                port:
+                  number: 7114
+            pathType: Prefix
+            path: /taxi
+          - backend:
+              service:
+                name: zilla
+                port:
+                  number: 7114
+            pathType: Prefix
+            path: /bus

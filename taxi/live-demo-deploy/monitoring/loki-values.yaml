@@ -1,0 +1,7 @@
+loki:
+  auth_enabled: false
+  isDefault: true
+grafana:
+  sidecar:
+    datasources:
+      enabled: true

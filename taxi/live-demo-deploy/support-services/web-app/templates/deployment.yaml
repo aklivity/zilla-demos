@@ -47,7 +47,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: GRPC_SERVER_ENDPOINT
-              value: "zilla.taxi-demo.svc.cluster.local:7151"
+              value: "dispatch-service.taxi-demo.svc.cluster.local:50051"
           ports:
             - name: http
               containerPort: 8085

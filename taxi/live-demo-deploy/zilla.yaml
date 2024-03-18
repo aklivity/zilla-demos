@@ -85,34 +85,6 @@ bindings:
       metrics:
         - stream.*
 
-telemetry:
-  # Desired metrics to track
-  metrics:
-    - http.active.requests
-    - http.duration
-    - http.request.size
-    - http.response.size
-    - stream.active.received
-    - stream.active.sent
-    - stream.opens.received
-    - stream.opens.sent
-    - stream.data.received
-    - stream.data.sent
-    - stream.errors.received
-    - stream.errors.sent
-    - stream.closes.received
-    - stream.closes.sent
-
-  # Prometheus endpoint definition
-  exporters:
-    prometheus_metric_exporter:
-      type: prometheus
-      options:
-        endpoints:
-          - scheme: http
-            path: /metrics
-            port: 7190
-
 ---
 name: zilla-taxi-hailing
 bindings:
@@ -244,8 +216,8 @@ telemetry:
     - grpc.active.requests
     - grpc.duration
     - grpc.request.size
-    - grpc.response.size
     - grpc.requests.per.rpc
+    - grpc.response.size
     - grpc.responses.per.rpc
     - http.active.requests
     - http.duration
@@ -253,14 +225,14 @@ telemetry:
     - http.response.size
     - stream.active.received
     - stream.active.sent
-    - stream.opens.received
-    - stream.opens.sent
+    - stream.closes.received
+    - stream.closes.sent
     - stream.data.received
     - stream.data.sent
     - stream.errors.received
     - stream.errors.sent
-    - stream.closes.received
-    - stream.closes.sent
+    - stream.opens.received
+    - stream.opens.sent
 
   # Prometheus endpoint definition
   exporters:
@@ -270,4 +242,6 @@ telemetry:
         endpoints:
           - scheme: http
             path: /metrics
-            port: 7191
+            port: 7190
+    stdout_exporter:
+      type: stdout

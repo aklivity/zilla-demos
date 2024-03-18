@@ -1,13 +1,16 @@
 aws eks update-kubeconfig --name zilla-demos
 
-
 k config use-context docker-desktop
 
 k logs -f -l app.kubernetes.io/instance=dispatch-service --all-containers -n taxi-demo
-k logs -f -l app.kubernetes.io/instance=zilla --all-containers -n taxi-demo
-k logs -f -l app.kubernetes.io/instance=web-app --all-containers -n taxi-demo
-k logs -f -l app.kubernetes.io/managed-by=Helm --all-containers -n taxi-demo --max-log-requests=10
 
+kubectl exec --stdin --tty zilla-5c7fc889bf-qbtln -n taxi-demo -- /bin/bash
+
+kubectl cp zilla-5c7fc889bf-qbtln:/var/run/zilla ./zilla_dump -n taxi-demo 
+
+
+k rollout restart deployment zilla -n taxi-demo
+k rollout restart deployment dispatch-service -n taxi-demo
 
 - might need for public protection
 kubectl apply -f https://raw.githubusercontent.com/nginxinc/kubernetes-ingress/v3.4.3/deploy/crds.yaml
@@ -29,6 +32,8 @@ helm:
 - ingress/serviceAccount option
 - dedicated local file configmap options
 - remove `$` in logs
+- running zilla in a replica set of `3` caused grpc to deliver 3 message to the remote grpc service
+- the kafka-grpc binding on a single zilla instance sometimes doesn't recognize there is a message it needs to send 
 
 mqtt:
 
@@ -52,6 +57,44 @@ mqtt:
 - review and update documentation
 
 
+
+
+
+### Full Diagram
+
+```mermaid
+flowchart LR
+    style app1 stroke:#0d9b76,stroke-width:4px
+    style app2 stroke:#0d9b76,stroke-width:4px
+
+    tmuisr[\Web APP/] -.- |gRPC| zhgs
+    subgraph app1 [Zilla Taxi Hailing]
+            zhgs{{Protobuf Dispatch Service}}
+            zhgs --- zhig[consume]
+            zhgs --- zheg[produce]
+    end
+
+    zhig -.-> |gRPC| tsgrpc[Dispatch gRPC Microservice]
+    tsgrpc --> ttiot[Taxi 1] & ttiotb[Taxi 2] & ttiotc[Taxi 3]
+
+    tmuisr -.- |HTTP| ztos
+
+    subgraph app2 [Zilla Taxi Tracking]
+            ztos{{OpenAPI REST}} --- ztoc[consume]
+            ztas{{AsyncAPI MQTT}} --- ztapc[pub/sub]
+    end
+
+    ttiot & ttiotb & ttiotc -.-> |MQTT| ztas
+
+    subgraph cc [Confluent Cloud]
+        ccsm[[Hailing Kafka Cluster]]
+        zheg -.- ccsm
+        zhig -.- ccsm
+        cciot[[Tracking Kafka Cluster]]
+        ztapc -.- cciot
+        ztoc -.- cciot
+    end
+```
 
 
 
