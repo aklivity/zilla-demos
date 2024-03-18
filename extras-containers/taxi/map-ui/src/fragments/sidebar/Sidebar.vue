@@ -25,7 +25,20 @@
             <top-menu></top-menu>
           </v-flex>
         </v-layout>
-        <profile-selector></profile-selector>
+        <v-layout row class="sidebar-header-links" >
+          <v-flex xs6 md9>
+            <v-list>
+              Resources and links | <a class="link" href="https://github.com/aklivity/zilla" target="_blank">Zilla</a>
+              <v-divider></v-divider>
+              <a class="link" href="https://github.com/aklivity/zilla-demos/tree/main/taxi" target="_blank">Taxi Demo GitHub</a> | <a class="link" href="https://github.com/aklivity/zilla-demos/tree/main/taxi#using-the-taxi-ui" target="_blank">Demo Guide</a>
+              <v-divider></v-divider>
+              <a class="link" href="https://taxi.aklivity.io/grafana/public-dashboards/64e595675aba4e8395f8ab482d98b6eb?orgId=1&refresh=5s" target="_blank">Grafana Dashboard</a> | <a class="link" href="https://taxi.aklivity.io/kafka/ui/clusters/taxi-demo/all-topics/taxi-locations/messages?seekDirection=TAILING&seekType=LATEST" target="_blank">Kafka UI</a>
+              <v-divider></v-divider>
+              <a class="link" href="https://www.openapis.org/" target="_blank">OpenAPI</a> | <a class="link" href="https://www.asyncapi.com/" target="_blank">AsyncAPI</a>
+            </v-list>
+          </v-flex>
+          <v-spacer></v-spacer>
+        </v-layout>
       </div>
 
       <!-- sidebar-content padding-bottom must be the same that is calculated in footer component height -->

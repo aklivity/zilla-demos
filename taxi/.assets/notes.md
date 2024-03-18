@@ -57,10 +57,10 @@ mqtt:
 - record example demo walkthrough
 - add resource links to the map ui
 - review and update documentation
-
-
-
-
+  - taxi demo ui has link to github and quick refs
+  - github readme has demo instructions and links
+  - docs link direct to live demo
+  - add dedicated async/open api section in docs
 
 ### Full Diagram
 

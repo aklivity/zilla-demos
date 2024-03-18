@@ -72,6 +72,14 @@
   margin-bottom: 10px;
 }
 
+.sidebar-header-links {
+  padding: 5px;
+}
+
+.sidebar-header-links a {
+  font-weight: bolder;
+}
+
 .info-item {
   text-transform: none;
 }

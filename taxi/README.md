@@ -31,10 +31,10 @@ The [Taxi Map UI](https://taxi.aklivity.io/) highlights downtown San Jose, CA ba
    - No Kafka Connect
    - No web server
 1. Zilla is proxying the MQTT and REST calls to the native Kafka protocol.
-1. The Zilla config is generated from [OpenAPI](https://www.openapis.org/) and [AsyncAPI](https://www.asyncapi.com/en) specs
-   - [Kafka AsyncAPI](./tracking-kafka-asyncapi.yaml)
-   - [MATT AsyncAPI](./tracking-mqtt-asyncapi.yaml)
-   - [Taxi REST OpenAPI](./tracking-openapi.yaml)
+1. Use the [OpenAPI Editor](https://editor.swagger.io/) and [AsyncAPI Studio](https://studio.asyncapi.com/) to see the specs used to generate the [Zilla config](./zilla.yaml).
+   - [Kafka AsyncAPI](./live-demo-deploytracking-kafka-asyncapi.yaml)
+   - [MQTT AsyncAPI](./live-demo-deploytracking-mqtt-asyncapi.yaml)
+   - [Taxi REST OpenAPI](./live-demo-deploy/tracking-openapi.yaml)
 1. Now you know how Zilla's Design-first, API-native approach to integration will:
    - Reduce architecture and DevOps complexity
    - Accelerate developer velocity
