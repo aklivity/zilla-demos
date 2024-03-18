@@ -26,7 +26,7 @@ The [Taxi Map UI](https://taxi.aklivity.io/) highlights downtown San Jose, CA ba
    1. Notice the MQTT topic includes the bar name in the key: `taxi/Fox_Tale_Ferm-86439137/location`.
    1. Each message is an individual location update with a new Lat Long coord.
    1. Once the taxi gets to the destination, it will stop sending new updates.
-1. The demo architecture is streamlined with Zilla.
+1. The [demo architecture](./demo-resources/arch-Taxi-Demo.md) is streamlined with Zilla.
    - No MQTT broker
    - No Kafka Connect
    - No web server
