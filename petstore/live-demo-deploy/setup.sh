@@ -24,13 +24,6 @@ echo "KAFKA_PASS=$KAFKA_PASS"
 
 ## Installing services
 
-# # Ingress controller
-# helm upgrade --install ingress-nginx ingress-nginx -n $NAMESPACE --create-namespace --repo https://kubernetes.github.io/ingress-nginx --wait \
-#     --set-string controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-type"="nlb" \
-
-# Print public ports
-# echo "==== $NAMESPACE Ingress controller is serving ports: $(kubectl get svc -n $NAMESPACE ingress-nginx-controller --template "{{ range .spec.ports }}{{.port}} {{ end }}")"
-
 # Zilla Petstore Demo
 helm upgrade --install zilla oci://ghcr.io/aklivity/charts/zilla --version 0.9.73 -n $NAMESPACE --create-namespace --wait \
     --set-file configMaps.specs.data.petstore-openapi\\.yaml=petstore-openapi.yaml \

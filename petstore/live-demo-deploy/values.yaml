@@ -1,4 +1,4 @@
-args: ["start", "-v", "-e"]
+args: ["start", "-v", "-e", "-Pzilla.engine.verbose.composites"]
 
 extraEnv:
   - name: KAFKA_BOOTSTRAP_SERVER
@@ -9,8 +9,8 @@ extraEnv:
     value: "admin"
   - name: ZILLA_INCUBATOR_ENABLED
     value: "true"
-  - name: JAVA_OPTIONS
-    value: "-Dzilla.binding.kafka.debug=true"
+  # - name: JAVA_OPTIONS
+  #   value: "-Dzilla.binding.kafka.debug=true"
 
 livenessProbePort: 7190
 readinessProbePort: 7190

@@ -20,9 +20,9 @@ info:
   version: 1.0.0
 defaultContentType: application/json
 servers:
-  host-connections:
-    host: kafka:29092
-    protocol: kafka
+  cc-sasl:
+    host: pkc-p11xm.us-east-1.aws.confluent.cloud:9092
+    protocol: kafka-secure
     description: Local broker
 channels:
   petstore:
