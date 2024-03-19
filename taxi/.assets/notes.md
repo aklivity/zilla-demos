@@ -1,10 +1,11 @@
 aws eks update-kubeconfig --name zilla-demos
 
-kubectl exec --stdin --tty zilla-5c7fc889bf-qbtln -n taxi-demo -- /bin/bash
+kubectl exec --stdin --tty zilla-5fd95bfdcd-q2w4v -n taxi-demo -- /bin/bash
 
 k config use-context docker-desktop
 
 k logs -f -l app.kubernetes.io/instance=dispatch-service --all-containers -n taxi-demo
+k logs -f -l pod/zilla-5fd95bfdcd-q2w4v --all-containers -n taxi-demo
 
 kubectl exec --stdin --tty zilla-5c7fc889bf-qbtln -n taxi-demo -- /bin/bash
 
@@ -13,6 +14,7 @@ kubectl cp zilla-5c7fc889bf-qbtln:/var/run/zilla ./zilla_dump -n taxi-demo
 
 k rollout restart deployment zilla -n taxi-demo
 k rollout restart deployment dispatch-service -n taxi-demo
+k rollout restart deployment dispatch-service-busses -n taxi-demo
 
 - might need for public protection
 kubectl apply -f https://raw.githubusercontent.com/nginxinc/kubernetes-ingress/v3.4.3/deploy/crds.yaml
