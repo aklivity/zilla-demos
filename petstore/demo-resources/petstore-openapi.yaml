@@ -4,7 +4,7 @@ info:
   description: This is a sample Pet Store Server based on the OpenAPI 3.0 specification.
   version: 1.0.18
 externalDocs:
-  description: Find out more about Swagger
+  description: Instructions to generate bearer token
   url: "https://github.com/aklivity/zilla-demos/tree/main/petstore#readme"
 servers:
   - url: https://petstore.aklivity.io
