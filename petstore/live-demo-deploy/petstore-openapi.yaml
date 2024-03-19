@@ -1,11 +1,11 @@
 openapi: 3.0.2
 info:
-  title: Swagger Petstore - OpenAPI 3.0
+  title: Aklvity Zilla Petstore - OpenAPI 3.0
   description: This is a sample Pet Store Server based on the OpenAPI 3.0 specification.
   version: 1.0.18
 externalDocs:
   description: Find out more about Swagger
-  url: "http://swagger.io"
+  url: "https://github.com/aklivity/zilla-demos/tree/main/petstore#readme"
 servers:
   - url: http://petstore.aklivity.io:7114
 tags:
