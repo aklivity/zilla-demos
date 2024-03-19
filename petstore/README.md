@@ -11,7 +11,7 @@ This demo demonstrate how to use openapi and asyncapi and map them together
 ### Generate jwt token
 
 ```bash
-jwt encode \
+docker run --rm -v ./private.pem:/private.pem bitnami/jwt-cli encode \
     --alg "RS256" \
     --kid "example" \
     --iss "https://auth.example.com" \
@@ -19,7 +19,8 @@ jwt encode \
     --exp=+7d \
     --no-iat \
     --payload "scope=read:pets write:pets" \
-    --secret @private.pem
+    --secret @private.pem \
+    | pbcopy
 ```
 
 ### Teardown the environment

@@ -25,6 +25,7 @@ chmod 700 get_helm.sh
 
 - don't validate on fetch
 - metrics in multi namespace zilla files
+- don't send 404 on token failure but ok onscope failure
 
 helm:
 

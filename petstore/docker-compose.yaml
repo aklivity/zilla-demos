@@ -1,8 +1,26 @@
 version: "3"
 services:
 
+  zilla:
+    image: ghcr.io/aklivity/zilla:0.9.73
+    container_name: zilla
+    restart: unless-stopped
+    depends_on:
+      - kafka
+    ports:
+      - "7143:7143"
+    environment:
+      KEYSTORE_PASSWORD: generated
+      ZILLA_INCUBATOR_ENABLED: true
+    volumes:
+      - ./zilla.yaml:/etc/zilla/zilla.yaml
+      - ./tls/localhost.p12:/etc/zilla/localhost.p12
+      - ./petstore-openapi.yaml:/etc/zilla/specs/petstore-openapi.yaml
+      - ./petstore-kafka-asyncapi.yaml:/etc/zilla/specs/petstore-kafka-asyncapi.yaml
+    command: start -v -e -Pzilla.engine.verbose.composites
+
   kafka:
-    image: bitnami/kafka:3.2.3
+    image: bitnami/kafka:3.5
     container_name: kafka
     restart: unless-stopped
     ports:
@@ -24,7 +42,7 @@ services:
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
 
   init-kafka:
-    image: bitnami/kafka:3.2.3
+    image: bitnami/kafka
     deploy:
       restart_policy:
         condition: none
@@ -54,24 +72,7 @@ services:
       KAFKA_CLUSTERS_0_NAME: localhost
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
 
-  zilla:
-    image: ghcr.io/aklivity/zilla:develop-SNAPSHOT
-    container_name: zilla
-    restart: unless-stopped
-    depends_on:
-      - kafka
-    ports:
-      - "7143:7143"
-    environment:
-      KEYSTORE_PASSWORD: generated
-    volumes:
-      - ./zilla.yaml:/etc/zilla/zilla.yaml
-      - ./tls/localhost.p12:/etc/zilla/localhost.p12
-      - ./specs/openapi.yaml:/etc/zilla/openapi.yaml
-      - ./specs/asyncapi.yaml:/etc/zilla/asyncapi.yaml
-    command: start -v -e -Pzilla.engine.verbose.composites
-
 networks:
   default:
-    name: zilla-taxi-demo-network
+    name: zilla-petstore-network
     driver: bridge

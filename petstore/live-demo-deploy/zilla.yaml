@@ -12,32 +12,13 @@ guards:
           e: AQAB
           alg: RS256
           kid: example
-vaults:
-  pet_server:
-    type: filesystem
-    options:
-      keys:
-        store: localhost.p12
-        type: pkcs12
-        password: ${{env.KEYSTORE_PASSWORD}}
-telemetry:
-  exporters:
-    stdout_exporter:
-      type: stdout
+
 bindings:
   north_rest_server:
     type: openapi
     kind: server
     vault: pet_server
     options:
-      tls:
-        keys:
-        - localhost
-        sni:
-          - localhost
-        alpn:
-          - http/1.1
-          - h2
       http:
         authorization:
           zilla-petstore:petstore_auth:
@@ -47,6 +28,10 @@ bindings:
       specs:
         petstore-rest-spec: specs/petstore-openapi.yaml
     exit: north_rest_kafka_proxy
+    telemetry:
+      metrics:
+        - stream.*
+        - http.*
   north_rest_kafka_proxy:
     type: openapi-asyncapi
     kind: proxy
@@ -62,13 +47,54 @@ bindings:
         exit: south_kafka_client
         with:
           api-id: petstore-kafka-spec
+    telemetry:
+      metrics:
+        - stream.*
   south_kafka_client:
     type: asyncapi
     kind: client
     options:
       specs:
         petstore-kafka-spec: specs/petstore-kafka-asyncapi.yaml
-      tcp:
-        host: kafka
-        port:
-          - 29092
+      kafka:
+        sasl:
+          mechanism: plain
+          username: ${{env.KAFKA_USER}}
+          password: ${{env.KAFKA_PASS}}
+      tls:
+        trustcacerts: true
+        sni:
+          - ${{env.KAFKA_BOOTSTRAP_HOST}}
+    telemetry:
+      metrics:
+        - stream.*
+
+telemetry:
+  # Desired metrics to track
+  metrics:
+    - http.active.requests
+    - http.duration
+    - http.request.size
+    - http.response.size
+    - stream.active.received
+    - stream.active.sent
+    - stream.closes.received
+    - stream.closes.sent
+    - stream.data.received
+    - stream.data.sent
+    - stream.errors.received
+    - stream.errors.sent
+    - stream.opens.received
+    - stream.opens.sent
+
+  # Prometheus endpoint definition
+  exporters:
+    prometheus_metric_exporter:
+      type: prometheus
+      options:
+        endpoints:
+          - scheme: http
+            path: /metrics
+            port: 7190
+    stdout_exporter:
+      type: stdout
