@@ -12726,7 +12726,7 @@ packages:
   /vue2-leaflet-polyline-measure@1.2.1(@types/leaflet@1.9.8)(leaflet@1.9.4)(vue@2.7.16):
     resolution: {integrity: sha512-C4Y6CV4fsfDqguagOjBsYkAIJg7nRkJTm1XrrOj94i2q5Ws+FE35tn6Se1AiZfSrg0VzpEmhHRFX64ECmvP5Eg==}
     dependencies:
-      leaflet.polylinemeasure: github.com/ppete2/Leaflet.PolylineMeasure/b85a4b9
+      leaflet.polylinemeasure: git@github.com+ppete2/Leaflet.PolylineMeasure/b85a4b9
       vue2-leaflet: 2.7.1(@types/leaflet@1.9.8)(leaflet@1.9.4)(vue@2.7.16)
     transitivePeerDependencies:
       - '@types/leaflet'
@@ -12865,8 +12865,8 @@ packages:
       webpack-dev-server: 4.15.1(webpack-cli@4.10.0)(webpack@5.90.3)
       webpack-merge: 5.10.0
 
-  /webpack-dev-middleware@5.3.3(webpack@5.90.3):
-    resolution: {integrity: sha512-hj5CYrY0bZLB+eTO+x/j67Pkrquiy7kWepMHmUMoPsmcUaeEnQJqFzHJOyxgWlq746/wUuA64p9ta34Kyb01pA==}
+  /webpack-dev-middleware@5.3.4(webpack@5.90.3):
+    resolution: {integrity: sha512-BVdTqhhs+0IfoeAf7EoH5WE+exCmqGerHfDM0IL096Px60Tq2Mn9MAbnaGUe6HiMa41KMCYF19gyzZmBcq/o4Q==}
     engines: {node: '>= 12.13.0'}
     peerDependencies:
       webpack: ^4.0.0 || ^5.0.0
@@ -12921,7 +12921,7 @@ packages:
       spdy: 4.0.2
       webpack: 5.90.3(webpack-cli@4.10.0)
       webpack-cli: 4.10.0(webpack-bundle-analyzer@4.10.1)(webpack-dev-server@4.15.1)(webpack@5.90.3)
-      webpack-dev-middleware: 5.3.3(webpack@5.90.3)
+      webpack-dev-middleware: 5.3.4(webpack@5.90.3)
       ws: 8.16.0
     transitivePeerDependencies:
       - bufferutil
@@ -13232,6 +13232,12 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
+  git@github.com+ppete2/Leaflet.PolylineMeasure/b85a4b9:
+    resolution: {commit: b85a4b9, repo: git@github.com:ppete2/Leaflet.PolylineMeasure.git, type: git}
+    name: leaflet.polylinemeasure
+    version: 1.0.0
+    dev: false
+
   github.com/GIScience/vue2-leaflet-height-graph/d44cc4b7c9b3d46d4b42ff9ae183228c9f5984c2(@types/leaflet@1.9.8)(leaflet@1.9.4)(vue2-leaflet@2.7.1):
     resolution: {tarball: https://codeload.github.com/GIScience/vue2-leaflet-height-graph/tar.gz/d44cc4b7c9b3d46d4b42ff9ae183228c9f5984c2}
     id: github.com/GIScience/vue2-leaflet-height-graph/d44cc4b7c9b3d46d4b42ff9ae183228c9f5984c2
@@ -13247,10 +13253,4 @@ packages:
       leaflet: 1.9.4
       leaflet.heightgraph: 1.4.0
       vue2-leaflet: 2.7.1(@types/leaflet@1.9.8)(leaflet@1.9.4)(vue@2.7.16)
-    dev: false
-
-  github.com/ppete2/Leaflet.PolylineMeasure/b85a4b9:
-    resolution: {tarball: https://codeload.github.com/ppete2/Leaflet.PolylineMeasure/tar.gz/b85a4b9}
-    name: leaflet.polylinemeasure
-    version: 1.0.0
     dev: false
