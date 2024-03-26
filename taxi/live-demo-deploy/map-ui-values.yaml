@@ -4,9 +4,8 @@ ingress:
   host: taxi.aklivity.io
   tls:
     enabled: true
-    secretName: taxi-demo-tls
+    secretName: taxi-demo-staging-tls
   annotations:
-    # cert-manager.io/issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-origin: "*"
     nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"

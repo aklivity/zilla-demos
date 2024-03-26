@@ -25,21 +25,11 @@ echo "KAFKA_PASS=$KAFKA_PASS"
 echo "SASL_JAAS=$SASL_JAAS"
 
 ## Installing services
-
-# # Ingress controller
-# helm upgrade --install ingress-nginx ingress-nginx -n $NAMESPACE --create-namespace --repo https://kubernetes.github.io/ingress-nginx --wait \
-#     --set-string controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-type"="nlb" \
-#     --set tcp.7114="taxi-demo/zilla:7114" \
-#     --set tcp.7183="taxi-demo/zilla:7183" \
-#     --set tcp.7151="taxi-demo/zilla:7151"
-    # --set extraArgs.default-ssl-certificate="taxi-demo/taxi-demo-tls" \
-
-
 # Print public ports
 # echo "==== $NAMESPACE Ingress controller is serving ports: $(kubectl get svc -n $NAMESPACE ingress-nginx-controller --template "{{ range .spec.ports }}{{.port}} {{ end }}")"
 
-# # Zilla Taxi Demo
-helm upgrade --install zilla oci://ghcr.io/aklivity/charts/zilla --version 0.9.74 -n $NAMESPACE --wait \
+# Zilla Taxi Demo
+helm upgrade --install zilla oci://ghcr.io/aklivity/charts/zilla --version 0.9.74 -n $NAMESPACE --create-namespace --wait \
     --set-file configMaps.proto.data.taxi_route\\.proto=taxi_route.proto \
     --set-file configMaps.specs.data.tracking-kafka-asyncapi\\.yaml=tracking-kafka-asyncapi.yaml \
     --set-file configMaps.specs.data.tracking-mqtt-asyncapi\\.yaml=tracking-mqtt-asyncapi.yaml \
