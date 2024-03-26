@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: zilla
+  name: zilla-staging
   namespace: taxi-demo
   labels:
     app.kubernetes.io/name: zilla

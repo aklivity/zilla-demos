@@ -23,7 +23,7 @@ ingress:
   path: /kafka
   tls:
     enabled: true
-    secretName: taxi-demo-staging-tls
+    secretName: taxi-demo-tls
 envs:
   config:
     SERVER_SERVLET_CONTEXT_PATH: /kafka
