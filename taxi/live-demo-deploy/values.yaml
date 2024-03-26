@@ -1,6 +1,6 @@
 replicaCount: 1
 
-args: ["start", "-v", "-e", "-Pzilla.engine.worker.capacity=512", "-Pzilla.engine.verbose.composites"]
+args: ["start", "-v", "-e", "-Pzilla.engine.worker.capacity=512"]
 
 extraEnv:
   - name: KAFKA_BOOTSTRAP_SERVER

@@ -4,6 +4,7 @@ kubectl exec --stdin --tty zilla-5fd95bfdcd-q2w4v -n taxi-demo -- /bin/bash
 
 k config use-context docker-desktop
 
+k describe pods -l app.kubernetes.io/instance=zila -n taxi-demo
 k logs -f -l app.kubernetes.io/instance=dispatch-service --all-containers -n taxi-demo
 k logs -f -l pod/zilla-5fd95bfdcd-q2w4v --all-containers -n taxi-demo
 
@@ -25,9 +26,16 @@ chmod 700 get_helm.sh
 
 ## Improvements
 
-- don't validate on fetch
+- clarify validate on fetch vs produce
 - metrics in multi namespace zilla files
-- don't send 404 on token failure but ok onscope failure
+- add zilla specific prefix to metric names
+- don't send 404 on token failure but ok on scope failure
+- topic that is deleting by time is not remove
+- swaggar.io petstore caching
+- preserve zilla generated files on restart
+- add configurable version number in zilla config and pull from specs
+- outgoing connection status metrics
+- 
 
 helm:
 
@@ -64,6 +72,8 @@ mqtt:
   - github readme has demo instructions and links
   - docs link direct to live demo
   - add dedicated async/open api section in docs
+- Kadeck local rest proxy feature with asyncapi definition
+- upgrade the aiven helsinky demo and modify the taxi demo to include live data
 
 ### Full Diagram
 

@@ -6,7 +6,7 @@ ingress:
   path: /taxiroute.TaxiRoute
   tls:
     enabled: true
-    secretName: taxi-prod-tls
+    secretName: taxi-demo-tls
   annotations:
     # cert-manager.io/issuer: "letsencrypt-staging"
     nginx.ingress.kubernetes.io/enable-cors: "true"

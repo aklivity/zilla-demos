@@ -2,7 +2,7 @@
 
 [Live Demo](https://taxi.aklivity.io/)
 
-This demo showcases the MQTT and REST protocols proxied to Kafka by Zilla. Zilla is using [OpenAPI](https://www.openapis.org/) and [AsyncAPI](https://www.asyncapi.com/en) spec definitions to generate the necessary proxy config. The demo uses [Open Street Maps](https://www.openstreetmap.org/), [Open Route Service](https://openrouteservice.org/), and the [MQTT Simulator](https://github.com/DamascenoRafael/mqtt-simulator) to demonstrate a real-world taxi-hailing and location tracking service.
+This demo showcases the MQTT and REST protocols proxied to Kafka by Zilla. Zilla is using [OpenAPI](https://www.openapis.org/) and [AsyncAPI](https://www.asyncapi.com/) spec definitions to generate the necessary proxy config. The demo uses [Open Street Maps](https://www.openstreetmap.org/), [Open Route Service](https://openrouteservice.org/), and the [MQTT Simulator](https://github.com/DamascenoRafael/mqtt-simulator) to demonstrate a real-world taxi-hailing and location tracking service.
 
 ![zilla-taxi-demo-diagram](.assets/zilla-taxi-demo-diagram@2x.png)
 

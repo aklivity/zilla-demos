@@ -1,4 +1,4 @@
-args: ["start", "-v", "-e", "-Pzilla.engine.verbose.composites"]
+args: ["start", "-v", "-e"]
 
 extraEnv:
   - name: KAFKA_BOOTSTRAP_SERVER

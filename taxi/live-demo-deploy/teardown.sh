@@ -18,5 +18,5 @@ helm uninstall zilla -n $NAMESPACE
 helm uninstall map-ui -n $NAMESPACE
 helm uninstall kafka-ui -n $NAMESPACE
 helm uninstall web-app -n $NAMESPACE
-helm uninstall dispatch-service -n $NAMESPACE
-helm uninstall dispatch-service-busses -n $NAMESPACE
+# helm uninstall dispatch-service -n $NAMESPACE
+# helm uninstall dispatch-service-busses -n $NAMESPACE

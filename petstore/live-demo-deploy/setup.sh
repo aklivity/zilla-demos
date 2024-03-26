@@ -25,7 +25,7 @@ echo "KAFKA_PASS=$KAFKA_PASS"
 ## Installing services
 
 # Zilla Petstore Demo
-helm upgrade --install zilla oci://ghcr.io/aklivity/charts/zilla --version 0.9.73 -n $NAMESPACE --create-namespace --wait \
+helm upgrade --install zilla oci://ghcr.io/aklivity/charts/zilla --version 0.9.74 -n $NAMESPACE --create-namespace --wait \
     --set-file configMaps.specs.data.petstore-openapi\\.yaml=petstore-openapi.yaml \
     --set-file configMaps.specs.data.petstore-kafka-asyncapi\\.yaml=petstore-kafka-asyncapi.yaml \
     --set-file zilla\\.yaml=zilla.yaml \

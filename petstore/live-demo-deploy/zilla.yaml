@@ -61,10 +61,6 @@ bindings:
           mechanism: plain
           username: ${{env.KAFKA_USER}}
           password: ${{env.KAFKA_PASS}}
-      tls:
-        trustcacerts: true
-        sni:
-          - ${{env.KAFKA_BOOTSTRAP_HOST}}
     telemetry:
       metrics:
         - stream.*
