@@ -2,6 +2,11 @@ alertmanager:
   enabled: false
 # prometheus-pushgateway:
 #   enabled: false
+remoteWrite:
+  - url: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom/push
+    basicAuth:
+      username: 1430893
+      password: admin
 grafana:
   enabled: true
   adminPassword: aklivity
@@ -16,8 +21,6 @@ grafana:
       - hosts:
           - taxi.aklivity.io
         secretName: taxi-demo-tls
-    annotations:
-      # cert-manager.io/issuer: "letsencrypt-prod"
     path: /grafana
   grafana.ini:
     server:
@@ -59,18 +62,7 @@ prometheus:
     extraFlags:
       - web.enable-lifecycle
       - storage.tsdb.wal-compression
-    remoteWrite:
-      # - url: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom/push
-      #   basic_auth:
-      #     username: 1430893
-      #     password: admin
-    #   basicAuth:
-    #       username:
-    #         name: kubepromsecret
-    #         key: username
-    #       password:
-    #         name: kubepromsecret
-    #         key: password
+    
 
     additionalScrapeConfigs:
       - job_name: zilla

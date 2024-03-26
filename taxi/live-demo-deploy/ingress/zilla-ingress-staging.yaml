@@ -2,14 +2,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: zilla
+  name: zilla-staging
   namespace: taxi-demo
   labels:
     app.kubernetes.io/name: zilla
     app.kubernetes.io/instance: zilla
     app.kubernetes.io/managed-by: Helm
   annotations:
-    cert-manager.io/issuer: letsencrypt-prod
+    cert-manager.io/issuer: letsencrypt-staging
     nginx.ingress.kubernetes.io/cors-allow-headers: '*'
     nginx.ingress.kubernetes.io/cors-allow-methods: PUT, GET, POST, OPTIONS
     nginx.ingress.kubernetes.io/cors-allow-origin: '*'
@@ -18,7 +18,7 @@ spec:
   tls:
     - hosts:
         - taxi.aklivity.io
-      secretName: taxi-demo-tls
+      secretName: taxi-demo-staging-tls
   ingressClassName: nginx
   rules:
     - host: taxi.aklivity.io

@@ -36,17 +36,24 @@ chmod 700 get_helm.sh
 - add configurable version number in zilla config and pull from specs
 - outgoing connection status metrics
 - 
+- don't send 404 on token failure but ok onscope failure
+- Multi instance zilla testing and examples, min 2
+- add std out to all examples
 
 helm:
+
+file a ticket with QoL improvements for helm chart
 
 - zilla.yaml checksum
 - zilla.yaml configmap name
 - env var map extraEnvMap
 - ingress/serviceAccount option
-- dedicated local file configmap options
+- dedicated local file configmap options with dynamic naming
 - remove `$` in logs
 - running zilla in a replica set of `3` caused grpc to deliver 3 message to the remote grpc service
-- the kafka-grpc binding on a single zilla instance sometimes doesn't recognize there is a message it needs to send 
+  - sometimes zilla wouldn't deliver the request message
+  - running multiple zilla would deliver multiple request message
+- the kafka-grpc binding on a single zilla instance sometimes doesn't recognize there is a message it needs to send
 
 mqtt:
 
