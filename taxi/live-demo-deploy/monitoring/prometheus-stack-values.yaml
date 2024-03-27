@@ -9,7 +9,6 @@ remoteWrite:
       password: admin
 grafana:
   enabled: true
-  adminPassword: aklivity
   annotations:
     kubernetes.io/ingress.class: "nginx"
   ingress:

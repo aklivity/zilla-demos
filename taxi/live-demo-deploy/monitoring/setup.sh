@@ -10,6 +10,7 @@ fi
 
 NAMESPACE="${NAMESPACE:-monitoring}"
 PROM_PASS="${PROM_PASS:-admin}"
+GRAFANA_PASS="${GRAFANA_PASS:-admin}"
 
 # kubectl create namespace $NAMESPACE
 # kubectl create -f pvc.yaml -n $NAMESPACE
@@ -17,6 +18,7 @@ PROM_PASS="${PROM_PASS:-admin}"
 # Prometheus stack metrics collector
 helm upgrade --install prometheus-stack kube-prometheus-stack --version 57.0.3 -n $NAMESPACE --create-namespace --repo https://prometheus-community.github.io/helm-charts \
     --values prometheus-stack-values.yaml \
+    --set grafana.adminPassword="$GRAFANA_PASS" \
     --set spec.remoteWrite[0].basicAuth.password="$PROM_PASS"
 helm upgrade --install loki loki-stack -n $NAMESPACE --repo https://grafana.github.io/helm-charts \
     --values loki-values.yaml
