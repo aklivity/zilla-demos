@@ -5,3 +5,5 @@ grafana:
   sidecar:
     datasources:
       enabled: true
+test_pod:
+  enabled: false

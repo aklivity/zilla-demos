@@ -2,11 +2,6 @@ alertmanager:
   enabled: false
 # prometheus-pushgateway:
 #   enabled: false
-remoteWrite:
-  - url: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom/push
-    basicAuth:
-      username: 1430893
-      password: admin
 grafana:
   enabled: true
   annotations:
@@ -30,24 +25,6 @@ grafana:
   #   - name: Loki
   #     type: loki
   #     url: loki.monitoring.svc.cluster.local:3100
-  #   - name: Prometheus
-  #     type: prometheus
-  #     url: http://prometheus-stack-kube-prom-prometheus.monitoring:9090/
-  #   - name: Alertmanager
-  #     type: alertmanager
-  #     url: http://prometheus-stack-kube-prom-alertmanager.monitoring:9093/
-  # - name: prometheus-sample
-  #   access: proxy
-  #   basicAuth: true
-  #   basicAuthPassword: pass
-  #   basicAuthUser: daco
-  #   editable: false
-  #   jsonData:
-  #       tlsSkipVerify: true
-  #   orgId: 1
-  #   type: prometheus
-  #   url: https://{{ printf "%s-prometheus.svc" .Release.Name }}:9090
-  #   version: 1
 
 prometheus:
   prometheusSpec:
@@ -61,8 +38,16 @@ prometheus:
     extraFlags:
       - web.enable-lifecycle
       - storage.tsdb.wal-compression
-    
-
+    remoteWrite:
+      - url: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom/push
+        basicAuth:
+          username:
+            name: remotewrite-secret
+            key: username
+          password:
+            name: remotewrite-secret
+            key: password
+    remoteWriteDashboards: true
     additionalScrapeConfigs:
       - job_name: zilla
         scrape_interval: 5s
