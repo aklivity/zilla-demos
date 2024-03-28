@@ -5,13 +5,14 @@ kubectl exec --stdin --tty zilla-5fd95bfdcd-q2w4v -n taxi-demo -- /bin/bash
 k config use-context docker-desktop
 
 k describe pods -l app.kubernetes.io/instance=zila -n taxi-demo
+k describe pods -l app.kubernetes.io/instance=zila -n taxi-demo
+k logs -f -l app.kubernetes.io/instance=zilla --all-containers -n petstore
 k logs -f -l app.kubernetes.io/instance=dispatch-service --all-containers -n taxi-demo
 k logs -f -l pod/zilla-5fd95bfdcd-q2w4v --all-containers -n taxi-demo
 
 kubectl exec --stdin --tty zilla-5c7fc889bf-qbtln -n taxi-demo -- /bin/bash
 
-kubectl cp zilla-5c7fc889bf-qbtln:/var/run/zilla ./zilla_dump -n taxi-demo 
-
+kubectl cp zilla-5c7fc889bf-qbtln:/var/run/zilla ./zilla_dump -n taxi-demo
 
 k rollout restart deployment zilla -n taxi-demo
 k rollout restart deployment dispatch-service -n taxi-demo
@@ -42,13 +43,22 @@ chmod 700 get_helm.sh
 
 helm:
 
+- sse auto start on last message id
+- mqtt consumer by namespace
+
 file a ticket with QoL improvements for helm chart
+
+- update `_helpers.tpl` and use params
+- ingress/serviceAccount option
+- env var map extraEnvMap
+- dedicated local file configmap options with dynamic naming
+- 
+- option to enable http2 by default from an ingress controller
+- Zilla config as an ingress crontroller
+- Zilla config as a sidecar
 
 - zilla.yaml checksum
 - zilla.yaml configmap name
-- env var map extraEnvMap
-- ingress/serviceAccount option
-- dedicated local file configmap options with dynamic naming
 - remove `$` in logs
 - running zilla in a replica set of `3` caused grpc to deliver 3 message to the remote grpc service
   - sometimes zilla wouldn't deliver the request message
@@ -60,6 +70,35 @@ mqtt:
 - don't disconnect client when subscribe address is wrong
 - generate uses `*` as wildcard instead of `+`
 - generate adds trailing `0`s, perhaps don't add trailing number unless greater than `0`
+
+OpenAPI spec:
+
+- Create individual messages from a list input
+  operationId: createUsersWithListInput
+- filter by properties
+  operationId: findPetsByStatus
+  operationId: findPetsByTags
+
+## End User API Migration Video | rough draft
+
+- Start with Pet store OpenAPI spec only includes basic pet crud
+- All specs are stored in a registry with appropriate versions for models and specs
+- Describe use case to expand api spec scope to include managing Stores and Owners
+- Modify both OpenAPI and AsyncAPI specs accordingly in some kind of UI or 3rd party tool
+- Publish new versions of specs and models to a registry
+- Update Zilla to use new models in a test environment, manual or automated
+- Improve the Owner creation API to include some kind of async verification step
+- Redeploy changes to test environment
+- Demonstrate everything working
+- Promote to a production environment
+- Verify changes all work
+
+Zilla components
+- openapi
+- openapi-asyncapi
+- asyncapi
+- model version updates
+- versioning zilla schemas or detecting model version changes
 
 ## Todo
 

@@ -13,7 +13,7 @@ externalDocs:
   url: https://docs.aklivity.io/
 servers:
   - url: http://taxi.aklivity.io:7114
-    description: local Zilla server
+    description: Zilla Taxi Hailing REST server
 tags:
   - name: Taxi
     description: Fetching Taxi info.
