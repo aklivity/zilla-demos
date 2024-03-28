@@ -1,4 +1,4 @@
-# Pet Store Architecture Diagram
+# Petstore Architecture Diagram
 
 ## Without Zilla
 
@@ -10,16 +10,16 @@ flowchart LR
     ui[\Web/] -.- |HTTP| psws
 
 
-    subgraph app2 [Pet Store Event source/sink]
+    subgraph app2 [Petstore Event source/sink]
             krp{{Kafka REST Proxy}} --- krpp[produce] & krpc[consume]
     end
 
-    subgraph app1 [Pet Store Backend]
+    subgraph app1 [Petstore Backend]
             psws{{OpenAPI Web Server}} --- | basic auth | krp
     end
 
     subgraph cc [Confluent Cloud]
-        ccps[[Pet Store Kafka Cluster]]
+        ccps[[Petstore Kafka Cluster]]
         krpp -.- ccps
         krpc -.- ccps
     end
@@ -34,12 +34,12 @@ flowchart LR
 
     ui[\Web/] -.- |HTTP| zpsos
 
-    subgraph app1 [Zilla Pet Store]
+    subgraph app1 [Zilla Petstore]
             zpsos{{OpenAPI REST}} --- zpp[produce] & zpc[consume]
     end
 
     subgraph cc [Confluent Cloud]
-        ccps[[Pet Store Kafka Cluster]]
+        ccps[[Petstore Kafka Cluster]]
         zpp -.- ccps
         zpc -.- ccps
     end

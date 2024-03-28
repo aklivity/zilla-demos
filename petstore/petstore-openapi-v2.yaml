@@ -12,7 +12,7 @@ info:
     name: Aklivity Community
     url: https://www.aklivity.io/slack
 externalDocs:
-  description: Find out more about Zilla
+  description: Zilla Documentation
   url: https://docs.aklivity.io/
 servers:
   - url: https://prod.url:7143
@@ -26,8 +26,8 @@ tags:
     description: Everything about your Pets
   - name: store
     description: Access to Petstore orders
-  - name: user
-    description: Operations about user
+  - name: customer
+    description: Operations for a customer
 paths:
   /pet:
     put:
@@ -272,12 +272,6 @@ paths:
             type: string
             pattern: '^wait=\d+$'
           required: true
-      requestBody:
-        description: Created customer object
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Customer"
       responses:
         default:
           description: successful operation
