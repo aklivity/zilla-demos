@@ -1,20 +1,20 @@
 openapi: 3.0.2
 info:
-  title: Swagger Petstore - OpenAPI 3.0
-  description: |-
-    This is a sample Petstore Server based on the OpenAPI 3.0 specification.
+  title: Aklvity Zilla Petstore - OpenAPI 3.0
+  description: This is a sample Petstore Server based on the OpenAPI 3.0 specification.
   version: 1.0.18
 externalDocs:
   description: Find out more about Swagger
-  url: http://swagger.io
+  url: "https://github.com/aklivity/zilla-demos/tree/main/petstore#readme"
 servers:
-  - url: https://localhost:7143
+  - url: http://localhost:7114
+  # - url: https://petstore.aklivity.io
 tags:
   - name: pet
     description: Everything about your Pets
     externalDocs:
       description: Find out more
-      url: http://swagger.io
+      url: "http://swagger.io"
 paths:
   /pet:
     get:
@@ -23,20 +23,20 @@ paths:
       summary: All Pets
       operationId: listPets
       responses:
-        '200':
+        "200":
           description: successful operation
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Pet'
-        '400':
+                  $ref: "#/components/schemas/Pet"
+        "400":
           description: Invalid output value
       security:
         - petstore_auth:
-            - write:pets
-            - read:pets
+            - "write:pets"
+            - "read:pets"
     post:
       tags:
         - pet
@@ -48,17 +48,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
         required: true
       responses:
-        '201':
+        "201":
           description: Successful operation
-        '400':
+        "400":
           description: Invalid input
       security:
         - petstore_auth:
-            - write:pets
-            - read:pets
+            - "write:pets"
+            - "read:pets"
   /pet/{petId}:
     get:
       tags:
@@ -74,20 +74,20 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet'
-        '400':
+                $ref: "#/components/schemas/Pet"
+        "400":
           description: Invalid ID supplied
-        '404':
+        "404":
           description: Pet not found
       security:
         - petstore_auth:
-            - write:pets
-            - read:pets
+            - "write:pets"
+            - "read:pets"
     put:
       tags:
         - pet
@@ -106,33 +106,33 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
         required: true
       responses:
-        '200':
+        "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet'
-        '400':
+                $ref: "#/components/schemas/Pet"
+        "400":
           description: Invalid ID supplied or invalid input
-        '404':
+        "404":
           description: Pet not found
       security:
         - petstore_auth:
-            - write:pets
-            - read:pets
+            - "write:pets"
+            - "read:pets"
     delete:
       tags:
         - pet
       summary: Deletes a pet
-      description: ''
+      description: ""
       operationId: deletePet
       parameters:
         - name: api_key
           in: header
-          description: ''
+          description: ""
           required: false
           schema:
             type: string
@@ -143,12 +143,12 @@ paths:
           schema:
             type: string
       responses:
-        '400':
+        "400":
           description: Invalid pet value
       security:
         - petstore_auth:
-            - write:pets
-            - read:pets
+            - "write:pets"
+            - "read:pets"
 components:
   schemas:
     Pet:
@@ -175,7 +175,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Pet'
+            $ref: "#/components/schemas/Pet"
   securitySchemes:
     petstore_auth:
       type: http

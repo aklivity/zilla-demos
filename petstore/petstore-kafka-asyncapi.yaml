@@ -4,10 +4,14 @@ info:
   version: 1.0.0
 defaultContentType: application/json
 servers:
-  host-connections:
+  cc-sasl:
+    host: pkc-p11xm.us-east-1.aws.confluent.cloud:9092
+    protocol: kafka-secure
+    description: Confluent cloud
+  local-dev:
     host: kafka:29092
     protocol: kafka
-    description: Local broker
+    description: local bitnami/kafka
 channels:
   petstore:
     address: 'petstore'

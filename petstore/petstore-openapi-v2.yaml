@@ -15,11 +15,11 @@ externalDocs:
   description: Zilla Documentation
   url: https://docs.aklivity.io/
 servers:
-  - url: https://prod.url:7143
-    description: Zilla Petstore REST API server for the prod environment
-  - url: https://staging.url:7143
-    description: Zilla Petstore REST API server for the staging environment
-  - url: https://dev.url:7143
+  # - url: https://prod.url:7114
+  #   description: Zilla Petstore REST API server for the prod environment
+  # - url: https://staging.url:7114
+  #   description: Zilla Petstore REST API server for the staging environment
+  - url: http://localhost:7114
     description: Zilla Petstore REST API server for the dev environment
 tags:
   - name: pet
@@ -51,7 +51,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Pet"
         "400":
-          description: Invalid ID supplied
+          description: Invalid Message Key supplied
         "404":
           description: Pet not found
         "405":
@@ -74,7 +74,7 @@ paths:
               $ref: "#/components/schemas/Pet"
         required: true
       responses:
-        "200":
+        "204":
           description: Successful operation
           content:
             application/json:
@@ -86,21 +86,21 @@ paths:
         - petstore_auth:
             - write:pets
             - read:pets
-  /pet/{petId}:
+  /pet/{petKey}:
     get:
       tags:
         - pet
-      summary: Find pet by ID
+      summary: Find pet by Message Key
       description: Returns a single pet
       operationId: getPetById
       parameters:
-        - name: petId
+        - name: petKey
           in: path
-          description: ID of pet to return
+          description: Message Key of pet to return
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         "200":
           description: successful operation
@@ -109,11 +109,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/Pet"
         "400":
-          description: Invalid ID supplied
+          description: Invalid Message Key supplied
         "404":
           description: Pet not found
       security:
-        - api_key: []
         - petstore_auth:
             - write:pets
             - read:pets
@@ -124,19 +123,13 @@ paths:
       description: ""
       operationId: deletePet
       parameters:
-        - name: api_key
-          in: header
-          description: ""
-          required: false
-          schema:
-            type: string
-        - name: petId
+        - name: petKey
           in: path
           description: Pet id to delete
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         "400":
           description: Invalid pet value
@@ -165,22 +158,22 @@ paths:
                 $ref: "#/components/schemas/Order"
         "405":
           description: Invalid input
-  /store/order/{orderId}:
+  /store/order/{orderKey}:
     get:
       tags:
         - store
-      summary: Find purchase order by ID
+      summary: Find purchase order by Message Key
       description: For valid response try integer IDs with value <= 5 or > 10. Other
         values will generate exceptions.
       operationId: getOrderById
       parameters:
-        - name: orderId
+        - name: orderKey
           in: path
-          description: ID of order that needs to be fetched
+          description: Message Key of order that needs to be fetched
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         "200":
           description: successful operation
@@ -189,27 +182,27 @@ paths:
               schema:
                 $ref: "#/components/schemas/Order"
         "400":
-          description: Invalid ID supplied
+          description: Invalid Message Key supplied
         "404":
           description: Order not found
     delete:
       tags:
         - store
-      summary: Delete purchase order by ID
+      summary: Delete purchase order by Message Key
       description: For valid response try integer IDs with value < 1000. Anything
         above 1000 or nonintegers will generate API errors
       operationId: deleteOrder
       parameters:
-        - name: orderId
+        - name: orderKey
           in: path
-          description: ID of the order that needs to be deleted
+          description: Message Key of the order that needs to be deleted
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         "400":
-          description: Invalid ID supplied
+          description: Invalid Message Key supplied
         "404":
           description: Order not found
   /customer:
@@ -222,10 +215,11 @@ paths:
       parameters:
         - in: header
           name: Prefer
+          required: true
           schema:
             type: string
-            pattern: 'respond-async'
-          required: true
+            enum:
+              - respond-async
       requestBody:
         description: Created customer object
         content:
@@ -233,18 +227,15 @@ paths:
             schema:
               $ref: "#/components/schemas/Customer"
       responses:
-        "200":
+        "202":
           description: successful operation
           headers:
             Location:
               schema:
                 type: string
+                format: /customer;cid={correlationId}
               description: Customer verification result location URL
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Customer"
-  /customer/{customerId}/verified;cid={correlationId}:
+  /customer;cid={correlationId}:
     get:
       tags:
         - customer
@@ -252,16 +243,9 @@ paths:
       description: ""
       operationId: getVerifiedCustomer
       parameters:
-        - name: customerId
-          in: path
-          description: ID of customer that is verified
-          required: true
-          schema:
-            type: integer
-            format: int64
         - name: correlationId
           in: path
-          description: Correlation ID of the verification request
+          description: Correlation Message Key of the verification request
           required: true
           schema:
             type: string
@@ -271,7 +255,6 @@ paths:
           schema:
             type: string
             pattern: '^wait=\d+$'
-          required: true
       responses:
         default:
           description: successful operation
@@ -279,6 +262,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Customer"
+        "202":
+          description: successful operation
+          headers:
+            Location:
+              schema:
+                type: string
+                default: /customer;cid={correlationId}
+              description: Customer verification result location URL
 components:
   schemas:
     Order:
@@ -288,7 +279,7 @@ components:
           type: integer
           format: int64
           example: 10
-        petId:
+        petKey:
           type: integer
           format: int64
           example: 198772
@@ -370,11 +361,7 @@ components:
       type: oauth2
       flows:
         implicit:
-          authorizationUrl: https://petstore3.swagger.io/oauth/authorize
+          authorizationUrl: https://auth.example.com
           scopes:
             write:pets: modify pets in your account
             read:pets: read your pets
-    api_key:
-      type: apiKey
-      name: api_key
-      in: header

@@ -2,23 +2,58 @@ version: "3"
 services:
 
   zilla:
-    image: ghcr.io/aklivity/zilla:0.9.73
+    image: ghcr.io/aklivity/zilla:develop-SNAPSHOT
     container_name: zilla
     restart: unless-stopped
     depends_on:
       - kafka
     ports:
-      - "7143:7143"
+      - "7114:7114"
     environment:
       KEYSTORE_PASSWORD: generated
       ZILLA_INCUBATOR_ENABLED: true
+      PETSTORE_VERSION: "v1"
     volumes:
       - ./zilla.yaml:/etc/zilla/zilla.yaml
       - ./tls/localhost.p12:/etc/zilla/localhost.p12
       - ./petstore-openapi.yaml:/etc/zilla/specs/petstore-openapi.yaml
       - ./petstore-kafka-asyncapi.yaml:/etc/zilla/specs/petstore-kafka-asyncapi.yaml
-    command: start -v -e -Pzilla.engine.verbose.composites
+    command: start -v -e -Pzilla.engine.verbose.composites -w 1
 
+  apicurio:
+    image: apicurio/apicurio-registry-mem:2.5.10.Final
+    container_name: apicurio
+    ports:
+      - "8081:8081"
+    environment:
+      CORS_ALLOWED_ORIGINS: '*'
+      QUARKUS_HTTP_PORT: 8081
+      LOG_LEVEL: "DEBUG"
+  init-apicurio:
+    image: curlimages/curl
+    deploy:
+      restart_policy:
+        condition: none
+        max_attempts: 0
+    depends_on:
+      - apicurio
+    volumes:
+      - ./petstore-openapi-v2.yaml:/petstore-openapi.yaml
+      - ./petstore-kafka-asyncapi-v2.yaml:/petstore-kafka-asyncapi.yaml
+    entrypoint: [ '/bin/sh', '-c' ]
+    command: 
+      - |
+        echo -e "blocks until apicurio is reachable";
+        wget --no-check-certificate -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.3/wait-for | sh -s -- apicurio:8081 --timeout=60 -- echo -e "apicurio ready";
+        echo -e "publish OPENAPI";
+        curl -X POST -H "Content-Type: application/json; artifactType=OPENAPI" \
+          -H "X-Registry-ArtifactId: petstore-openapi" -H "X-Registry-Version: v1" \
+          --data-binary "@/petstore-openapi.yaml" http://apicurio:8081/apis/registry/v2/groups/petstore/artifacts;
+        echo -e "publish ASYNCAPI";
+        curl -X POST -H "Content-Type: application/json; artifactType=ASYNCAPI" \
+          -H "X-Registry-ArtifactId: petstore-asyncapi" -H "X-Registry-Version: v1" \
+          --data-binary "@/petstore-kafka-asyncapi.yaml" http://apicurio:8081/apis/registry/v2/groups/petstore/artifacts;
+      
   kafka:
     image: bitnami/kafka:3.5
     container_name: kafka
@@ -50,17 +85,17 @@ services:
     depends_on:
       - kafka
     entrypoint: [ '/bin/sh', '-c' ]
-    command: |
-      "
-      # blocks until kafka is reachable
-      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list
-      
-      echo -e 'Creating kafka topic'
-      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic petstore --config cleanup.policy=compact
-      
-      echo -e 'Successfully created the following topics:'
-      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list
-      "
+    command:
+     - |
+      echo -e "blocks until kafka is reachable";
+      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list;
+      echo -e "Creating kafka topic";
+      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic petstore --config cleanup.policy=compact;
+      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic petstore-pets --config cleanup.policy=compact;
+      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic petstore-orders --config cleanup.policy=compact;
+      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic petstore-customers --config cleanup.policy=compact;
+      echo -e "Successfully created the following topics:";
+      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list;
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest

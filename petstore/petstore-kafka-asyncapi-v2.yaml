@@ -42,7 +42,7 @@ servers:
       kafka:
         schemaRegistryUrl: https://schema-registry.prod.url/
   dev:
-    host: dev.url:9092
+    host: kafka:29092
     protocol: kafka
     description: Kafka DEV cluster for `dev` and `sit` environments
     bindings:
@@ -118,6 +118,9 @@ operations:
     action: send
     channel:
       $ref: "#/channels/customers"
+    reply:
+      address:
+        location: '$message.header#/customer'
     summary: >-
       Add a pet.
     messages:
@@ -126,6 +129,9 @@ operations:
     action: receive
     channel:
       $ref: "#/channels/customers"
+    reply:
+      address:
+        location: '$message.header#/customer'
     summary: >-
       Get a pet.
     messages:
@@ -199,8 +205,8 @@ components:
       payload:
         $ref: "#/components/schemas/Order"
     customer:
-      name: Pet
-      title: Pet
+      name: Customer
+      title: Customer
       summary: Information about a Customer.
       contentType: application/json
       payload:
@@ -302,4 +308,4 @@ components:
       description: >
         Use [SASL authentication with SSL
         encryption](https://docs.confluent.io/platform/current/security/security_tutorial.html#configure-clients)
-        to connect to the ADEO Broker.
+        to connect to the Broker.
