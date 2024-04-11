@@ -15,10 +15,10 @@ externalDocs:
   description: Zilla Documentation
   url: https://docs.aklivity.io/
 servers:
-  # - url: https://prod.url:7114
-  #   description: Zilla Petstore REST API server for the prod environment
-  # - url: https://staging.url:7114
-  #   description: Zilla Petstore REST API server for the staging environment
+  - url: https://petstore.aklivity.io
+    description: Zilla Petstore REST API server for the prod environment
+  - url: https://staging.url:7114
+    description: Zilla Petstore REST API server for the staging environment
   - url: http://localhost:7114
     description: Zilla Petstore REST API server for the dev environment
 tags:
@@ -210,7 +210,7 @@ paths:
       tags:
         - customer
       summary: Create unverified customer
-      description: ""
+      description: Create a new customer and start a verification process
       operationId: createCustomer
       parameters:
         - in: header
@@ -240,12 +240,12 @@ paths:
       tags:
         - customer
       summary: Verify customer details
-      description: ""
+      description: Fetch and wait the verification status change
       operationId: getVerifiedCustomer
       parameters:
         - name: correlationId
           in: path
-          description: Correlation Message Key of the verification request
+          description: Correlation ID of the verification request
           required: true
           schema:
             type: string
@@ -270,6 +270,29 @@ paths:
                 type: string
                 default: /customer;cid={correlationId}
               description: Customer verification result location URL
+    put:
+      tags:
+        - customer
+      summary: Verify customer
+      description: Publish and updated customer with the verification status
+      operationId: verifyCustomer
+      parameters:
+        - name: correlationId
+          in: path
+          description: Correlation ID of the verification request
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Verified customer object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Customer"
+      responses:
+        "204":
+          description: successful operation
 components:
   schemas:
     Order:
@@ -310,6 +333,14 @@ components:
         username:
           type: string
           example: fehguy
+        status:
+          type: string
+          description: Verification Status
+          example: approved
+          enum:
+            - pending
+            - approved
+            - denied
         address:
           type: array
           items:
@@ -358,10 +389,6 @@ components:
             - sold
   securitySchemes:
     petstore_auth:
-      type: oauth2
-      flows:
-        implicit:
-          authorizationUrl: https://auth.example.com
-          scopes:
-            write:pets: modify pets in your account
-            read:pets: read your pets
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

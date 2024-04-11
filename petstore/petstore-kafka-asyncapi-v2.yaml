@@ -24,30 +24,21 @@ info:
 defaultContentType: application/json
 servers:
   production:
-    host: prod.url:9092
-    protocol: kafka
+    host: pkc-p11xm.us-east-1.aws.confluent.cloud:9092
+    protocol: kafka-secure
     description: Kafka PRODUCTION cluster
     security:
       - $ref: "#/components/securitySchemes/sasl-ssl"
-    bindings:
-      kafka:
-        schemaRegistryUrl: https://schema-registry.prod.url/
   staging:
     host: staging.url:9092
-    protocol: kafka
+    protocol: kafka-secure
     description: Kafka STAGING cluster for `uat` and `preprod` environments
     security:
       - $ref: "#/components/securitySchemes/sasl-ssl"
-    bindings:
-      kafka:
-        schemaRegistryUrl: https://schema-registry.prod.url/
   dev:
     host: kafka:29092
     protocol: kafka
     description: Kafka DEV cluster for `dev` and `sit` environments
-    bindings:
-      kafka:
-        schemaRegistryUrl: https://schema-registry.prod.url/
 channels:
   pets:
     address: "petstore-pets"
@@ -67,6 +58,14 @@ channels:
     description: The topic on which pet values may be produced and consumed.
   customers:
     address: "petstore-customers"
+    messages:
+      customer:
+        $ref: "#/components/messages/customer"
+      empty:
+        $ref: "#/components/messages/empty"
+    description: The topic on which pet values may be produced and consumed.
+  verifiedCustomers:
+    address: "petstore-verified-customers"
     messages:
       customer:
         $ref: "#/components/messages/customer"
@@ -132,6 +131,14 @@ operations:
     reply:
       address:
         location: '$message.header#/customer'
+    summary: >-
+      Get a pet.
+    messages:
+      - $ref: "#/channels/customers/messages/customer"
+  verifyCustomer:
+    action: send
+    channel:
+      $ref: "#/channels/verifiedCustomers"
     summary: >-
       Get a pet.
     messages:
@@ -250,6 +257,14 @@ components:
         username:
           type: string
           example: fehguy
+        status:
+          type: string
+          description: Verification Status
+          example: approved
+          enum:
+            - pending
+            - approved
+            - denied
         address:
           type: array
           items:

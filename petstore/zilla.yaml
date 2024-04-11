@@ -36,8 +36,8 @@ bindings:
             my_apicurio:
               subject: petstore-openapi
               version: ${{env.PETSTORE_VERSION}}
-          # server:
-          #   - url: localhost:7114
+          servers:
+            - url: localhost:7114
     exit: north_rest_kafka_proxy
     telemetry:
       metrics:
@@ -81,6 +81,11 @@ bindings:
               version: ${{env.PETSTORE_VERSION}}
           servers:
             - host: kafka:29092
+      kafka:
+        sasl:
+          mechanism: plain
+          username: ${{env.KAFKA_USER}}
+          password: ${{env.KAFKA_PASS}}
     telemetry:
       metrics:
         - stream.*

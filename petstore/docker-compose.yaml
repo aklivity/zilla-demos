@@ -12,6 +12,8 @@ services:
     environment:
       KEYSTORE_PASSWORD: generated
       ZILLA_INCUBATOR_ENABLED: true
+      KAFKA_USER: "admin"
+      KAFKA_PASS: "admin"
       PETSTORE_VERSION: "v1"
     volumes:
       - ./zilla.yaml:/etc/zilla/zilla.yaml
@@ -94,6 +96,7 @@ services:
       /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic petstore-pets --config cleanup.policy=compact;
       /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic petstore-orders --config cleanup.policy=compact;
       /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic petstore-customers --config cleanup.policy=compact;
+      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic petstore-verified-customers --config cleanup.policy=compact;
       echo -e "Successfully created the following topics:";
       /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list;
 
