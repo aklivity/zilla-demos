@@ -37,7 +37,7 @@ bindings:
               subject: petstore-openapi
               version: ${{env.PETSTORE_VERSION}}
           servers:
-            - url: localhost:7114
+            - url: http://localhost:7114
     exit: north_rest_kafka_proxy
     telemetry:
       metrics:

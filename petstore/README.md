@@ -18,7 +18,7 @@ docker run --rm -v ./private.pem:/private.pem bitnami/jwt-cli encode \
     --aud "https://api.example.com" \
     --exp=+7d \
     --no-iat \
-    --payload "scope=read:pets write:pets" \
+    --payload "scope=read:all write:all" \
     --secret @private.pem \
     | pbcopy
 ```

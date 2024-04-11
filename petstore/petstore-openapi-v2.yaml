@@ -58,6 +58,8 @@ paths:
           description: Validation exception
       security:
         - petstore_auth:
+            - read:all
+            - write:all
             - write:pets
             - read:pets
     post:
@@ -84,6 +86,8 @@ paths:
           description: Invalid input
       security:
         - petstore_auth:
+            - read:all
+            - write:all
             - write:pets
             - read:pets
   /pet/{petKey}:
@@ -114,6 +118,8 @@ paths:
           description: Pet not found
       security:
         - petstore_auth:
+            - read:all
+            - write:all
             - write:pets
             - read:pets
     delete:
@@ -135,6 +141,8 @@ paths:
           description: Invalid pet value
       security:
         - petstore_auth:
+            - read:all
+            - write:all
             - write:pets
             - read:pets
   /store/order:
@@ -158,6 +166,12 @@ paths:
                 $ref: "#/components/schemas/Order"
         "405":
           description: Invalid input
+      security:
+        - petstore_auth:
+            - read:all
+            - write:all
+            - write:order
+            - read:order
   /store/order/{orderKey}:
     get:
       tags:
@@ -185,6 +199,12 @@ paths:
           description: Invalid Message Key supplied
         "404":
           description: Order not found
+      security:
+        - petstore_auth:
+            - read:all
+            - write:all
+            - write:order
+            - read:order
     delete:
       tags:
         - store
@@ -205,6 +225,12 @@ paths:
           description: Invalid Message Key supplied
         "404":
           description: Order not found
+      security:
+        - petstore_auth:
+            - read:all
+            - write:all
+            - write:order
+            - read:order
   /customer:
     post:
       tags:
@@ -235,6 +261,12 @@ paths:
                 type: string
                 format: /customer;cid={correlationId}
               description: Customer verification result location URL
+      security:
+        - petstore_auth:
+            - read:all
+            - write:all
+            - write:customer
+            - read:customer
   /customer;cid={correlationId}:
     get:
       tags:
@@ -270,6 +302,12 @@ paths:
                 type: string
                 format: /customer;cid={correlationId}
               description: Customer verification result location URL
+      security:
+        - petstore_auth:
+            - read:all
+            - write:all
+            - write:customer
+            - read:customer
 components:
   schemas:
     Order:
