@@ -268,31 +268,8 @@ paths:
             Location:
               schema:
                 type: string
-                default: /customer;cid={correlationId}
+                format: /customer;cid={correlationId}
               description: Customer verification result location URL
-    put:
-      tags:
-        - customer
-      summary: Verify customer
-      description: Publish and updated customer with the verification status
-      operationId: verifyCustomer
-      parameters:
-        - name: correlationId
-          in: path
-          description: Correlation ID of the verification request
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        description: Verified customer object
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Customer"
-      responses:
-        "204":
-          description: successful operation
 components:
   schemas:
     Order:

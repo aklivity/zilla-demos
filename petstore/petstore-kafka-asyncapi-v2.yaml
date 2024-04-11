@@ -118,27 +118,19 @@ operations:
     channel:
       $ref: "#/channels/customers"
     reply:
-      address:
-        location: '$message.header#/customer'
+      channel:
+        $ref: "#/channels/verifiedCustomers"
     summary: >-
       Add a pet.
     messages:
       - $ref: "#/channels/customers/messages/customer"
   getVerifiedCustomer:
-    action: receive
-    channel:
-      $ref: "#/channels/customers"
-    reply:
-      address:
-        location: '$message.header#/customer'
-    summary: >-
-      Get a pet.
-    messages:
-      - $ref: "#/channels/customers/messages/customer"
-  verifyCustomer:
     action: send
     channel:
       $ref: "#/channels/verifiedCustomers"
+    reply:
+      channel:
+        $ref: "#/channels/verifiedCustomers"
     summary: >-
       Get a pet.
     messages:
