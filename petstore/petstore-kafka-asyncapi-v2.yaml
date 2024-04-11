@@ -134,7 +134,7 @@ operations:
     summary: >-
       Get a pet.
     messages:
-      - $ref: "#/channels/customers/messages/customer"
+      - $ref: "#/channels/verifiedCustomers/messages/customer"
   deleteCustomer:
     action: send
     channel:

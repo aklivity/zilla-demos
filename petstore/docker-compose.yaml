@@ -18,7 +18,7 @@ services:
       - ./tls/localhost.p12:/etc/zilla/localhost.p12
       - ./petstore-openapi.yaml:/etc/zilla/specs/petstore-openapi.yaml
       - ./petstore-kafka-asyncapi.yaml:/etc/zilla/specs/petstore-kafka-asyncapi.yaml
-    command: start -v -e -Pzilla.engine.verbose.composites -w 1
+    command: start -v -e -Pzilla.engine.verbose.composites
 
   apicurio:
     image: apicurio/apicurio-registry-mem:2.5.10.Final
