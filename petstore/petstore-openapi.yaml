@@ -180,4 +180,4 @@ components:
     petstore_auth:
       type: http
       scheme: bearer
-      bearerFormat: jwt
+      bearerFormat: JWT
