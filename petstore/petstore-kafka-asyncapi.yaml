@@ -1,13 +1,9 @@
 asyncapi: 3.0.0
 info:
-  title: Petstore Kafka API
+  title: Petstore Kafka API v1
   version: 1.0.0
 defaultContentType: application/json
 servers:
-  cc-sasl:
-    host: pkc-p11xm.us-east-1.aws.confluent.cloud:9092
-    protocol: kafka-secure
-    description: Confluent cloud
   local-dev:
     host: kafka:29092
     protocol: kafka
@@ -19,7 +15,7 @@ channels:
       pet:
         $ref: '#/components/messages/pet'
       empty:
-        $ref: '#/components/messages/pet'
+        $ref: '#/components/messages/nullPet'
     description: The topic on which pet values may be produced and consumed.
 operations:
   listPets:
@@ -71,7 +67,7 @@ operations:
     traits:
       - $ref: '#/components/operationTraits/kafka'
     messages:
-      - $ref: '#/channels/petstore/messages/nullPet'
+      - $ref: '#/channels/petstore/messages/empty'
 components:
   messages:
     nullPet:
@@ -116,7 +112,7 @@ components:
       type: array
       maxItems: 100
       items:
-        $ref: "#/components/schemas/Pet"
+        $ref: "#/components/schemas/petPayload"
   messageTraits:
     commonHeaders:
       headers:

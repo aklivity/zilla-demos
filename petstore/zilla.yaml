@@ -16,7 +16,7 @@ catalogs:
   my_apicurio:
     type: apicurio
     options:
-      url: http://apicurio:8081
+      url: ${{env.APICURIO_URL}}
       group-id: petstore
 bindings:
   north_rest_server:
@@ -37,7 +37,7 @@ bindings:
               subject: petstore-openapi
               version: ${{env.PETSTORE_VERSION}}
           servers:
-            - url: http://localhost:7114
+            - url: ${{env.API_URL}}
     exit: north_rest_kafka_proxy
     telemetry:
       metrics:
@@ -80,7 +80,7 @@ bindings:
               subject: petstore-asyncapi
               version: ${{env.PETSTORE_VERSION}}
           servers:
-            - host: kafka:29092
+            - host: ${{env.KAFKA_HOST}}
       kafka:
         sasl:
           mechanism: plain

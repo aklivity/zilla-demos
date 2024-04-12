@@ -1,10 +1,10 @@
 openapi: 3.0.2
 info:
-  title: Zilla Petstore - OpenAPI 3.0
+  title: Zilla Petstore REST API - OpenAPI 3.0
   version: 2.0.0
   description: >
     This Petstore specification illustrates how Zilla can proxy synchronous and asynchronous
-    REST APIs using OpenAPI 3.0 to document and generate them.
+    REST APIs using an OpenAPI 3.0 spec to document and generate the API endpoints.
   license:
     name: Aklivity Community License
     url: https://github.com/aklivity/zilla/blob/main/LICENSE
@@ -17,8 +17,6 @@ externalDocs:
 servers:
   - url: https://petstore.aklivity.io
     description: Zilla Petstore REST API server for the prod environment
-  - url: https://staging.url:7114
-    description: Zilla Petstore REST API server for the staging environment
   - url: http://localhost:7114
     description: Zilla Petstore REST API server for the dev environment
 tags:
@@ -30,12 +28,90 @@ tags:
     description: Operations for a customer
 paths:
   /pet:
+    get:
+      tags:
+        - pet
+      summary: All Pets
+      description: Fetch all of the Pets
+      operationId: listPets
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pet"
+        "400":
+          description: Invalid output value
+      security:
+        - petstore_auth:
+            - "read:all"
+    post:
+      tags:
+        - pet
+      summary: Add a new pet to the store
+      description: Add a new pet to the store
+      operationId: addPet
+      requestBody:
+        description: Create a new pet in the store
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Pet"
+        required: true
+      responses:
+        "204":
+          description: Successful operation
+        "400":
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - write:all
+  /pet/{petKey}:
+    get:
+      tags:
+        - pet
+      summary: Find pet by Message Key
+      description: Returns a single pet
+      operationId: getPetById
+      parameters:
+        - name: petKey
+          in: path
+          description: Message Key of pet to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+        "400":
+          description: Invalid Message Key supplied
+        "404":
+          description: Pet not found
+      security:
+        - petstore_auth:
+            - read:all
     put:
       tags:
         - pet
       summary: Update an existing pet
       description: Update an existing pet by Id
       operationId: updatePet
+      parameters:
+        - name: petKey
+          in: path
+          description: Message Key of pet to update
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         description: Update an existent pet in the store
         content:
@@ -59,60 +135,6 @@ paths:
       security:
         - petstore_auth:
             - write:all
-    post:
-      tags:
-        - pet
-      summary: Add a new pet to the store
-      description: Add a new pet to the store
-      operationId: addPet
-      requestBody:
-        description: Create a new pet in the store
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Pet"
-        required: true
-      responses:
-        "204":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Pet"
-        "405":
-          description: Invalid input
-      security:
-        - petstore_auth:
-            - write:all
-  /pet/{petKey}:
-    get:
-      tags:
-        - pet
-      summary: Find pet by Message Key
-      description: Returns a single pet
-      operationId: getPetById
-      parameters:
-        - name: petKey
-          in: path
-          description: Message Key of pet to return
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Pet"
-        "400":
-          description: Invalid Message Key supplied
-        "404":
-          description: Pet not found
-      security:
-        - petstore_auth:
-            - read:all
     delete:
       tags:
         - pet
@@ -122,12 +144,14 @@ paths:
       parameters:
         - name: petKey
           in: path
-          description: Pet id to delete
+          description: Message Key of Pet to delete
           required: true
           schema:
             type: string
             format: uuid
       responses:
+        "200":
+          description: Successful operation
         "400":
           description: Invalid pet value
       security:
@@ -147,7 +171,7 @@ paths:
               $ref: "#/components/schemas/Order"
       responses:
         "200":
-          description: successful operation
+          description: Successful operation
           content:
             application/json:
               schema:
@@ -175,7 +199,7 @@ paths:
             format: uuid
       responses:
         "200":
-          description: successful operation
+          description: Successful operation
           content:
             application/json:
               schema:
@@ -191,8 +215,7 @@ paths:
       tags:
         - store
       summary: Delete purchase order by Message Key
-      description: For valid response try integer IDs with value < 1000. Anything
-        above 1000 or nonintegers will generate API errors
+      description: ""
       operationId: deleteOrder
       parameters:
         - name: orderKey
@@ -233,7 +256,7 @@ paths:
               $ref: "#/components/schemas/Customer"
       responses:
         "202":
-          description: successful operation
+          description: Successful operation
           headers:
             Location:
               schema:
@@ -264,14 +287,14 @@ paths:
             type: string
             pattern: '^wait=\d+$'
       responses:
-        default:
-          description: successful operation
+        "200":
+          description: Successful operation; correlated message exists
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Customer"
         "202":
-          description: successful operation
+          description: Successful operation; no correlated message exists
           headers:
             Location:
               schema:

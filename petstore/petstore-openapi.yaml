@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  title: Aklvity Zilla Petstore - OpenAPI 3.0
+  title: Zilla Petstore v1
   description: This is a sample Petstore Server based on the OpenAPI 3.0 specification.
   version: 1.0.18
 externalDocs:
@@ -8,13 +8,9 @@ externalDocs:
   url: "https://github.com/aklivity/zilla-demos/tree/main/petstore#readme"
 servers:
   - url: http://localhost:7114
-  # - url: https://petstore.aklivity.io
 tags:
   - name: pet
     description: Everything about your Pets
-    externalDocs:
-      description: Find out more
-      url: "http://swagger.io"
 paths:
   /pet:
     get:
@@ -24,7 +20,7 @@ paths:
       operationId: listPets
       responses:
         "200":
-          description: successful operation
+          description: Successful operation
           content:
             application/json:
               schema:
@@ -75,7 +71,7 @@ paths:
             type: string
       responses:
         "200":
-          description: successful operation
+          description: Successful operation
           content:
             application/json:
               schema:

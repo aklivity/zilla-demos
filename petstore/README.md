@@ -18,7 +18,7 @@ docker run --rm -v ./private.pem:/private.pem bitnami/jwt-cli encode \
     --aud "https://api.example.com" \
     --exp=+7d \
     --no-iat \
-    --payload "scope=read:all write:all" \
+    --payload "scope=read:all write:all write:pets read:pets" \
     --secret @private.pem \
     | pbcopy
 ```
@@ -32,9 +32,8 @@ docker run --rm -v ./private.pem:/private.pem bitnami/jwt-cli encode \
 docker compose down && docker compose up -d
 docker compose down zilla && docker compose up zilla -d
 
-curl -X POST -H "Content-Type: application/json;" \
-    -H "X-Registry-ArtifactId: petstore-openapi" -H "X-Registry-Version: v2" \
-    --data-binary "@petstore-openapi-v2.yaml" http://localhost:8081/apis/registry/v2/groups/petstore/artifacts/petstore-openapi/versions
-curl -X POST -H "Content-Type: application/json;" \
-    -H "X-Registry-ArtifactId: petstore-asyncapi" -H "X-Registry-Version: v2" \
-    --data-binary "@petstore-kafka-asyncapi-v2.yaml" http://localhost:8081/apis/registry/v2/groups/petstore/artifacts/petstore-asyncapi/versions;
+[openapi/v1](http://localhost:8081/apis/registry/v2/groups/petstore/artifacts/petstore-openapi/versions/v1)
+[openapi/v2](http://localhost:8081/apis/registry/v2/groups/petstore/artifacts/petstore-openapi/versions/v2)
+[asyncapi/v1](http://localhost:8081/apis/registry/v2/groups/petstore/artifacts/petstore-asyncapi/versions/v1)
+[asyncapi/v2](http://localhost:8081/apis/registry/v2/groups/petstore/artifacts/petstore-asyncapi/versions/v2)
+
