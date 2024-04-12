@@ -10,15 +10,13 @@ services:
       - "7114:7114"
     environment:
       KEYSTORE_PASSWORD: "generated"
-      KAFKA_USER: "admin"
-      KAFKA_PASS: "admin"
+      KAFKA_USER: "user"
+      KAFKA_PASS: "bitnami"
       PETSTORE_VERSION: "v1"
     volumes:
       - ./zilla.yaml:/etc/zilla/zilla.yaml
       - ./tls/localhost.p12:/etc/zilla/localhost.p12
-      - ./petstore-openapi.yaml:/etc/zilla/specs/petstore-openapi.yaml
-      - ./petstore-kafka-asyncapi.yaml:/etc/zilla/specs/petstore-kafka-asyncapi.yaml
-    command: start -v -e -Pzilla.engine.verbose.composites -Pzilla.binding.kafka.client.produce.record.framing.size=1024
+    command: start -v -e -Pzilla.engine.verbose.composites -Pzilla.binding.kafka.client.produce.record.framing.size=2048
 
   apicurio:
     image: apicurio/apicurio-registry-mem:2.5.10.Final
