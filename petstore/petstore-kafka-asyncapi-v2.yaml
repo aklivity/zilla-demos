@@ -28,17 +28,19 @@ servers:
     protocol: kafka-secure
     description: Kafka PRODUCTION cluster
     security:
-      - $ref: "#/components/securitySchemes/sasl-ssl"
+      - $ref: "#/components/securitySchemes/sasl-plaintext"
   staging:
     host: staging.url:9092
     protocol: kafka-secure
     description: Kafka STAGING cluster for `uat` and `preprod` environments
     security:
-      - $ref: "#/components/securitySchemes/sasl-ssl"
+      - $ref: "#/components/securitySchemes/sasl-plaintext"
   dev:
     host: kafka:29092
     protocol: kafka
     description: Kafka DEV cluster for `dev` and `sit` environments
+    security:
+      - $ref: "#/components/securitySchemes/sasl-plaintext"
 channels:
   pets:
     address: "petstore-pets"
@@ -304,15 +306,5 @@ components:
             - pending
             - sold
   securitySchemes:
-    sasl-ssl:
+    sasl-plaintext:
       type: plain
-      x-sasl.jaas.config: >-
-        org.apache.kafka.common.security.plain.PlainLoginModule required
-        username="<CLUSTER_API_KEY>" password="<CLUSTER_API_SECRET>";
-      x-security.protocol: SASL_SSL
-      x-ssl.endpoint.identification.algorithm: https
-      x-sasl.mechanism: PLAIN
-      description: >
-        Use [SASL authentication with SSL
-        encryption](https://docs.confluent.io/platform/current/security/security_tutorial.html#configure-clients)
-        to connect to the Broker.

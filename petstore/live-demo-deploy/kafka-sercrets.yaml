@@ -1,0 +1,8 @@
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kafka-env
+data:
+  KAFKA_USER: "JC6Q5MQMG7FFXNDC"
+  KAFKA_PASS: "KDLJedDBxRVgjpRKLealLl+RUtH7IjZy5DBrZNHsAV3+60T3DE1Vt8kVkDrMHB9a"

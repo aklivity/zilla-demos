@@ -65,7 +65,7 @@ services:
       KAFKA_CFG_BROKER_ID: "1"
       KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@127.0.0.1:9093"
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "CLIENT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "CLIENT:PLAINTEXT,INTERNAL:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT"
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_CFG_LOG_DIRS: "/tmp/logs"
       KAFKA_CFG_PROCESS_ROLES: "broker,controller"
@@ -73,9 +73,12 @@ services:
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
       KAFKA_CFG_ADVERTISED_LISTENERS: "CLIENT://localhost:9092,INTERNAL://kafka:29092"
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CFG_SASL_ENABLED_MECHANISMS: "PLAIN"
+      KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: "PLAIN"
 
   init-kafka:
     image: bitnami/kafka
+    user: root
     deploy:
       restart_policy:
         condition: none
@@ -85,16 +88,22 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
+        echo -e "creating client.properties";
+        cat <<EOT >> client.properties
+        security.protocol=SASL_PLAINTEXT
+        sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required username="user" password="bitnami";
+        sasl.mechanism=PLAIN
+        EOT
         echo -e "blocks until kafka is reachable";
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --command-config client.properties --list;
         echo -e "Creating kafka topic";
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic petstore --config cleanup.policy=compact;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic petstore-pets --config cleanup.policy=compact;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic petstore-orders --config cleanup.policy=compact;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic petstore-customers --config cleanup.policy=compact;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic petstore-verified-customers --config cleanup.policy=compact;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --command-config client.properties --create --if-not-exists --topic petstore --config cleanup.policy=compact;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --command-config client.properties --create --if-not-exists --topic petstore-pets --config cleanup.policy=compact;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --command-config client.properties --create --if-not-exists --topic petstore-orders --config cleanup.policy=compact;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --command-config client.properties --create --if-not-exists --topic petstore-customers --config cleanup.policy=compact;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --command-config client.properties --create --if-not-exists --topic petstore-verified-customers --config cleanup.policy=compact;
         echo -e "Successfully created the following topics:";
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --command-config client.properties --list;
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -105,6 +114,9 @@ services:
     environment:
       KAFKA_CLUSTERS_0_NAME: "localhost"
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:29092"
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: PLAIN
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule required username="user" password="bitnami";
 
 networks:
   default:
