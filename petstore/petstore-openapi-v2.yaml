@@ -1,10 +1,10 @@
 openapi: 3.0.2
 info:
-  title: Zilla Petstore - OpenAPI 3.0
+  title: Zilla Petstore REST API
   version: 2.0.0
   description: >
     This Petstore specification illustrates how Zilla can proxy synchronous and asynchronous
-    REST APIs using OpenAPI 3.0 to document and generate them.
+    REST APIs using an OpenAPI 3.0 spec to document and generate the API endpoints.
   license:
     name: Aklivity Community License
     url: https://github.com/aklivity/zilla/blob/main/LICENSE
@@ -12,14 +12,12 @@ info:
     name: Aklivity Community
     url: https://www.aklivity.io/slack
 externalDocs:
-  description: Zilla Documentation
-  url: https://docs.aklivity.io/
+  description: Demo Repo
+  url: https://github.com/aklivity/zilla-demos/tree/main/petstore#readme
 servers:
-  - url: https://prod.url:7143
+  - url: https://petstore.aklivity.io
     description: Zilla Petstore REST API server for the prod environment
-  - url: https://staging.url:7143
-    description: Zilla Petstore REST API server for the staging environment
-  - url: https://dev.url:7143
+  - url: http://localhost:7114
     description: Zilla Petstore REST API server for the dev environment
 tags:
   - name: pet
@@ -30,36 +28,26 @@ tags:
     description: Operations for a customer
 paths:
   /pet:
-    put:
+    get:
       tags:
         - pet
-      summary: Update an existing pet
-      description: Update an existing pet by Id
-      operationId: updatePet
-      requestBody:
-        description: Update an existent pet in the store
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Pet"
-        required: true
+      summary: All Pets
+      description: Fetch all of the Pets
+      operationId: listPets
       responses:
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Pet"
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pet"
         "400":
-          description: Invalid ID supplied
-        "404":
-          description: Pet not found
-        "405":
-          description: Validation exception
+          description: Invalid output value
       security:
         - petstore_auth:
-            - write:pets
-            - read:pets
+            - "read:all"
     post:
       tags:
         - pet
@@ -74,49 +62,73 @@ paths:
               $ref: "#/components/schemas/Pet"
         required: true
       responses:
+        "204":
+          description: Successful operation
+        "400":
+          description: Invalid input
+      security:
+        - petstore_auth:
+            - write:all
+  /pet/{petKey}:
+    get:
+      tags:
+        - pet
+      summary: Find pet by Message Key
+      description: Returns a single pet
+      operationId: getPet
+      parameters:
+        - name: petKey
+          in: path
+          description: Message Key of pet to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Pet"
-        "405":
-          description: Invalid input
-      security:
-        - petstore_auth:
-            - write:pets
-            - read:pets
-  /pet/{petId}:
-    get:
-      tags:
-        - pet
-      summary: Find pet by ID
-      description: Returns a single pet
-      operationId: getPetById
-      parameters:
-        - name: petId
-          in: path
-          description: ID of pet to return
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Pet"
         "400":
-          description: Invalid ID supplied
+          description: Invalid Message Key supplied
         "404":
           description: Pet not found
       security:
-        - api_key: []
         - petstore_auth:
-            - write:pets
-            - read:pets
+            - read:all
+    put:
+      tags:
+        - pet
+      summary: Update an existing pet
+      description: Update an existing pet by Id
+      operationId: updatePet
+      parameters:
+        - name: petKey
+          in: path
+          description: Message Key of pet to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Update an existent pet in the store
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Pet"
+        required: true
+      responses:
+        "204":
+          description: Successful operation
+        "400":
+          description: Invalid input
+        "404":
+          description: Pet not found
+      security:
+        - petstore_auth:
+            - write:all
     delete:
       tags:
         - pet
@@ -124,26 +136,21 @@ paths:
       description: ""
       operationId: deletePet
       parameters:
-        - name: api_key
-          in: header
-          description: ""
-          required: false
-          schema:
-            type: string
-        - name: petId
+        - name: petKey
           in: path
-          description: Pet id to delete
+          description: Message Key of Pet to delete
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
+        "200":
+          description: Successful operation
         "400":
           description: Invalid pet value
       security:
         - petstore_auth:
-            - write:pets
-            - read:pets
+            - write:all
   /store/order:
     post:
       tags:
@@ -157,75 +164,80 @@ paths:
             schema:
               $ref: "#/components/schemas/Order"
       responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Order"
-        "405":
+        "204":
+          description: Successful operation
+        "400":
           description: Invalid input
-  /store/order/{orderId}:
+      security:
+        - petstore_auth:
+            - write:all
+  /store/order/{orderKey}:
     get:
       tags:
         - store
-      summary: Find purchase order by ID
+      summary: Find purchase order by Message Key
       description: For valid response try integer IDs with value <= 5 or > 10. Other
         values will generate exceptions.
-      operationId: getOrderById
+      operationId: getOrder
       parameters:
-        - name: orderId
+        - name: orderKey
           in: path
-          description: ID of order that needs to be fetched
+          description: Message Key of order that needs to be fetched
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         "200":
-          description: successful operation
+          description: Successful operation
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Order"
         "400":
-          description: Invalid ID supplied
+          description: Invalid Message Key supplied
         "404":
           description: Order not found
+      security:
+        - petstore_auth:
+            - read:all
     delete:
       tags:
         - store
-      summary: Delete purchase order by ID
-      description: For valid response try integer IDs with value < 1000. Anything
-        above 1000 or nonintegers will generate API errors
+      summary: Delete purchase order by Message Key
+      description: ""
       operationId: deleteOrder
       parameters:
-        - name: orderId
+        - name: orderKey
           in: path
-          description: ID of the order that needs to be deleted
+          description: Message Key of the order that needs to be deleted
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
       responses:
         "400":
-          description: Invalid ID supplied
+          description: Invalid Message Key supplied
         "404":
           description: Order not found
+      security:
+        - petstore_auth:
+            - write:all
   /customer:
     post:
       tags:
         - customer
       summary: Create unverified customer
-      description: ""
+      description: Create a new customer and start a verification process
       operationId: createCustomer
       parameters:
         - in: header
           name: Prefer
+          required: true
           schema:
             type: string
-            pattern: 'respond-async'
-          required: true
+            enum:
+              - respond-async
       requestBody:
         description: Created customer object
         content:
@@ -233,32 +245,25 @@ paths:
             schema:
               $ref: "#/components/schemas/Customer"
       responses:
-        "200":
-          description: successful operation
+        "202":
+          description: Successful operation
           headers:
             Location:
               schema:
                 type: string
+                format: /customer;cid={correlationId}
               description: Customer verification result location URL
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Customer"
-  /customer/{customerId}/verified;cid={correlationId}:
+      security:
+        - petstore_auth:
+            - write:all
+  /customer;cid={correlationId}:
     get:
       tags:
         - customer
       summary: Verify customer details
-      description: ""
+      description: Fetch and wait the verification status change
       operationId: getVerifiedCustomer
       parameters:
-        - name: customerId
-          in: path
-          description: ID of customer that is verified
-          required: true
-          schema:
-            type: integer
-            format: int64
         - name: correlationId
           in: path
           description: Correlation ID of the verification request
@@ -271,14 +276,24 @@ paths:
           schema:
             type: string
             pattern: '^wait=\d+$'
-          required: true
       responses:
-        default:
-          description: successful operation
+        "200":
+          description: Successful operation; correlated message exists
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Customer"
+        "202":
+          description: Successful operation; no correlated message exists
+          headers:
+            Location:
+              schema:
+                type: string
+                format: /customer;cid={correlationId}
+              description: Customer verification result location URL
+      security:
+        - petstore_auth:
+            - read:all
 components:
   schemas:
     Order:
@@ -288,7 +303,7 @@ components:
           type: integer
           format: int64
           example: 10
-        petId:
+        petKey:
           type: integer
           format: int64
           example: 198772
@@ -319,6 +334,14 @@ components:
         username:
           type: string
           example: fehguy
+        status:
+          type: string
+          description: Verification Status
+          example: approved
+          enum:
+            - pending
+            - approved
+            - denied
         address:
           type: array
           items:
@@ -367,14 +390,6 @@ components:
             - sold
   securitySchemes:
     petstore_auth:
-      type: oauth2
-      flows:
-        implicit:
-          authorizationUrl: https://petstore3.swagger.io/oauth/authorize
-          scopes:
-            write:pets: modify pets in your account
-            read:pets: read your pets
-    api_key:
-      type: apiKey
-      name: api_key
-      in: header
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

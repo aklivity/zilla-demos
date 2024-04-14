@@ -1,73 +1,83 @@
 asyncapi: 3.0.0
 info:
-  title: Petstore Kafka API
+  title: Petstore Kafka v1
+  description: This is a sample Petstore Server.
   version: 1.0.0
+  license:
+    name: Aklivity Community License
+    url: https://github.com/aklivity/zilla/blob/main/LICENSE
+  contact:
+    name: Aklivity Community
+    url: https://www.aklivity.io/slack
+  externalDocs:
+    description: Demo Repo
+    url: https://github.com/aklivity/zilla-demos/tree/main/petstore#readme
 defaultContentType: application/json
 servers:
-  host-connections:
+  local-dev:
     host: kafka:29092
     protocol: kafka
-    description: Local broker
+    description: local bitnami/kafka
 channels:
   petstore:
-    address: 'petstore'
+    address: "petstore"
     messages:
       pet:
-        $ref: '#/components/messages/pet'
+        $ref: "#/components/messages/pet"
       empty:
-        $ref: '#/components/messages/pet'
+        $ref: "#/components/messages/nullPet"
     description: The topic on which pet values may be produced and consumed.
 operations:
   listPets:
     action: receive
     channel:
-      $ref: '#/channels/petstore'
+      $ref: "#/channels/petstore"
     summary: >-
       List all pets.
     traits:
-      - $ref: '#/components/operationTraits/kafka'
+      - $ref: "#/components/operationTraits/kafka"
     messages:
-      - $ref: '#/channels/petstore/messages/pet'
+      - $ref: "#/channels/petstore/messages/pet"
   addPet:
     action: send
     channel:
-      $ref: '#/channels/petstore'
+      $ref: "#/channels/petstore"
     summary: >-
       Add a pet.
     traits:
-      - $ref: '#/components/operationTraits/kafka'
+      - $ref: "#/components/operationTraits/kafka"
     messages:
-      - $ref: '#/channels/petstore/messages/pet'
-  getPetById:
+      - $ref: "#/channels/petstore/messages/pet"
+  getPet:
     action: receive
     channel:
-      $ref: '#/channels/petstore'
+      $ref: "#/channels/petstore"
     summary: >-
       Get a pet.
     traits:
-      - $ref: '#/components/operationTraits/kafka'
+      - $ref: "#/components/operationTraits/kafka"
     messages:
-      - $ref: '#/channels/petstore/messages/pet'
+      - $ref: "#/channels/petstore/messages/pet"
   updatePet:
     action: send
     channel:
-      $ref: '#/channels/petstore'
+      $ref: "#/channels/petstore"
     summary: >-
-       Update an existing pet by Id.
+      Update an existing pet by Id.
     traits:
-      - $ref: '#/components/operationTraits/kafka'
+      - $ref: "#/components/operationTraits/kafka"
     messages:
-      - $ref: '#/channels/petstore/messages/pet'
+      - $ref: "#/channels/petstore/messages/pet"
   deletePet:
     action: send
     channel:
-      $ref: '#/channels/petstore'
+      $ref: "#/channels/petstore"
     summary: >-
       Deletes a pet
     traits:
-      - $ref: '#/components/operationTraits/kafka'
+      - $ref: "#/components/operationTraits/kafka"
     messages:
-      - $ref: '#/channels/petstore/messages/nullPet'
+      - $ref: "#/channels/petstore/messages/empty"
 components:
   messages:
     nullPet:
@@ -81,9 +91,9 @@ components:
         Inform about Pet.
       contentType: application/json
       traits:
-        - $ref: '#/components/messageTraits/commonHeaders'
+        - $ref: "#/components/messageTraits/commonHeaders"
       payload:
-        $ref: '#/components/schemas/petPayload'
+        $ref: "#/components/schemas/petPayload"
     pets:
       name: Pets
       title: Pets
@@ -91,9 +101,9 @@ components:
         Inform about Pets.
       contentType: application/json
       traits:
-        - $ref: '#/components/messageTraits/commonHeaders'
+        - $ref: "#/components/messageTraits/commonHeaders"
       payload:
-        $ref: '#/components/schemas/petsPayload'
+        $ref: "#/components/schemas/petsPayload"
   schemas:
     petPayload:
       type: object
@@ -112,7 +122,7 @@ components:
       type: array
       maxItems: 100
       items:
-        $ref: "#/components/schemas/Pet"
+        $ref: "#/components/schemas/petPayload"
   messageTraits:
     commonHeaders:
       headers:

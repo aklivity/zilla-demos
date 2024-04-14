@@ -70,6 +70,8 @@ mqtt:
 - don't disconnect client when subscribe address is wrong
 - generate uses `*` as wildcard instead of `+`
 - generate adds trailing `0`s, perhaps don't add trailing number unless greater than `0`
+- busses stop after a while
+
 
 OpenAPI spec:
 
@@ -78,6 +80,13 @@ OpenAPI spec:
 - filter by properties
   operationId: findPetsByStatus
   operationId: findPetsByTags
+
+support sasl config:
+      x-sasl.jaas.config: >-
+        org.apache.kafka.common.security.plain.PlainLoginModule required
+        username="<CLUSTER_API_KEY>" password="<CLUSTER_API_SECRET>";
+      x-security.protocol: SASL_PLAINTEXT
+      x-sasl.mechanism: PLAIN
 
 ## End User API Migration Video | rough draft
 

@@ -1,10 +1,10 @@
 asyncapi: 3.0.0
 info:
-  title: Petstore Kafka API
+  title: Zilla Petstore Kafka API
   version: 2.0.0
   description: >
     This Petstore specification illustrates how Zilla can proxy synchronous and asynchronous
-    REST APIs using AsyncAPI to document and generate them.
+    REST APIs using an AsyncAPI 3.0 spec to document and generate them.
   license:
     name: Aklivity Community License
     url: https://github.com/aklivity/zilla/blob/main/LICENSE
@@ -12,8 +12,8 @@ info:
     name: Aklivity Community
     url: https://www.aklivity.io/slack
   externalDocs:
-    description: Zilla Documentation
-    url: https://docs.aklivity.io/
+    description: Demo Repo
+    url: https://github.com/aklivity/zilla-demos/tree/main/petstore#readme
   tags:
     - name: pet
       description: Everything about your Pets
@@ -24,30 +24,17 @@ info:
 defaultContentType: application/json
 servers:
   production:
-    host: prod.url:9092
-    protocol: kafka
+    host: pkc-p11xm.us-east-1.aws.confluent.cloud:9092
+    protocol: kafka-secure
     description: Kafka PRODUCTION cluster
     security:
       - $ref: "#/components/securitySchemes/sasl-ssl"
-    bindings:
-      kafka:
-        schemaRegistryUrl: https://schema-registry.prod.url/
-  staging:
-    host: staging.url:9092
-    protocol: kafka
-    description: Kafka STAGING cluster for `uat` and `preprod` environments
-    security:
-      - $ref: "#/components/securitySchemes/sasl-ssl"
-    bindings:
-      kafka:
-        schemaRegistryUrl: https://schema-registry.prod.url/
   dev:
-    host: dev.url:9092
+    host: kafka:29092
     protocol: kafka
-    description: Kafka DEV cluster for `dev` and `sit` environments
-    bindings:
-      kafka:
-        schemaRegistryUrl: https://schema-registry.prod.url/
+    description: Kafka DEV cluster
+    security:
+      - $ref: "#/components/securitySchemes/sasl-plaintext"
 channels:
   pets:
     address: "petstore-pets"
@@ -64,7 +51,7 @@ channels:
         $ref: "#/components/messages/order"
       empty:
         $ref: "#/components/messages/empty"
-    description: The topic on which pet values may be produced and consumed.
+    description: The topic on which order values may be produced and consumed.
   customers:
     address: "petstore-customers"
     messages:
@@ -72,7 +59,15 @@ channels:
         $ref: "#/components/messages/customer"
       empty:
         $ref: "#/components/messages/empty"
-    description: The topic on which pet values may be produced and consumed.
+    description: The topic on which customer values may be produced and consumed.
+  verifiedCustomers:
+    address: "petstore-verified-customers"
+    messages:
+      customer:
+        $ref: "#/components/messages/customer"
+      empty:
+        $ref: "#/components/messages/empty"
+    description: The topic on which verified customers values may be produced and consumed.
 operations:
   listPets:
     action: receive
@@ -90,7 +85,7 @@ operations:
       Add a pet.
     messages:
       - $ref: "#/channels/pets/messages/pet"
-  getPetById:
+  getPet:
     action: receive
     channel:
       $ref: "#/channels/pets"
@@ -103,7 +98,7 @@ operations:
     channel:
       $ref: "#/channels/pets"
     summary: >-
-      Update an existing pet by Id.
+      Update an existing Pet.
     messages:
       - $ref: "#/channels/pets/messages/pet"
   deletePet:
@@ -111,31 +106,37 @@ operations:
     channel:
       $ref: "#/channels/pets"
     summary: >-
-      Deletes a pet
+      Deletes a pet.
     messages:
       - $ref: "#/channels/pets/messages/empty"
   createCustomer:
     action: send
     channel:
       $ref: "#/channels/customers"
+    reply:
+      channel:
+        $ref: "#/channels/verifiedCustomers"
     summary: >-
-      Add a pet.
+      Add a customer.
     messages:
       - $ref: "#/channels/customers/messages/customer"
   getVerifiedCustomer:
-    action: receive
+    action: send
     channel:
-      $ref: "#/channels/customers"
+      $ref: "#/channels/verifiedCustomers"
+    reply:
+      channel:
+        $ref: "#/channels/verifiedCustomers"
     summary: >-
-      Get a pet.
+      Get a customer.
     messages:
-      - $ref: "#/channels/customers/messages/customer"
+      - $ref: "#/channels/verifiedCustomers/messages/customer"
   deleteCustomer:
     action: send
     channel:
       $ref: "#/channels/customers"
     summary: >-
-      Deletes a pet
+      Deletes a customer.
     messages:
       - $ref: "#/channels/customers/messages/empty"
   placeOrder:
@@ -143,15 +144,15 @@ operations:
     channel:
       $ref: "#/channels/orders"
     summary: >-
-      Add a pet.
+      Add an order.
     messages:
       - $ref: "#/channels/orders/messages/order"
-  getOrderById:
+  getOrder:
     action: receive
     channel:
       $ref: "#/channels/orders"
     summary: >-
-      Get a pet.
+      Get an order.
     messages:
       - $ref: "#/channels/orders/messages/order"
   deleteOrder:
@@ -159,7 +160,7 @@ operations:
     channel:
       $ref: "#/channels/orders"
     summary: >-
-      Deletes a pet
+      Deletes an order.
     messages:
       - $ref: "#/channels/orders/messages/empty"
 components:
@@ -167,9 +168,8 @@ components:
     customerVerifyCorrelationId:
       description: >
         This correlation ID is used for message tracing and messages
-        correlation. This correlation ID is generated at runtime based on the
-        `VERIFY_ID` and sent to the RESPONSE message.
-      location: $message.header#/VERIFY_ID
+        correlation. This correlation ID is generated at runtime.
+      location: $message.header#/zilla:correlation-id
   messages:
     empty:
       name: EmptyMessage
@@ -199,8 +199,8 @@ components:
       payload:
         $ref: "#/components/schemas/Order"
     customer:
-      name: Pet
-      title: Pet
+      name: Customer
+      title: Customer
       summary: Information about a Customer.
       contentType: application/json
       payload:
@@ -244,6 +244,14 @@ components:
         username:
           type: string
           example: fehguy
+        status:
+          type: string
+          description: Verification Status
+          example: approved
+          enum:
+            - pending
+            - approved
+            - denied
         address:
           type: array
           items:
@@ -293,13 +301,5 @@ components:
   securitySchemes:
     sasl-ssl:
       type: plain
-      x-sasl.jaas.config: >-
-        org.apache.kafka.common.security.plain.PlainLoginModule required
-        username="<CLUSTER_API_KEY>" password="<CLUSTER_API_SECRET>";
-      x-security.protocol: SASL_SSL
-      x-ssl.endpoint.identification.algorithm: https
-      x-sasl.mechanism: PLAIN
-      description: >
-        Use [SASL authentication with SSL
-        encryption](https://docs.confluent.io/platform/current/security/security_tutorial.html#configure-clients)
-        to connect to the ADEO Broker.
+    sasl-plaintext:
+      type: plain
