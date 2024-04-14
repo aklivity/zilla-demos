@@ -1,10 +1,10 @@
 asyncapi: 3.0.0
 info:
-  title: Zilla Petstore Kafka API - AsyncAPI 3.0
+  title: Zilla Petstore Kafka API
   version: 2.0.0
   description: >
     This Petstore specification illustrates how Zilla can proxy synchronous and asynchronous
-    REST APIs using AsyncAPI to document and generate them.
+    REST APIs using an AsyncAPI 3.0 spec to document and generate them.
   license:
     name: Aklivity Community License
     url: https://github.com/aklivity/zilla/blob/main/LICENSE
@@ -12,8 +12,8 @@ info:
     name: Aklivity Community
     url: https://www.aklivity.io/slack
   externalDocs:
-    description: Zilla Documentation
-    url: https://docs.aklivity.io/
+    description: Demo Repo
+    url: https://github.com/aklivity/zilla-demos/tree/main/petstore#readme
   tags:
     - name: pet
       description: Everything about your Pets
@@ -28,11 +28,11 @@ servers:
     protocol: kafka-secure
     description: Kafka PRODUCTION cluster
     security:
-      - $ref: "#/components/securitySchemes/sasl-plaintext"
+      - $ref: "#/components/securitySchemes/sasl-ssl"
   dev:
     host: kafka:29092
     protocol: kafka
-    description: Kafka DEV cluster for `dev` and `sit` environments
+    description: Kafka DEV cluster
     security:
       - $ref: "#/components/securitySchemes/sasl-plaintext"
 channels:
@@ -51,7 +51,7 @@ channels:
         $ref: "#/components/messages/order"
       empty:
         $ref: "#/components/messages/empty"
-    description: The topic on which pet values may be produced and consumed.
+    description: The topic on which order values may be produced and consumed.
   customers:
     address: "petstore-customers"
     messages:
@@ -59,7 +59,7 @@ channels:
         $ref: "#/components/messages/customer"
       empty:
         $ref: "#/components/messages/empty"
-    description: The topic on which pet values may be produced and consumed.
+    description: The topic on which customer values may be produced and consumed.
   verifiedCustomers:
     address: "petstore-verified-customers"
     messages:
@@ -67,7 +67,7 @@ channels:
         $ref: "#/components/messages/customer"
       empty:
         $ref: "#/components/messages/empty"
-    description: The topic on which pet values may be produced and consumed.
+    description: The topic on which verified customers values may be produced and consumed.
 operations:
   listPets:
     action: receive
@@ -85,7 +85,7 @@ operations:
       Add a pet.
     messages:
       - $ref: "#/channels/pets/messages/pet"
-  getPetById:
+  getPet:
     action: receive
     channel:
       $ref: "#/channels/pets"
@@ -98,7 +98,7 @@ operations:
     channel:
       $ref: "#/channels/pets"
     summary: >-
-      Update an existing pet by Id.
+      Update an existing Pet.
     messages:
       - $ref: "#/channels/pets/messages/pet"
   deletePet:
@@ -106,7 +106,7 @@ operations:
     channel:
       $ref: "#/channels/pets"
     summary: >-
-      Deletes a pet
+      Deletes a pet.
     messages:
       - $ref: "#/channels/pets/messages/empty"
   createCustomer:
@@ -117,7 +117,7 @@ operations:
       channel:
         $ref: "#/channels/verifiedCustomers"
     summary: >-
-      Add a pet.
+      Add a customer.
     messages:
       - $ref: "#/channels/customers/messages/customer"
   getVerifiedCustomer:
@@ -128,7 +128,7 @@ operations:
       channel:
         $ref: "#/channels/verifiedCustomers"
     summary: >-
-      Get a pet.
+      Get a customer.
     messages:
       - $ref: "#/channels/verifiedCustomers/messages/customer"
   deleteCustomer:
@@ -136,7 +136,7 @@ operations:
     channel:
       $ref: "#/channels/customers"
     summary: >-
-      Deletes a pet
+      Deletes a customer.
     messages:
       - $ref: "#/channels/customers/messages/empty"
   placeOrder:
@@ -144,15 +144,15 @@ operations:
     channel:
       $ref: "#/channels/orders"
     summary: >-
-      Add a pet.
+      Add an order.
     messages:
       - $ref: "#/channels/orders/messages/order"
-  getOrderById:
+  getOrder:
     action: receive
     channel:
       $ref: "#/channels/orders"
     summary: >-
-      Get a pet.
+      Get an order.
     messages:
       - $ref: "#/channels/orders/messages/order"
   deleteOrder:
@@ -160,7 +160,7 @@ operations:
     channel:
       $ref: "#/channels/orders"
     summary: >-
-      Deletes a pet
+      Deletes an order.
     messages:
       - $ref: "#/channels/orders/messages/empty"
 components:
@@ -168,9 +168,8 @@ components:
     customerVerifyCorrelationId:
       description: >
         This correlation ID is used for message tracing and messages
-        correlation. This correlation ID is generated at runtime based on the
-        `VERIFY_ID` and sent to the RESPONSE message.
-      location: $message.header#/VERIFY_ID
+        correlation. This correlation ID is generated at runtime.
+      location: $message.header#/zilla:correlation-id
   messages:
     empty:
       name: EmptyMessage
@@ -300,5 +299,7 @@ components:
             - pending
             - sold
   securitySchemes:
+    sasl-ssl:
+      type: plain
     sasl-plaintext:
       type: plain

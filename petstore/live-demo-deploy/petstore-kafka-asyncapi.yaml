@@ -54,7 +54,7 @@ operations:
       - $ref: '#/components/operationTraits/kafka'
     messages:
       - $ref: '#/channels/petstore/messages/pet'
-  getPetById:
+  getPet:
     action: receive
     channel:
       $ref: '#/channels/petstore'

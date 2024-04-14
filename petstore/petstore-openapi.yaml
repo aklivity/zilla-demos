@@ -1,11 +1,17 @@
 openapi: 3.0.2
 info:
-  title: Zilla Petstore v1
-  description: This is a sample Petstore Server based on the OpenAPI 3.0 specification.
-  version: 1.0.18
+  title: Petstore REST v1
+  description: This is a sample Petstore Server.
+  version: 1.0.0
+  license:
+    name: Aklivity Community License
+    url: https://github.com/aklivity/zilla/blob/main/LICENSE
+  contact:
+    name: Aklivity Community
+    url: https://www.aklivity.io/slack
 externalDocs:
-  description: Find out more about Swagger
-  url: "https://github.com/aklivity/zilla-demos/tree/main/petstore#readme"
+  description: Demo Repo
+  url: https://github.com/aklivity/zilla-demos/tree/main/petstore#readme
 servers:
   - url: http://localhost:7114
 tags:
@@ -61,7 +67,7 @@ paths:
         - pet
       summary: Find pet by ID
       description: Returns a single pet
-      operationId: getPetById
+      operationId: getPet
       parameters:
         - name: petId
           in: path

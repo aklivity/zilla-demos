@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  title: Zilla Petstore REST API - OpenAPI 3.0
+  title: Zilla Petstore REST API
   version: 2.0.0
   description: >
     This Petstore specification illustrates how Zilla can proxy synchronous and asynchronous
@@ -12,8 +12,8 @@ info:
     name: Aklivity Community
     url: https://www.aklivity.io/slack
 externalDocs:
-  description: Zilla Documentation
-  url: https://docs.aklivity.io/
+  description: Demo Repo
+  url: https://github.com/aklivity/zilla-demos/tree/main/petstore#readme
 servers:
   - url: https://petstore.aklivity.io
     description: Zilla Petstore REST API server for the prod environment
@@ -75,7 +75,7 @@ paths:
         - pet
       summary: Find pet by Message Key
       description: Returns a single pet
-      operationId: getPetById
+      operationId: getPet
       parameters:
         - name: petKey
           in: path
@@ -120,18 +120,12 @@ paths:
               $ref: "#/components/schemas/Pet"
         required: true
       responses:
-        "200":
+        "204":
           description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Pet"
         "400":
-          description: Invalid Message Key supplied
+          description: Invalid input
         "404":
           description: Pet not found
-        "405":
-          description: Validation exception
       security:
         - petstore_auth:
             - write:all
@@ -170,13 +164,9 @@ paths:
             schema:
               $ref: "#/components/schemas/Order"
       responses:
-        "200":
+        "204":
           description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Order"
-        "405":
+        "400":
           description: Invalid input
       security:
         - petstore_auth:
@@ -188,7 +178,7 @@ paths:
       summary: Find purchase order by Message Key
       description: For valid response try integer IDs with value <= 5 or > 10. Other
         values will generate exceptions.
-      operationId: getOrderById
+      operationId: getOrder
       parameters:
         - name: orderKey
           in: path

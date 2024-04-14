@@ -23,7 +23,7 @@ paths:
       operationId: listPets
       responses:
         "200":
-          description: successful operation
+          description: Successful operation
           content:
             application/json:
               schema:
@@ -69,7 +69,7 @@ paths:
         - pet
       summary: Find pet by ID
       description: Returns a single pet
-      operationId: getPetById
+      operationId: getPet
       parameters:
         - name: petId
           in: path
@@ -79,7 +79,7 @@ paths:
             type: string
       responses:
         "200":
-          description: successful operation
+          description: Successful operation
           content:
             application/json:
               schema:

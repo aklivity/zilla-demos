@@ -6,25 +6,30 @@ Zilla implements the RESTful APIs described in the OpenAPI Petstore spec and con
 
 - petstore open api
 - petstore async api
-- zilla
-- No external dependencies
+- zilla diagram
+- Petstore without/with zilla diagram, No external dependencies
 - zilla is lightweight and uses your existing components
 
 ## Steps
 
 - Zilla is a REST proxy
-- Implement OpenAPI spec
+- Implement OpenAPI-AsyncAPI v1 spec
 - Zilla for async workloads
-- Implement AsyncAPI spec
 - Petstore v2 with async customer verification
-- Publish Spec versions to catalog registry
-- Zilla redeploy with new model versions
+- Show published Spec versions to catalog registry
+- Zilla redeploy with new model versions Petstore v2
 - Client POST async customer request
 - Client GET Prefer wait
 - Customer verified
 - Client GET response
+
+- Send invalid payload
+
+  
+with live zilla:
+
 - Promote Zilla to prod cluster
-- Switch server context and execute GET
+- Switch server context and execute GET to show the config exists
 
 ## Recap
 
