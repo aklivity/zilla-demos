@@ -15,10 +15,9 @@ services:
       KAFKA_USER: "user"
       KAFKA_PASS: "bitnami"
       APICURIO_URL: "http://apicurio:8081"
-      PETSTORE_VERSION: "v2"
+      PETSTORE_VERSION: ${PETSTORE_VERSION}
     volumes:
       - ./zilla.yaml:/etc/zilla/zilla.yaml
-      - ./tls/localhost.p12:/etc/zilla/localhost.p12
     command: start -v -e -Pzilla.engine.verbose.composites -Pzilla.binding.kafka.client.produce.record.framing.size=2048
 
   apicurio:
@@ -39,8 +38,8 @@ services:
     depends_on:
       - apicurio
     volumes:
-      - ./petstore-openapi.yaml:/petstore-openapi.yaml
-      - ./petstore-kafka-asyncapi.yaml:/petstore-kafka-asyncapi.yaml
+      - ./petstore-openapi-v1.yaml:/petstore-openapi-v1.yaml
+      - ./petstore-kafka-asyncapi-v1.yaml:/petstore-kafka-asyncapi-v1.yaml
       - ./petstore-openapi-v2.yaml:/petstore-openapi-v2.yaml
       - ./petstore-kafka-asyncapi-v2.yaml:/petstore-kafka-asyncapi-v2.yaml
     entrypoint: ["/bin/sh", "-c"]
@@ -51,11 +50,11 @@ services:
         echo -e "publish OPENAPI";
         curl -X POST -H "Content-Type: application/json; artifactType=OPENAPI" \
           -H "X-Registry-ArtifactId: petstore-openapi" -H "X-Registry-Version: v1" \
-          --data-binary "@/petstore-openapi.yaml" http://apicurio:8081/apis/registry/v2/groups/petstore/artifacts;
+          --data-binary "@/petstore-openapi-v1.yaml" http://apicurio:8081/apis/registry/v2/groups/petstore/artifacts;
         echo -e "publish ASYNCAPI";
         curl -X POST -H "Content-Type: application/json; artifactType=ASYNCAPI" \
           -H "X-Registry-ArtifactId: petstore-asyncapi" -H "X-Registry-Version: v1" \
-          --data-binary "@/petstore-kafka-asyncapi.yaml" http://apicurio:8081/apis/registry/v2/groups/petstore/artifacts;
+          --data-binary "@/petstore-kafka-asyncapi-v1.yaml" http://apicurio:8081/apis/registry/v2/groups/petstore/artifacts;
         echo -e "publish OPENAPI v2";
         curl -X POST -H "Content-Type: application/json;" \
           -H "X-Registry-ArtifactId: petstore-openapi" -H "X-Registry-Version: v2" \

@@ -7,5 +7,6 @@ NAMESPACE=zilla-petstore
 if [[ -z $(docker-compose -p $NAMESPACE ps -q zilla) ]]; then
   docker-compose -p $NAMESPACE up -d
 else
-  docker-compose -p $NAMESPACE restart --no-deps zilla
+  docker-compose -p $NAMESPACE down zilla
+  docker-compose -p $NAMESPACE up -d zilla
 fi
