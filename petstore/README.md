@@ -2,6 +2,10 @@
 
 This is an implementation of the common Petstore example where requests are proxied to Kafka. Zilla is implementing the REST endpoints defined in an OpenAPI 3.x spec and proxying them onto Kafka topics defined in an AsyncAPI 3.x spec based on the operations defined in each spec.
 
+### Watch the Walkthrough
+
+[![image](https://img.youtube.com/vi/FemWt31R7jg/0.jpg)](https://youtu.be/FemWt31R7jg)
+
 ## Petstore Architecture Diagram
 
 ### Without Zilla
