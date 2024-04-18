@@ -1,16 +1,16 @@
-args: ["start", "-v", "-e"]
+image:
+  tag: 0.9.76
 
-extraEnv:
-  - name: KAFKA_BOOTSTRAP_SERVER
-    value: "kafka.petstore.svc.cluster.local:9092"
-  - name: KAFKA_USER
-    value: "admin"
-  - name: KAFKA_PASS
-    value: "admin"
-  - name: ZILLA_INCUBATOR_ENABLED
-    value: "true"
-  # - name: JAVA_OPTIONS
-  #   value: "-Dzilla.binding.kafka.debug=true"
+env:
+  API_URL: https://petstore.aklivity.io
+  KAFKA_BOOTSTRAP_SERVER: "pkc-p11xm.us-east-1.aws.confluent.cloud:9092"
+  KAFKA_BOOTSTRAP_HOST: "pkc-p11xm.us-east-1.aws.confluent.cloud"
+  KAFKA_BOOTSTRAP_PORT: "9092"
+  APICURIO_URL: APICURIO:8080
+  PETSTORE_VERSION: "v2"
+  JAVA_OPTIONS: "-Dzilla.binding.kafka.debug=true"
+
+envFromSecret: "kafka-env"
 
 livenessProbePort: 7190
 readinessProbePort: 7190
@@ -19,3 +19,23 @@ service:
   ports:
     - port: 7114
       name: http
+    - port: 7190
+      name: metrics
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  tls:
+    enabled: true
+    secretName: taxi-demo-tls
+  hosts:
+    - host: petstore.aklivity.io
+      paths:
+        - path: /
+          port: 7114
+  annotations:
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "*"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "false"

@@ -12,7 +12,12 @@ guards:
           e: AQAB
           alg: RS256
           kid: example
-
+catalogs:
+  my_apicurio:
+    type: apicurio
+    options:
+      url: ${{env.APICURIO_URL}}
+      group-id: petstore
 bindings:
   north_rest_server:
     type: openapi
@@ -26,7 +31,13 @@ bindings:
               headers:
                 authorization: Bearer {credentials}
       specs:
-        petstore-rest-spec: specs/petstore-openapi.yaml
+        petstore-rest-spec:
+          catalog:
+            my_apicurio:
+              subject: petstore-openapi
+              version: ${{env.PETSTORE_VERSION}}
+          servers:
+            - url: ${{env.API_URL}}
     exit: north_rest_kafka_proxy
     telemetry:
       metrics:
@@ -38,9 +49,17 @@ bindings:
     options:
       specs:
         openapi:
-          petstore-rest-spec: specs/petstore-openapi.yaml
+          petstore-rest-spec:
+            catalog:
+              my_apicurio:
+                subject: petstore-openapi
+                version: ${{env.PETSTORE_VERSION}}
         asyncapi:
-          petstore-kafka-spec: specs/petstore-kafka-asyncapi.yaml
+          petstore-kafka-spec:
+            catalog:
+              my_apicurio:
+                subject: petstore-asyncapi
+                version: ${{env.PETSTORE_VERSION}}
     routes:
       - when:
           - api-id: petstore-rest-spec
@@ -55,7 +74,13 @@ bindings:
     kind: client
     options:
       specs:
-        petstore-kafka-spec: specs/petstore-kafka-asyncapi.yaml
+        petstore-kafka-spec:
+          catalog:
+            my_apicurio:
+              subject: petstore-asyncapi
+              version: ${{env.PETSTORE_VERSION}}
+          servers:
+            - host: ${{env.KAFKA_BOOTSTRAP_SERVER}}
       kafka:
         sasl:
           mechanism: plain

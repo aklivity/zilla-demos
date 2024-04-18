@@ -5,57 +5,13 @@ on:
     paths:
       - "extras-containers/taxi/grpc/gateway/**/*"
 
-env:
-  IMAGE_NAME: extras-taxi-gateway
-  DOCKERFILE_CONTEXT: extras-containers/taxi/grpc/gateway
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  buildx-push:
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout-cone-mode: false
-          sparse-checkout: ${{ env.DOCKERFILE_CONTEXT }}
-
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
-            type=ref,event=branch
-            type=sha
-          labels: |
-            org.opencontainers.image.title=Zilla Demos ${{ env.IMAGE_NAME }}
-            org.opencontainers.image.description=Supporting container for ${{ env.DOCKERFILE_CONTEXT }}
-            org.opencontainers.image.source=https://github.com/${{ github.repository }}/tree/main/${{ env.DOCKERFILE_CONTEXT }}
-          annotations: |
-            manifest:org.opencontainers.image.title=Zilla Demos ${{ env.IMAGE_NAME }}
-            manifest:org.opencontainers.image.description=Supporting container for ${{ env.DOCKERFILE_CONTEXT }}
-            manifest:org.opencontainers.image.source=https://github.com/${{ github.repository }}/tree/main/${{ env.DOCKERFILE_CONTEXT }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to GHCR
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: ${{ env.DOCKERFILE_CONTEXT }}
-          platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+  docker-buildx-push:
+    uses: ./.github/workflows/extras-container-build.yaml
+    with:
+      image-name: extras-taxi-gateway
+      dockerfile-context: extras-containers/taxi/grpc/gateway
