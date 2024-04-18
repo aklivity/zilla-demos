@@ -9,6 +9,7 @@ on:
 
 permissions:
   packages: write
+  contents: read
 
 jobs:
   docker-buildx-push:
