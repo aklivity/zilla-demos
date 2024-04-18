@@ -2,14 +2,12 @@ name: Build and Push route-guide-server image
 
 on:
   push:
-    branches:
-      - "main"
-    # paths:
-    #   - 'extras-containers/route-guide-server/**/*'
+    paths:
+      - 'extras-containers/route-guide-server/**/*'
 
 permissions:
-  packages: write
   contents: read
+  packages: write
 
 jobs:
   docker-buildx-push:
