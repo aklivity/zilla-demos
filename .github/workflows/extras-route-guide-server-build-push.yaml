@@ -9,7 +9,7 @@ on:
 
 jobs:
   buildx-push:
-    uses: ./.github/workflows/example_test.yml
+    uses: ./.github/workflows/extras-container-build.yaml
     with:
       image-name: extras-route-guide-server
       dockerfile-context: extras-containers/route-guide-server
