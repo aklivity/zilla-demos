@@ -1,5 +1,18 @@
 ---
 name: zilla-taxi-tracking
+
+catalogs:
+  filesystem_catalog:
+    type: filesystem
+    options:
+      subjects:
+        rest-tracking:
+          path: tracking-openapi.yaml
+        kafka-tracking:
+          path: tracking-kafka-asyncapi.yaml
+        mqtt-tracking:
+          path: tracking-mqtt-asyncapi.yaml
+
 bindings:
 
 # REST endpoints
@@ -8,7 +21,10 @@ bindings:
     kind: server
     options:
       specs:
-        rest-tracking-spec: tracking-openapi.yaml
+        rest-tracking-spec: 
+          catalog:
+            filesystem_catalog:
+              subject: rest-tracking
     exit: north_rest_kafka_proxy
   north_rest_kafka_proxy:
     type: openapi-asyncapi
@@ -16,9 +32,15 @@ bindings:
     options:
       specs:
         openapi:
-          rest-tracking-spec: tracking-openapi.yaml
+          rest-tracking-spec: 
+            catalog:
+              filesystem_catalog:
+                subject: rest-tracking
         asyncapi:
-          kafka-tracking-spec: tracking-kafka-asyncapi.yaml
+          kafka-tracking-spec: 
+            catalog:
+              filesystem_catalog:
+                subject: kafka-tracking
     routes:
       - when:
           - api-id: rest-tracking-spec
@@ -32,7 +54,10 @@ bindings:
     kind: server
     options:
       specs:
-        mqtt-tracking-spec: tracking-mqtt-asyncapi.yaml
+        mqtt-tracking-spec:
+          catalog:
+            filesystem_catalog:
+              subject: mqtt-tracking
     exit: mqtt_kafka_proxy
     telemetry:
       metrics:
@@ -42,8 +67,14 @@ bindings:
     kind: proxy
     options:
       specs:
-        mqtt-tracking-spec: tracking-mqtt-asyncapi.yaml
-        kafka-tracking-spec: tracking-kafka-asyncapi.yaml
+        mqtt-tracking-spec: 
+          catalog:
+              filesystem_catalog:
+                subject: mqtt-tracking
+        kafka-tracking-spec: 
+          catalog:
+              filesystem_catalog:
+                subject: kafka-tracking
       mqtt-kafka:
         channels:
           sessions: mqttSessions
@@ -71,7 +102,10 @@ bindings:
     kind: client
     options:
       specs:
-        kafka-tracking-spec: tracking-kafka-asyncapi.yaml
+        kafka-tracking-spec: 
+          catalog:
+              filesystem_catalog:
+                subject: kafka-tracking
     telemetry:
       metrics:
         - stream.*
