@@ -89,7 +89,7 @@ services:
       KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: "PLAIN"
 
   init-kafka:
-    image: bitnami/kafka
+    image: bitnami/kafka:3.5
     user: root
     deploy:
       restart_policy:
