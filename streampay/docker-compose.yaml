@@ -1,0 +1,46 @@
+version: "3"
+services:
+
+  zilla:
+    image: ghcr.io/aklivity/zilla:0.9.79
+    container_name: zilla
+    restart: unless-stopped
+    ports:
+      - 7114:7114
+      - 7190:7190
+    volumes:
+      # - ./tracking-kafka-asyncapi.yaml:/etc/zilla/tracking-kafka-asyncapi.yaml
+      # - ./tracking-openapi.yaml:/etc/zilla/tracking-openapi.yaml
+      - ./zilla.yaml:/etc/zilla/zilla.yaml
+    environment:
+      KAFKA_BOOTSTRAP_SERVER: kafka:9092
+    command: start -v -e
+
+
+  # hailing-ui:
+  #   image: ghcr.io/aklivity/extras-taxi-map-ui:sha-8233ad9
+  #   container_name: hailing-ui
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - zilla
+  #   ports:
+  #     - 80:8080
+  # streampay-stream:
+
+  #   image: "streampay-stream:develop-SNAPSHOT"
+  #   environment:
+  #     SPRING_KAFKA_APPLICATION_ID: stream-service
+  #     SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+  #     SPRING_KAFKA_SECURITY_PROTOCOL: PLAINTEXT
+
+  # streampay-simulation:
+  #   image: "streampay-simulation:develop-SNAPSHOT"
+  #   environment:
+  #     SPRING_KAFKA_APPLICATION_ID: simulation-service
+  #     SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+  #     SPRING_KAFKA_SECURITY_PROTOCOL: PLAINTEXT
+
+networks:
+  default:
+    name: zilla-streampay-demo-network
+    driver: bridge
