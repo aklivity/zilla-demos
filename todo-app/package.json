@@ -1,0 +1,68 @@
+{
+  "name": "todo-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "engines": {
+    "node": ">=16.0.0 <21.0.0"
+  },
+  "dependencies": {
+    "@auth0/auth0-spa-js": "^1.22.0",
+    "@auth0/auth0-vue": "^1.0.1",
+    "@fortawesome/fontawesome-svg-core": "~1.2.36",
+    "@fortawesome/free-solid-svg-icons": "^5.15.4",
+    "@fortawesome/vue-fontawesome": "^3.0.0-5",
+    "core-js": "^3.22.7",
+    "express": "^4.19.2",
+    "highlight.js": "^10.7.3",
+    "morgan": "^1.10.0",
+    "uuid": "^8.3.2",
+    "vue": "^3.2.36",
+    "vue-router": "^4.0.15",
+    "vue3-highlightjs": "^1.0.5"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.18.0",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-plugin-typescript": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "@vue/compiler-sfc": "^3.2.36",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "buffer": "^6.0.3",
+    "error-stack-parser": "2.0.6",
+    "eslint": "^7.5.0",
+    "eslint-plugin-vue": "^7.0.0",
+    "node-sass": "^9.0.0",
+    "sass-loader": "^13.3.3",
+    "typescript": "~4.7.2"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true,
+      "browser": true
+    },
+    "plugins": [
+      "vue"
+    ],
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2020
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
+}
