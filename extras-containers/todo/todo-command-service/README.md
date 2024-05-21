@@ -1,4 +1,4 @@
 ## Build
 ```
-./mvnw clean install
+./mvnw clean install -DskipTests
 ```

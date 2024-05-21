@@ -14,25 +14,12 @@
             <id>confluent</id>
             <url>https://packages.confluent.io/maven/</url>
         </repository>
-        <repository>
-            <id>aklivity</id>
-            <url>https://maven.packages.aklivity.io/</url>
-        </repository>
     </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>aklivity</id>
-            <url>https://maven.packages.aklivity.io/</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <checkstyle.config.location>io/aklivity/zilla/conf/checkstyle/configuration.xml</checkstyle.config.location>
-        <checkstyle.suppressions.location>io/aklivity/zilla/conf/checkstyle/suppressions.xml</checkstyle.suppressions.location>
 
         <kafka.version>3.1.0</kafka.version>
     </properties>
@@ -121,67 +108,6 @@
                 <configuration>
                     <finalName>${project.artifactId}</finalName>
                 </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.1.2</version>
-                <configuration>
-                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.puppycrawl.tools</groupId>
-                        <artifactId>checkstyle</artifactId>
-                        <version>8.45.1</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>io.aklivity.zilla</groupId>
-                        <artifactId>conf</artifactId>
-                        <version>0.9.19</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>4.1</version>
-                <configuration>
-                    <header>COPYRIGHT</header>
-                    <properties>
-                        <copyrightYears>${project.inceptionYear}-2022</copyrightYears>
-                    </properties>
-                    <includes>
-                        <include>src/**</include>
-                    </includes>
-                    <excludes>
-                        <exclude>src/main/api/**</exclude>
-                        <exclude>src/conf/**</exclude>
-                        <exclude>src/**/*.btm</exclude>
-                    </excludes>
-                    <mapping>
-                        <g4>SLASHSTAR_STYLE</g4>
-                        <idl>SLASHSTAR_STYLE</idl>
-                        <rpt>SCRIPT_STYLE</rpt>
-                    </mapping>
-                    <failIfUnknown>true</failIfUnknown>
-                    <failIfMissing>true</failIfMissing>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

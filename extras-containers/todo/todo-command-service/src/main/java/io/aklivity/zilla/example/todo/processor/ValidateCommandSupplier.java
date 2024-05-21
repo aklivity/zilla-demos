@@ -1,6 +1,3 @@
-/*
- * Copyright 2021-2022 Aklivity. All rights reserved.
- */
 package io.aklivity.zilla.example.todo.processor;
 
 import java.util.Arrays;

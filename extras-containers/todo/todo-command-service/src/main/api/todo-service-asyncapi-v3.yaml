@@ -59,7 +59,7 @@ components:
         allOf:
           - $ref : '#/components/schemas/command'
           - properties:
-              zilla:domain-model:
+              todo-command:operation:
                 type: string
                 description: create task domain model name
                 const: 'CreateTaskCommand'
@@ -72,7 +72,7 @@ components:
         allOf:
           - $ref : '#/components/schemas/command'
           - properties:
-              zilla:domain-model:
+              todo-command:operation:
                 type: string
                 description: rename task domain model name
                 const: 'RenameTaskCommand'
@@ -85,7 +85,7 @@ components:
         allOf:
           - $ref : '#/components/schemas/command'
           - properties:
-              zilla:domain-model:
+              todo-command:operation:
                 type: string
                 description: delete task domain model name
                 const: 'DeleteTaskCommand'

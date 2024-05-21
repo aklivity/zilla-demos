@@ -1,13 +1,11 @@
-FROM bellsoft/liberica-runtime-container:jre-17-cds-slim-glibc as builder
-WORKDIR /builder
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} application.jar
-RUN java -Djarmode=tools -jar application.jar extract --layers --destination extracted
+FROM openjdk:17-jdk-slim as builder
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+COPY src src
 
-FROM bellsoft/liberica-runtime-container:jre-17-cds-slim-glibc
-WORKDIR /application
-COPY --from=builder /builder/extracted/dependencies/ ./
-COPY --from=builder /builder/extracted/spring-boot-loader/ ./
-COPY --from=builder /builder/extracted/snapshot-dependencies/ ./
-COPY --from=builder /builder/extracted/application/ ./
-ENTRYPOINT ["java", "-jar", "application.jar"]
+RUN --mount=type=cache,target=/root/.m2 ./mvnw install -DskipTests
+
+FROM openjdk:17-jdk-slim
+COPY --from=builder target/todo-service.jar /
+ENTRYPOINT ["java", "-jar", "/todo-service.jar"]

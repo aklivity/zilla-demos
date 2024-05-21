@@ -1,6 +1,3 @@
-/*
- * Copyright 2021-2022 Aklivity. All rights reserved.
- */
 package io.aklivity.zilla.example.todo;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -92,7 +89,7 @@ public class ProcessorTest
     {
         final Headers headers = new RecordHeaders(
                 new Header[]{
-                    new RecordHeader("zilla:domain-model", "CreateTaskCommand".getBytes()),
+                    new RecordHeader("todo-command:operation", "CreateTaskCommand".getBytes()),
                     new RecordHeader("zilla:correlation-id", "1".getBytes()),
                     new RecordHeader("idempotency-key", "task1".getBytes()),
                     new RecordHeader(":path", "/task".getBytes())
@@ -111,7 +108,7 @@ public class ProcessorTest
     {
         final Headers createHeaders = new RecordHeaders(
                 new Header[]{
-                    new RecordHeader("zilla:domain-model", "CreateTaskCommand".getBytes()),
+                    new RecordHeader("todo-command:operation", "CreateTaskCommand".getBytes()),
                     new RecordHeader("zilla:correlation-id", "1".getBytes()),
                     new RecordHeader("idempotency-key", "task1".getBytes()),
                     new RecordHeader(":path", "/task".getBytes())
@@ -121,7 +118,7 @@ public class ProcessorTest
                 .build(), createHeaders));
         final Headers headers = new RecordHeaders(
                 new Header[]{
-                    new RecordHeader("zilla:domain-model", "RenameTaskCommand".getBytes()),
+                    new RecordHeader("todo-command:operation", "RenameTaskCommand".getBytes()),
                     new RecordHeader("zilla:correlation-id", "1".getBytes()),
                     new RecordHeader("idempotency-key", "task1".getBytes()),
                     new RecordHeader(":path", "/task".getBytes())
@@ -140,7 +137,7 @@ public class ProcessorTest
     {
         final Headers headers = new RecordHeaders(
                 new Header[]{
-                    new RecordHeader("zilla:domain-model", "DeleteTaskCommand".getBytes()),
+                    new RecordHeader("todo-command:operation", "DeleteTaskCommand".getBytes()),
                     new RecordHeader("zilla:correlation-id", "1".getBytes()),
                     new RecordHeader("idempotency-key", "task1".getBytes()),
                     new RecordHeader(":path", "/task".getBytes())
@@ -159,7 +156,7 @@ public class ProcessorTest
     {
         final Headers createHeaders = new RecordHeaders(
                 new Header[]{
-                    new RecordHeader("zilla:domain-model", "CreateTaskCommand".getBytes()),
+                    new RecordHeader("todo-command:operation", "CreateTaskCommand".getBytes()),
                     new RecordHeader("zilla:correlation-id", "1".getBytes()),
                     new RecordHeader("idempotency-key", "task1".getBytes()),
                     new RecordHeader(":path", "/task".getBytes())
@@ -170,7 +167,7 @@ public class ProcessorTest
         final TestRecord<String, Task> testRecord = snapshotsOutTopic.readRecord();
         final Headers updateHeaders = new RecordHeaders(
                 new Header[]{
-                    new RecordHeader("zilla:domain-model", "RenameTaskCommand".getBytes()),
+                    new RecordHeader("todo-command:operation", "RenameTaskCommand".getBytes()),
                     new RecordHeader("zilla:correlation-id", "1".getBytes()),
                     new RecordHeader("idempotency-key", "task1".getBytes()),
                     new RecordHeader("if-match", testRecord.headers().lastHeader("etag").value()),
@@ -191,7 +188,7 @@ public class ProcessorTest
     {
         final Headers createHeaders = new RecordHeaders(
                 new Header[]{
-                    new RecordHeader("zilla:domain-model", "CreateTaskCommand".getBytes()),
+                    new RecordHeader("todo-command:operation", "CreateTaskCommand".getBytes()),
                     new RecordHeader("zilla:correlation-id", "1".getBytes()),
                     new RecordHeader("idempotency-key", "task1".getBytes()),
                     new RecordHeader(":path", "/task".getBytes())
@@ -201,7 +198,7 @@ public class ProcessorTest
                 .build(), createHeaders));
         final Headers updateHeaders = new RecordHeaders(
                 new Header[]{
-                    new RecordHeader("zilla:domain-model", "RenameTaskCommand".getBytes()),
+                    new RecordHeader("todo-command:operation", "RenameTaskCommand".getBytes()),
                     new RecordHeader("zilla:correlation-id", "1".getBytes()),
                     new RecordHeader("idempotency-key", "task1".getBytes()),
                     new RecordHeader("if-match", "wrong-etag".getBytes()),
@@ -219,7 +216,7 @@ public class ProcessorTest
     {
         final Headers createHeaders = new RecordHeaders(
                 new Header[]{
-                    new RecordHeader("zilla:domain-model", "CreateTaskCommand".getBytes()),
+                    new RecordHeader("todo-command:operation", "CreateTaskCommand".getBytes()),
                     new RecordHeader("zilla:correlation-id", "1".getBytes()),
                     new RecordHeader("idempotency-key", "task1".getBytes()),
                     new RecordHeader(":path", "/task".getBytes())

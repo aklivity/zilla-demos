@@ -1,6 +1,3 @@
-/*
- * Copyright 2021-2022 Aklivity. All rights reserved.
- */
 package io.aklivity.zilla.example.todo.serde;
 
 import org.apache.kafka.common.errors.SerializationException;
@@ -28,7 +25,7 @@ public class CommandJsonDeserializer implements Deserializer<Command>
     @Override
     public Command deserialize(String topic, Headers headers, byte[] data)
     {
-        final Header domainModelHeader = headers.lastHeader("zilla:domain-model");
+        final Header domainModelHeader = headers.lastHeader("todo-command:operation");
         final Header correlationId = headers.lastHeader("zilla:correlation-id");
         final String domainModel = new String(domainModelHeader.value());
 
