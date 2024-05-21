@@ -1,0 +1,17 @@
+name: Build and Push taxi-gateway image
+
+on:
+  push:
+    paths:
+      - "extras-containers/todo/todo-command-service/**/*"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  docker-buildx-push:
+    uses: ./.github/workflows/extras-container-build.yaml
+    with:
+      image-name: extras-todo-command-service
+      dockerfile-context: extras-containers/todo/todo-command-service

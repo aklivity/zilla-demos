@@ -1,0 +1,148 @@
+asyncapi: 3.0.0 # not yet released
+id: urn:io.aklivity.zilla.example.todo.service
+info:
+  title: Todo Service
+  description: Manage a list of todo tasks
+  version: 0.1.0
+operations:
+  createTask:
+    channel: task-commands
+    action: receive
+    title: Create a new task
+    summary: Request service to create a new task in the system
+    tags:
+      - name: Tasks API
+    message:
+      $ref : '#/components/messages/CreateTaskCommand'
+    reply:
+      message:
+        $ref : '#/components/messages/TaskReply'
+  renameTask:
+    channel: task-commands
+    action: receive
+    title: Rename an existing task
+    summary: Request service to rename an existing task in the system
+    tags:
+      - name: Tasks API
+    message:
+      $ref : '#/components/messages/RenameTaskCommand'
+    reply:
+      message:
+        $ref : '#/components/messages/TaskReply'
+  deleteTask:
+    channel: task-commands
+    action: receive
+    title: Delete task
+    summary: Request service to delete an existing task from the system
+    tags:
+      - name: Tasks API
+    message:
+      $ref : '#/components/messages/DeleteTaskCommand'
+    reply:
+      message:
+        $ref : '#/components/messages/TaskReply'
+  taskUpdated:
+    channel: task-snapshots
+    action: send
+    title: Task updated
+    summary: Notify observers when a task is updated
+    tags:
+      - name: Tasks API
+    message:
+      $ref : '#/components/messages/TaskSnapshot'
+components:
+  messages:
+    CreateTaskCommand:
+      name: createTask
+      contentType: application/json
+      headers:
+        allOf:
+          - $ref : '#/components/schemas/command'
+          - properties:
+              zilla:domain-model:
+                type: string
+                description: create task domain model name
+                const: 'CreateTaskCommand'
+      payload:
+        $ref : '#/components/schemas/task'
+    RenameTaskCommand:
+      name: renameTask
+      contentType: application/json
+      headers:
+        allOf:
+          - $ref : '#/components/schemas/command'
+          - properties:
+              zilla:domain-model:
+                type: string
+                description: rename task domain model name
+                const: 'RenameTaskCommand'
+      payload:
+        $ref : '#/components/schemas/task'
+    DeleteTaskCommand:
+      name: deleteTask
+      contentType: application/json
+      headers:
+        allOf:
+          - $ref : '#/components/schemas/command'
+          - properties:
+              zilla:domain-model:
+                type: string
+                description: delete task domain model name
+                const: 'DeleteTaskCommand'
+    TaskReply:
+      name: taskReply
+      headers:
+        $ref : '#/components/schemas/reply'
+    TaskSnapshot:
+      name: taskSnapshot
+      contentType: application/json
+      payload:
+        $ref : '#/components/schemas/task'
+      bindings:
+        kafka:
+          key:
+            type: string
+  schemas:
+    command:
+      type: object
+      properties:
+        zilla:correlation-id:
+          type: string
+          description: correlation identifier
+        zilla:reply-to:
+          type: string
+          description: reply topic name
+        idempotency-key:
+          type: string
+          format: uuid
+          description: command identifier
+        :path:
+          type: string
+          description: command path
+        if-match:
+          type: string
+          description: command conditional tag
+      required:
+        - zilla:correlation-id
+        - zilla:reply-to
+        - idempotency-key
+        - :path
+    reply:
+      type: object
+      properties:
+        zilla:correlation-id:
+          type: string
+          description: correlation identifier
+        :status:
+          type: string
+          description: reply status
+        etag:
+          type: string
+          description: reply tag
+    task:
+      type: object
+      description: Task structure
+      properties:
+        name:
+          type: string
+          description: task name
