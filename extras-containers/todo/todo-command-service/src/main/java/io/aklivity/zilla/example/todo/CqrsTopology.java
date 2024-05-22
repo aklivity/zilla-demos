@@ -34,13 +34,13 @@ public class CqrsTopology
     private final Serde<Task> taskSerde = SerdeFactory.jsonSerdeFor(Task.class, false);
     private final Serde<String> responseSerde = Serdes.String();
 
-    @Value("${task.commands.topic}")
+    @Value("${task.commands.topic:task-commands}")
     String taskCommandsTopic;
 
-    @Value("${task.snapshots.topic}")
+    @Value("${task.snapshots.topic:task-snapshots}")
     String taskSnapshotsTopic;
 
-    @Value("${task.replies.topic}")
+    @Value("${task.replies.topic:task-replies}")
     String taskRepliesTopic;
 
 

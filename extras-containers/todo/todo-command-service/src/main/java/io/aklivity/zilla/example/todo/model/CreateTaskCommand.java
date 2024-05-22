@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @Getter
 public class CreateTaskCommand implements Command
 {
-    String name;
+    String title;
 }

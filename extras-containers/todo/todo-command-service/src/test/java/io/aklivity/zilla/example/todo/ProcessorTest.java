@@ -32,7 +32,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import io.aklivity.zilla.example.todo.model.Command;
 import io.aklivity.zilla.example.todo.model.CreateTaskCommand;
 import io.aklivity.zilla.example.todo.model.DeleteTaskCommand;
-import io.aklivity.zilla.example.todo.model.RenameTaskCommand;
+import io.aklivity.zilla.example.todo.model.UpdateTaskCommand;
 import io.aklivity.zilla.example.todo.model.Task;
 import io.confluent.kafka.serializers.KafkaJsonDeserializer;
 
@@ -95,7 +95,7 @@ public class ProcessorTest
                     new RecordHeader(":path", "/task".getBytes())
                 });
         commandsInTopic.pipeInput(new TestRecord<>("task1", CreateTaskCommand.builder()
-                .name("Test")
+                .title("Test")
                 .build(), headers));
         List<KeyValue<String, Object>> response = commandsResponseTopic.readKeyValuesToList();
         assertEquals(1, response.size());
@@ -114,17 +114,17 @@ public class ProcessorTest
                     new RecordHeader(":path", "/task".getBytes())
                 });
         commandsInTopic.pipeInput(new TestRecord<>("task1", CreateTaskCommand.builder()
-                .name("Test")
+                .title("Test")
                 .build(), createHeaders));
         final Headers headers = new RecordHeaders(
                 new Header[]{
-                    new RecordHeader("todo-command:operation", "RenameTaskCommand".getBytes()),
+                    new RecordHeader("todo-command:operation", "UpdateTaskCommand".getBytes()),
                     new RecordHeader("zilla:correlation-id", "1".getBytes()),
                     new RecordHeader("idempotency-key", "task1".getBytes()),
                     new RecordHeader(":path", "/task".getBytes())
                 });
-        commandsInTopic.pipeInput(new TestRecord<>("task1", RenameTaskCommand.builder()
-                .name("Test")
+        commandsInTopic.pipeInput(new TestRecord<>("task1", UpdateTaskCommand.builder()
+                .title("Test")
                 .build(), headers));
         List<KeyValue<String, Object>> response = commandsResponseTopic.readKeyValuesToList();
         assertEquals(2, response.size());
@@ -162,19 +162,19 @@ public class ProcessorTest
                     new RecordHeader(":path", "/task".getBytes())
                 });
         commandsInTopic.pipeInput(new TestRecord<>("task1", CreateTaskCommand.builder()
-                .name("Test")
+                .title("Test")
                 .build(), createHeaders));
         final TestRecord<String, Task> testRecord = snapshotsOutTopic.readRecord();
         final Headers updateHeaders = new RecordHeaders(
                 new Header[]{
-                    new RecordHeader("todo-command:operation", "RenameTaskCommand".getBytes()),
+                    new RecordHeader("todo-command:operation", "UpdateTaskCommand".getBytes()),
                     new RecordHeader("zilla:correlation-id", "1".getBytes()),
                     new RecordHeader("idempotency-key", "task1".getBytes()),
                     new RecordHeader("if-match", testRecord.headers().lastHeader("etag").value()),
                     new RecordHeader(":path", "/task".getBytes())
                 });
-        commandsInTopic.pipeInput(new TestRecord<>("task1", RenameTaskCommand.builder()
-                .name("Test")
+        commandsInTopic.pipeInput(new TestRecord<>("task1", UpdateTaskCommand.builder()
+                .title("Test")
                 .build(), updateHeaders));
         List<TestRecord<String, Object>> responses = commandsResponseTopic.readRecordsToList();
         assertArrayEquals("204".getBytes(), responses.get(1).headers().lastHeader(":status").value());
@@ -194,18 +194,18 @@ public class ProcessorTest
                     new RecordHeader(":path", "/task".getBytes())
                 });
         commandsInTopic.pipeInput(new TestRecord<>("task1", CreateTaskCommand.builder()
-                .name("Test1")
+                .title("Test1")
                 .build(), createHeaders));
         final Headers updateHeaders = new RecordHeaders(
                 new Header[]{
-                    new RecordHeader("todo-command:operation", "RenameTaskCommand".getBytes()),
+                    new RecordHeader("todo-command:operation", "UpdateTaskCommand".getBytes()),
                     new RecordHeader("zilla:correlation-id", "1".getBytes()),
                     new RecordHeader("idempotency-key", "task1".getBytes()),
                     new RecordHeader("if-match", "wrong-etag".getBytes()),
                     new RecordHeader(":path", "/task".getBytes())
                 });
-        commandsInTopic.pipeInput(new TestRecord<>("task1", RenameTaskCommand.builder()
-                .name("Test2")
+        commandsInTopic.pipeInput(new TestRecord<>("task1", UpdateTaskCommand.builder()
+                .title("Test2")
                 .build(), updateHeaders));
         List<TestRecord<String, Object>> responses = commandsResponseTopic.readRecordsToList();
         assertArrayEquals("412".getBytes(), responses.get(1).headers().lastHeader(":status").value());
@@ -222,10 +222,10 @@ public class ProcessorTest
                     new RecordHeader(":path", "/task".getBytes())
                 });
         commandsInTopic.pipeInput(new TestRecord<>("task1", CreateTaskCommand.builder()
-                .name("Test")
+                .title("Test")
                 .build(), createHeaders));
         commandsInTopic.pipeInput(new TestRecord<>("task1", CreateTaskCommand.builder()
-                .name("Test")
+                .title("Test")
                 .build(), createHeaders));
         List<KeyValue<String, Object>> response = commandsResponseTopic.readKeyValuesToList();
         assertEquals(1, response.size());

@@ -16,12 +16,12 @@ channels:
       x-reply-to: task-replies
   task-commands/rename:
     publish:
-      operationId: renameTask
+      operationId: updateTask
       summary: Request service to rename an existing task in the system
       tags:
         - name: Tasks API
       message:
-        $ref : '#/components/messages/RenameTaskCommand'
+        $ref : '#/components/messages/UpdateTaskCommand'
       x-reply-to: task-replies
   task-commands/delete:
     publish:
@@ -60,8 +60,8 @@ components:
                 const: 'CreateTaskCommand'
       payload:
         $ref : '#/components/schemas/task'
-    RenameTaskCommand:
-      name: renameTask
+    UpdateTaskCommand:
+      name: updateTask
       contentType: application/json
       headers:
         allOf:
@@ -70,7 +70,7 @@ components:
               todo-command:operation:
                 type: string
                 description: rename task domain model name
-                const: 'RenameTaskCommand'
+                const: 'UpdateTaskCommand'
       payload:
         $ref : '#/components/schemas/task'
     DeleteTaskCommand:
