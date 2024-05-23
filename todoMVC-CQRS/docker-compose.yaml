@@ -24,7 +24,7 @@ services:
   #     - 80:8080
 
   todo-command-service:
-    image: ghcr.io/aklivity/extras-todo-command-service:sha-a47b9e4
+    image: ghcr.io/aklivity/extras-todo-command-service:add-todo-app
     container_name: todo-command-service
     restart: unless-stopped
     depends_on:
