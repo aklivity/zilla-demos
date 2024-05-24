@@ -1,0 +1,46 @@
+version: "3"
+services:
+
+  zilla:
+    image: ghcr.io/aklivity/zilla:0.9.79
+    container_name: zilla
+    restart: unless-stopped
+    ports:
+      - 7114:7114
+      - 7190:7190
+    volumes:
+      - ./zilla.yaml:/etc/zilla/zilla.yaml
+    environment:
+      KAFKA_BOOTSTRAP_SERVER: kafka:9092
+    command: start -v -e
+
+
+  ui:
+    image: ghcr.io/aklivity/extras-streampay-ui:update-streampay
+    container_name: ui
+    restart: unless-stopped
+    depends_on:
+      - zilla
+    ports:
+      - 80:80
+
+  stream:
+    image: ghcr.io/aklivity/extras-streampay-command-service:update-streampay
+    container_name: command-service
+    environment:
+      SPRING_KAFKA_APPLICATION_ID: stream-service
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_SECURITY_PROTOCOL: PLAINTEXT
+
+  simulation:
+    image: ghcr.io/aklivity/extras-streampay-simulation:update-streampay
+    container_name: simulation
+    environment:
+      SPRING_KAFKA_APPLICATION_ID: simulation-service
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_SECURITY_PROTOCOL: PLAINTEXT
+
+networks:
+  default:
+    name: zilla-streampay-demo-network
+    driver: bridge
