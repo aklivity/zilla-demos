@@ -11,5 +11,5 @@ RUN --mount=type=cache,target=/root/.m2 ./mvnw install -DskipTests
 
 FROM openjdk:17-jdk-slim
 ARG JAR_NAME="application"
-COPY --from=builder ${JAR_NAME}/target/${JAR_NAME}.jar /
-ENTRYPOINT ["java", "-jar", "/$JAR_NAME.jar"]
+COPY --from=builder ${JAR_NAME}/target/${JAR_NAME}.jar /application.jar
+ENTRYPOINT ["java", "-jar", "/application.jar"]
