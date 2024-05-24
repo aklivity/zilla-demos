@@ -18,7 +18,7 @@ services:
 
 
   ui:
-    image: ghcr.io/aklivity/extras-streampay-ui:sha-8233ad9
+    image: ghcr.io/aklivity/extras-streampay-ui:sha-2030758
     container_name: hailing-ui
     restart: unless-stopped
     depends_on:
@@ -27,14 +27,14 @@ services:
       - 80:8080
 
   stream:
-    image: ghcr.io/aklivity/extras-streampay-stream:sha-8233ad9
+    image: ghcr.io/aklivity/extras-streampay-command-service:sha-2030758
     environment:
       SPRING_KAFKA_APPLICATION_ID: stream-service
       SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
       SPRING_KAFKA_SECURITY_PROTOCOL: PLAINTEXT
 
   simulation:
-    image: ghcr.io/aklivity/extras-streampay-simulation:sha-8233ad9
+    image: ghcr.io/aklivity/extras-streampay-simulation:sha-2030758
     environment:
       SPRING_KAFKA_APPLICATION_ID: simulation-service
       SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
