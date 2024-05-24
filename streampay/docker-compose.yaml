@@ -9,8 +9,6 @@ services:
       - 7114:7114
       - 7190:7190
     volumes:
-      # - ./tracking-kafka-asyncapi.yaml:/etc/zilla/tracking-kafka-asyncapi.yaml
-      # - ./tracking-openapi.yaml:/etc/zilla/tracking-openapi.yaml
       - ./zilla.yaml:/etc/zilla/zilla.yaml
     environment:
       KAFKA_BOOTSTRAP_SERVER: kafka:9092
@@ -18,26 +16,28 @@ services:
 
 
   ui:
-    image: ghcr.io/aklivity/extras-streampay-ui:sha-2030758
-    container_name: hailing-ui
+    image: ghcr.io/aklivity/extras-streampay-ui:update-streampay
+    container_name: ui
     restart: unless-stopped
     depends_on:
       - zilla
     ports:
-      - 80:8080
+      - 80:80
 
   stream:
-    image: ghcr.io/aklivity/extras-streampay-command-service:sha-2030758
+    image: ghcr.io/aklivity/extras-streampay-command-service:update-streampay
+    container_name: command-service
     environment:
       SPRING_KAFKA_APPLICATION_ID: stream-service
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_KAFKA_SECURITY_PROTOCOL: PLAINTEXT
 
   simulation:
-    image: ghcr.io/aklivity/extras-streampay-simulation:sha-2030758
+    image: ghcr.io/aklivity/extras-streampay-simulation:update-streampay
+    container_name: simulation
     environment:
       SPRING_KAFKA_APPLICATION_ID: simulation-service
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_KAFKA_SECURITY_PROTOCOL: PLAINTEXT
 
 networks:
