@@ -17,28 +17,28 @@ services:
     command: start -v -e
 
 
-  # hailing-ui:
-  #   image: ghcr.io/aklivity/extras-taxi-map-ui:sha-8233ad9
-  #   container_name: hailing-ui
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - zilla
-  #   ports:
-  #     - 80:8080
-  # streampay-stream:
+  ui:
+    image: ghcr.io/aklivity/extras-streampay-ui:sha-8233ad9
+    container_name: hailing-ui
+    restart: unless-stopped
+    depends_on:
+      - zilla
+    ports:
+      - 80:8080
 
-  #   image: "streampay-stream:develop-SNAPSHOT"
-  #   environment:
-  #     SPRING_KAFKA_APPLICATION_ID: stream-service
-  #     SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
-  #     SPRING_KAFKA_SECURITY_PROTOCOL: PLAINTEXT
+  stream:
+    image: ghcr.io/aklivity/extras-streampay-stream:sha-8233ad9
+    environment:
+      SPRING_KAFKA_APPLICATION_ID: stream-service
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      SPRING_KAFKA_SECURITY_PROTOCOL: PLAINTEXT
 
-  # streampay-simulation:
-  #   image: "streampay-simulation:develop-SNAPSHOT"
-  #   environment:
-  #     SPRING_KAFKA_APPLICATION_ID: simulation-service
-  #     SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
-  #     SPRING_KAFKA_SECURITY_PROTOCOL: PLAINTEXT
+  simulation:
+    image: ghcr.io/aklivity/extras-streampay-simulation:sha-8233ad9
+    environment:
+      SPRING_KAFKA_APPLICATION_ID: simulation-service
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      SPRING_KAFKA_SECURITY_PROTOCOL: PLAINTEXT
 
 networks:
   default:
