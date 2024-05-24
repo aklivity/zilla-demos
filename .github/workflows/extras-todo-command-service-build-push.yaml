@@ -1,4 +1,4 @@
-name: Build and Push taxi-gateway image
+name: Build and Push todo-command image
 
 on:
   push:

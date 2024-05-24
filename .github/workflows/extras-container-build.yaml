@@ -11,6 +11,11 @@ on:
         required: true
         description: Path to dockerfile
         type: string
+      build-args:
+        description: "build-time variables"
+        required: false
+        type: string
+      
   workflow_call:
     inputs:
       image-name:
@@ -19,6 +24,11 @@ on:
       dockerfile-context:
         required: true
         type: string
+      build-args:
+        description: "build-time variables"
+        required: false
+        type: string
+
 
 jobs:
   docker-buildx-push:
@@ -66,6 +76,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ${{ inputs.dockerfile-context }}
+          build-args: ${{ inputs.build-args }}
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}

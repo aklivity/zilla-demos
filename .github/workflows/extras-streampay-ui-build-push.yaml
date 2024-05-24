@@ -1,0 +1,17 @@
+name: Build and Push streampay-ui image
+
+on:
+  push:
+    paths:
+      - "extras-containers/streampay/ui/**/*"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  docker-buildx-push:
+    uses: ./.github/workflows/extras-container-build.yaml
+    with:
+      image-name: extras-streampay-ui
+      dockerfile-context: extras-containers/streampay/ui

@@ -1,0 +1,24 @@
+name: Build and Push streampay-service image
+
+on:
+  push:
+    paths:
+      - "extras-containers/streampay/service/**/*"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  stream-docker-buildx-push:
+    uses: ./.github/workflows/extras-container-build.yaml
+    with:
+      image-name: extras-streampay-command-service
+      dockerfile-context: extras-containers/streampay/service
+      build-args: JAR_NAME=stream
+  simulation-docker-buildx-push:
+    uses: ./.github/workflows/extras-container-build.yaml
+    with:
+      image-name: extras-streampay-simulation
+      dockerfile-context: extras-containers/streampay/service
+      build-args: JAR_NAME=simulation
