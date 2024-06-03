@@ -105,14 +105,14 @@ Use your favorite REST client with either OpenAPI spec to generate an interface 
 Both the `/pet` and `/store/order` endpoints all proxy to Kafka synchronously meaning they will behave like a normal rest endpoint where the message persists on a kafka topics
 
 - The [petstore-pets](http://localhost:8080/ui/clusters/localhost/all-topics/petstore-pets/messages) Kafka topic will have all the pets you posted, updated, and deleted.
-- The [petstore-orders](http://localhost:8080/ui/clusters/localhost/all-topics/petstore-pets/messages) Kafka topic will have all the order you posted or deleted.
+- The [petstore-orders](http://localhost:8080/ui/clusters/localhost/all-topics/petstore-orders/messages) Kafka topic will have all the order you posted or deleted.
 
 ### Asynchronous APIs
 
 The `/customer` endpoint is an asynchronous endpoint meaning it will success with a `202 ACCEPTED` response and include a `Location` header that will include the correlation id used in the `/customer;cid={correlationId}` endpoint.
 
-- The [petstore-customers](http://localhost:8080/ui/clusters/localhost/all-topics/petstore-pets/messages) Kafka topic will have all the pending customer object you posted with a `zilla:correlation-id` header on the kafka message.
-- The [petstore-verified-customers](http://localhost:8080/ui/clusters/localhost/all-topics/petstore-pets/messages) Kafka topic will have all the verified customers and will need to include a matching `zilla:correlation-id` header to align with the message on the initial topic.
+- The [petstore-customers](http://localhost:8080/ui/clusters/localhost/all-topics/petstore-customers/messages) Kafka topic will have all the pending customer object you posted with a `zilla:correlation-id` header on the kafka message.
+- The [petstore-verified-customers](http://localhost:8080/ui/clusters/localhost/all-topics/petstore-verified-customers/messages) Kafka topic will have all the verified customers and will need to include a matching `zilla:correlation-id` header to align with the message on the initial topic.
 
 Here is an example using `kcat` to produce the correlated message:
 
