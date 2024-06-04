@@ -1,0 +1,17 @@
+name: Build and Push todo-mvc-ui image
+
+on:
+  push:
+    paths:
+      - "extras-containers/todo/todo-mvc-ui/**/*"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  docker-buildx-push:
+    uses: ./.github/workflows/extras-container-build.yaml
+    with:
+      image-name: extras-todo-mvc-ui
+      dockerfile-context: extras-containers/todo/todo-mvc-ui
