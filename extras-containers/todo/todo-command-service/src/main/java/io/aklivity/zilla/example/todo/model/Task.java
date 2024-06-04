@@ -13,5 +13,7 @@ import lombok.extern.jackson.Jacksonized;
 @Data
 public class Task
 {
-    private String name;
+    private String id;
+    private String title;
+    private Boolean completed;
 }

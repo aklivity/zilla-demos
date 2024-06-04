@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.aklivity.zilla.example.todo.model.Command;
 import io.aklivity.zilla.example.todo.model.CreateTaskCommand;
 import io.aklivity.zilla.example.todo.model.DeleteTaskCommand;
-import io.aklivity.zilla.example.todo.model.RenameTaskCommand;
+import io.aklivity.zilla.example.todo.model.UpdateTaskCommand;
 import io.confluent.kafka.serializers.jackson.Jackson;
 
 public class CommandJsonDeserializer implements Deserializer<Command>
@@ -37,8 +37,8 @@ public class CommandJsonDeserializer implements Deserializer<Command>
             case "CreateTaskCommand" :
                 type = objectMapper.getTypeFactory().constructType(CreateTaskCommand.class);
                 break;
-            case "RenameTaskCommand" :
-                type = objectMapper.getTypeFactory().constructType(RenameTaskCommand.class);
+            case "UpdateTaskCommand" :
+                type = objectMapper.getTypeFactory().constructType(UpdateTaskCommand.class);
                 break;
             case "DeleteTaskCommand" :
                 type = objectMapper.getTypeFactory().constructType(DeleteTaskCommand.class);

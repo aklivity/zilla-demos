@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Getter
-public class RenameTaskCommand implements Command
+public class UpdateTaskCommand implements Command
 {
-    String name;
+    String id;
+    String title;
+    Boolean completed;
 }

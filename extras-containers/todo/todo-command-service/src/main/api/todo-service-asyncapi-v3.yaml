@@ -17,7 +17,7 @@ operations:
     reply:
       message:
         $ref : '#/components/messages/TaskReply'
-  renameTask:
+  updateTask:
     channel: task-commands
     action: receive
     title: Rename an existing task
@@ -25,7 +25,7 @@ operations:
     tags:
       - name: Tasks API
     message:
-      $ref : '#/components/messages/RenameTaskCommand'
+      $ref : '#/components/messages/UpdateTaskCommand'
     reply:
       message:
         $ref : '#/components/messages/TaskReply'
@@ -65,8 +65,8 @@ components:
                 const: 'CreateTaskCommand'
       payload:
         $ref : '#/components/schemas/task'
-    RenameTaskCommand:
-      name: renameTask
+    UpdateTaskCommand:
+      name: updateTask
       contentType: application/json
       headers:
         allOf:
@@ -75,7 +75,7 @@ components:
               todo-command:operation:
                 type: string
                 description: rename task domain model name
-                const: 'RenameTaskCommand'
+                const: 'UpdateTaskCommand'
       payload:
         $ref : '#/components/schemas/task'
     DeleteTaskCommand:
