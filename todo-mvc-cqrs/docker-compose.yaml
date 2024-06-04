@@ -1,0 +1,42 @@
+version: "3"
+services:
+
+  zilla:
+    image: ghcr.io/aklivity/zilla:0.9.80
+    container_name: zilla
+    restart: unless-stopped
+    ports:
+      - 7114:7114
+      - 7190:7190
+    volumes:
+      - ./zilla.yaml:/etc/zilla/zilla.yaml
+    environment:
+      KAFKA_BOOTSTRAP_SERVER: kafka:9092
+    command: start -v -e -Pzilla.binding.kafka.client.produce.record.framing.size=2048
+
+  # todoMVC-CQRS:
+  #   image: ghcr.io/aklivity/extras-taxi-map-ui:sha-8233ad9
+  #   container_name: hailing-ui
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - zilla
+  #   ports:
+  #     - 80:8080
+
+  todo-command-service:
+    image: ghcr.io/aklivity/extras-todo-command-service:add-todo-app
+    container_name: todo-command-service
+    restart: unless-stopped
+    depends_on:
+      - zilla
+    environment:
+      SPRING_KAFKA_APPLICATION_ID: todo-command-service
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      # TASK_COMMANDS_TOPIC: task-commands
+      # TASK_SNAPSHOTS_TOPIC: task-snapshots
+      # TASK_REPLIES_TOPIC: task-replies
+
+networks:
+  default:
+    name: zilla-todo-demo-network
+    driver: bridge
