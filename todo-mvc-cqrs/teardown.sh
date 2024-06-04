@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
 
-NAMESPACE=zilla-todo-demo
-
+NAMESPACE="${NAMESPACE:-zilla-todo-mvc-demo}"
 docker-compose -p $NAMESPACE down --remove-orphans

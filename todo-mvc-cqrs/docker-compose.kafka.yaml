@@ -6,8 +6,7 @@ services:
     container_name: kafka
     restart: unless-stopped
     ports:
-      - 19092:19092
-      - 9092:9092
+      - ${KAFKA_PORT}:${KAFKA_PORT}
     environment:
       ALLOW_PLAINTEXT_LISTENER: "yes"
       KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
@@ -18,9 +17,9 @@ services:
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_CFG_LOG_DIRS: "/tmp/logs"
       KAFKA_CFG_PROCESS_ROLES: "broker,controller"
-      KAFKA_CFG_LISTENERS: "CLIENT://:19092,INTERNAL://:9092,CONTROLLER://:9093"
+      KAFKA_CFG_LISTENERS: "CLIENT://:${KAFKA_PORT},INTERNAL://:19092,CONTROLLER://:9093"
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "CLIENT://localhost:19092,INTERNAL://kafka:9092"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "CLIENT://${KAFKA_BOOTSTRAP_SERVER},INTERNAL://kafka:19092"
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
 
   kafka-init:
@@ -29,14 +28,13 @@ services:
     command:
       - "-c"
       - |
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list --topic 'task-.*'
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server ${KAFKA_BOOTSTRAP_SERVER} --list --topic 'task-.*'
         echo '## Creating the Kafka topics'
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic task-commands --partitions 1
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic task-replies --partitions 1
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic task-snapshots --config cleanup.policy=compact --partitions 1
-        echo ''
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server ${KAFKA_BOOTSTRAP_SERVER} --create --if-not-exists --topic task-commands --partitions 1
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server ${KAFKA_BOOTSTRAP_SERVER} --create --if-not-exists --topic task-replies --partitions 1
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server ${KAFKA_BOOTSTRAP_SERVER} --create --if-not-exists --topic task-snapshots --config cleanup.policy=compact --partitions 1
         echo '## Created the Kafka topics'
-        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list --topic 'task-.*'
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server ${KAFKA_BOOTSTRAP_SERVER} --list --topic 'task-.*'
     depends_on:
       - kafka
     init: true
@@ -52,4 +50,4 @@ services:
         condition: service_completed_successfully
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:${KAFKA_PORT}

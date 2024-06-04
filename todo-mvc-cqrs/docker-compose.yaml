@@ -2,7 +2,7 @@ version: "3"
 services:
 
   zilla:
-    image: ghcr.io/aklivity/zilla:0.9.80
+    image: ghcr.io/aklivity/zilla:${ZILLA_VERSION}
     container_name: zilla
     restart: unless-stopped
     ports:
@@ -11,32 +11,25 @@ services:
     volumes:
       - ./zilla.yaml:/etc/zilla/zilla.yaml
     environment:
-      KAFKA_BOOTSTRAP_SERVER: kafka:9092
+      KAFKA_BOOTSTRAP_SERVER: ${KAFKA_BOOTSTRAP_SERVER}
     command: start -v -e -Pzilla.binding.kafka.client.produce.record.framing.size=2048
 
-  # todoMVC-CQRS:
-  #   image: ghcr.io/aklivity/extras-taxi-map-ui:sha-8233ad9
-  #   container_name: hailing-ui
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - zilla
-  #   ports:
-  #     - 80:8080
+  todo-mvc-ui:
+    image: ghcr.io/aklivity/extras-todo-mvc-ui:sha-868af1e
+    container_name: todo-mvc-ui
+    restart: unless-stopped
+    ports:
+      - 80:8080
 
   todo-command-service:
-    image: ghcr.io/aklivity/extras-todo-command-service:add-todo-app
+    image: ghcr.io/aklivity/extras-todo-command-service:sha-868af1e
     container_name: todo-command-service
     restart: unless-stopped
-    depends_on:
-      - zilla
     environment:
       SPRING_KAFKA_APPLICATION_ID: todo-command-service
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      # TASK_COMMANDS_TOPIC: task-commands
-      # TASK_SNAPSHOTS_TOPIC: task-snapshots
-      # TASK_REPLIES_TOPIC: task-replies
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVER}
 
 networks:
   default:
-    name: zilla-todo-demo-network
+    name: ${NAMESPACE}-network
     driver: bridge

@@ -3,13 +3,13 @@ services:
 
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:v23.2.16
-    container_name: kafka
+    container_name: redpanda
     command:
       - redpanda start
       - --smp 1
       - --overprovisioned
-      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
-      - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
+      - --kafka-addr internal://0.0.0.0:${KAFKA_PORT},external://0.0.0.0:19092
+      - --advertise-kafka-addr internal://redpanda:${KAFKA_PORT},external://localhost:19092
       - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082
       - --advertise-pandaproxy-addr internal://redpanda:8082,external://localhost:18082
       - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
@@ -21,6 +21,7 @@ services:
       - 18082:18082
       - 19092:19092
       - 19644:9644
+      - ${KAFKA_PORT}:${KAFKA_PORT}
     healthcheck:
       test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true' || exit 1"]
       interval: 15s
@@ -37,7 +38,7 @@ services:
       CONFIG_FILEPATH: /tmp/config.yml
       CONSOLE_CONFIG_FILE: |
         kafka:
-          brokers: ["redpanda:9092"]
+          brokers: ["redpanda:${KAFKA_PORT}"]
           schemaRegistry:
             enabled: true
             urls: ["http://redpanda:8081"]
@@ -59,13 +60,12 @@ services:
     command:
       - "-c"
       - |
-        rpk topic create --brokers redpanda:9092 mqtt-messages || exit 0;
-        rpk topic create --brokers redpanda:9092 mqtt-sessions --topic-config cleanup.policy=compact
-        rpk topic create --brokers redpanda:9092 mqtt-retained --topic-config cleanup.policy=compact
-        rpk topic create --brokers redpanda:9092 taxi-locations --topic-config cleanup.policy=compact
-        rpk topic create --brokers redpanda:9092 bus-locations --topic-config cleanup.policy=compact
-        rpk topic create --brokers redpanda:9092 dispatch-requests
-        rpk topic create --brokers redpanda:9092 dispatch-replies
+        rpk topic create --brokers ${KAFKA_BOOTSTRAP_SERVER} task-commands || exit 0;
+        echo '## Creating the Kafka topics'
+        rpk topic create --brokers ${KAFKA_BOOTSTRAP_SERVER} task-commands --partitions 1
+        rpk topic create --brokers ${KAFKA_BOOTSTRAP_SERVER} task-replies --partitions 1
+        rpk topic create --brokers ${KAFKA_BOOTSTRAP_SERVER} task-snapshots --topic-config cleanup.policy=compact --partitions 1
+        echo '## Created the Kafka topics'
     depends_on:
       redpanda:
         condition: service_healthy
