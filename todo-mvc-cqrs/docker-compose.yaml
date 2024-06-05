@@ -21,12 +21,12 @@ services:
     ports:
       - 80:8080
 
-  todo-command-service:
+  todo-management-service:
     image: ghcr.io/aklivity/extras-todo-command-service:sha-868af1e
-    container_name: todo-command-service
+    container_name: todo-management-service
     restart: unless-stopped
     environment:
-      SPRING_KAFKA_APPLICATION_ID: todo-command-service
+      SPRING_KAFKA_APPLICATION_ID: todo-management-service
       SPRING_KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVER}
 
 networks:
