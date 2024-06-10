@@ -2,6 +2,8 @@ name: Build and Push taxi-gateway image
 
 on:
   push:
+    branches:
+      - '**'
     paths:
       - "extras-containers/taxi/grpc/gateway/**/*"
 
