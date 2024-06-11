@@ -1,0 +1,19 @@
+{
+	"type": "record",
+	"name": "UserBalance",
+	"namespace": "com.example",
+	"fields": [
+		{
+			"name": "id",
+			"type": "string"
+		},
+		{
+			"name": "name",
+			"type": "string"
+		},
+		{
+			"name": "username",
+			"type": "string"
+		}
+	]
+}

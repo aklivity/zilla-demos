@@ -1,0 +1,15 @@
+{
+	"type": "record",
+	"name": "Replies",
+	"namespace": "com.example",
+	"fields": [
+		{
+			"name": "status",
+			"type": "string"
+		},
+		{
+			"name": "correlationid",
+			"type": "string"
+		}
+	]
+}

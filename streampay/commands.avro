@@ -1,0 +1,27 @@
+{
+	"type": "record",
+	"name": "PaymentCommand",
+	"namespace": "com.example",
+	"fields": [
+		{
+			"name": "type",
+			"type": "string"
+		},
+		{
+			"name": "userid",
+			"type": "string"
+		},
+		{
+			"name": "requestid",
+			"type": "string"
+		},
+		{
+			"name": "amount",
+			"type": "double"
+		},
+		{
+			"name": "notes",
+			"type": "string"
+		}
+	]
+}

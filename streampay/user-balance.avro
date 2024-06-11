@@ -1,0 +1,15 @@
+{
+	"type": "record",
+	"name": "UserBalance",
+	"namespace": "com.example",
+	"fields": [
+		{
+			"name": "userid",
+			"type": "string"
+		},
+		{
+			"name": "balance",
+			"type": "double"
+		}
+	]
+}
