@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-NAMESPACE=zilla-petstore
+NAMESPACE=${NAMESPACE:-zilla-petstore}
 
 # Start or restart Zilla
 if [[ -z $(docker-compose -p $NAMESPACE ps -q zilla) ]]; then

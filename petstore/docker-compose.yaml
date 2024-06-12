@@ -15,7 +15,7 @@ services:
       KAFKA_USER: "user"
       KAFKA_PASS: "bitnami"
       APICURIO_URL: "http://apicurio:8081"
-      PETSTORE_VERSION: ${PETSTORE_VERSION}
+      PETSTORE_VERSION: ${PETSTORE_VERSION:-v2}
     volumes:
       - ./zilla.yaml:/etc/zilla/zilla.yaml
     command: start -v -e -Pzilla.engine.verbose.composites -Pzilla.binding.kafka.client.produce.record.framing.size=2048
