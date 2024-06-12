@@ -64,9 +64,9 @@ create function generate_guid() returns varchar language javascript as $$
   return result;
 $$;
 
-    
+
 CREATE MATERIALIZED VIEW withdrawals_transaction as
- SELECT
+SELECT
     generate_guid() as id,
     owenerid::varchar as owenerid,
     -(cmd.amount) as amount,
@@ -84,7 +84,7 @@ FROM
         WHERE
         KEY IS NOT NULL
         AND type = 'PayCommand'
-    ) as cmd 
+    ) as cmd
     LEFT JOIN (
         SELECT
             userid,
@@ -92,15 +92,15 @@ FROM
         FROM
             users_balance
     ) AS ub ON cmd.owenerid = ub.userid AND ub.balance >= cmd.amount;
-    
+
 
 CREATE SINK replies
-FROM invalid_commands
+FROM valid_commands
 WITH (
     connector='kafka',
     topic='replies',
     properties.bootstrap.server='localhost:9092',
-    primary_key='correlation_id'
+    primary_key='correlationid'
 ) FORMAT UPSERT
 ENCODE AVRO (
     schema.registry = 'http://localhost:8081'

@@ -1,6 +1,6 @@
 {
 	"type": "record",
-	"name": "UserBalance",
+	"name": "User",
 	"namespace": "com.example",
 	"fields": [
 		{
