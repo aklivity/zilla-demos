@@ -1,0 +1,35 @@
+version: "3"
+services:
+
+  zilla:
+    image: ghcr.io/aklivity/zilla:${ZILLA_VERSION}
+    container_name: zilla
+    restart: unless-stopped
+    ports:
+      - 7114:7114
+      - 7190:7190
+    volumes:
+      - ./zilla.yaml:/etc/zilla/zilla.yaml
+    environment:
+      KAFKA_BOOTSTRAP_SERVER: ${KAFKA_BOOTSTRAP_SERVER}
+    command: start -v -e -Pzilla.binding.kafka.client.produce.record.framing.size=2048
+
+  todo-mvc-ui:
+    image: ghcr.io/aklivity/extras-todo-mvc-ui:sha-868af1e
+    container_name: todo-mvc-ui
+    restart: unless-stopped
+    ports:
+      - 80:8080
+
+  todo-management-service:
+    image: ghcr.io/aklivity/extras-todo-command-service:sha-868af1e
+    container_name: todo-management-service
+    restart: unless-stopped
+    environment:
+      SPRING_KAFKA_APPLICATION_ID: todo-management-service
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVER}
+
+networks:
+  default:
+    name: ${NAMESPACE}-network
+    driver: bridge

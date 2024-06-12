@@ -4,9 +4,10 @@ on:
   push:
     tags:
       - 'v[0-9]+'
+
 permissions:
   contents: write
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest
