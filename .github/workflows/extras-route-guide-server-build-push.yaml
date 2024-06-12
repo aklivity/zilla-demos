@@ -2,6 +2,8 @@ name: Build and Push route-guide-server image
 
 on:
   push:
+    branches:
+      - '**'
     paths:
       - 'extras-containers/route-guide-server/**/*'
 

@@ -2,6 +2,8 @@ name: Build and Push taxi-map-ui image
 
 on:
   push:
+    branches:
+      - '**'
     paths:
       - "extras-containers/taxi/map-ui/**/*"
 

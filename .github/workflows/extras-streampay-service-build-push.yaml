@@ -2,6 +2,8 @@ name: Build and Push streampay-service image
 
 on:
   push:
+    branches:
+      - '**'
     paths:
       - "extras-containers/streampay/service/**/*"
 

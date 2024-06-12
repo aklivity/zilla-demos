@@ -2,6 +2,8 @@ name: Build and Push todo-mvc-ui image
 
 on:
   push:
+    branches:
+      - '**'
     paths:
       - "extras-containers/todo/todo-mvc-ui/**/*"
 
