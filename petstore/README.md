@@ -35,7 +35,6 @@ flowchart LR
 
 ### With Zilla
 
-
 ```mermaid
 flowchart LR
     style app1 stroke:#0d9b76,stroke-width:4px
@@ -53,22 +52,20 @@ flowchart LR
     end
 ```
 
-
-
 ## Run the demo locally
 
 The local demo uses a [docker-compose.yaml](docker-compose.yaml) setup and can be started running the [setup.sh](setup.sh) script. Running this script again will only restart the `zilla` service.
 
 This demo implements two different versions of the Petstore API example. You can set the `PETSTORE_VERSION` env var as `v1` or `v2` with the setup script to change between the deployed versions.
 
-|v1 | apicurio registry url|
-| -- | -- |
-| [petstore-openapi-v1.yaml](petstore-openapi-v1.yaml) | [petstore-openapi/versions/v1](http://localhost:8081/apis/registry/v2/groups/petstore/artifacts/petstore-openapi/versions/v1) |
+| v1                                                                 | apicurio registry url                                                                                                           |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| [petstore-openapi-v1.yaml](petstore-openapi-v1.yaml)               | [petstore-openapi/versions/v1](http://localhost:8081/apis/registry/v2/groups/petstore/artifacts/petstore-openapi/versions/v1)   |
 | [petstore-kafka-asyncapi-v1.yaml](petstore-kafka-asyncapi-v1.yaml) | [petstore-asyncapi/versions/v1](http://localhost:8081/apis/registry/v2/groups/petstore/artifacts/petstore-asyncapi/versions/v1) |
 
-| v2 | apicurio registry url|
-| -- | -- |
-| [petstore-openapi-v2.yaml](petstore-openapi-v2.yaml) | [petstore-openapi/versions/v2](http://localhost:8081/apis/registry/v2/groups/petstore/artifacts/petstore-openapi/versions/v2) |
+| v2                                                                 | apicurio registry url                                                                                                           |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| [petstore-openapi-v2.yaml](petstore-openapi-v2.yaml)               | [petstore-openapi/versions/v2](http://localhost:8081/apis/registry/v2/groups/petstore/artifacts/petstore-openapi/versions/v2)   |
 | [petstore-kafka-asyncapi-v2.yaml](petstore-kafka-asyncapi-v2.yaml) | [petstore-asyncapi/versions/v2](http://localhost:8081/apis/registry/v2/groups/petstore/artifacts/petstore-asyncapi/versions/v2) |
 
 ```bash
