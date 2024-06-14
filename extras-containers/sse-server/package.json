@@ -1,0 +1,23 @@
+{
+  "name": "sse-server",
+  "author": "",
+  "version": "0.0.1",
+  "description": "Push an event stream from terminal to browser.",
+  "repository": "",
+  "bin": "bin/cli.js",
+  "type": "module",
+  "exports": "./index.js",
+  "keywords": [],
+  "license": "MIT",
+  "engines": {
+    "node": ">=12.17"
+  },
+  "scripts": {},
+  "dependencies": {
+    "command-line-args": "^5.2.0",
+    "command-line-usage": "^6.1.1",
+    "in": "^0.19.0",
+    "index.js": "^0.0.3",
+    "sse-server": "^0.4.0"
+  }
+}
