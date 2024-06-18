@@ -16,11 +16,11 @@ servers:
     security:
       - $ref: '#/components/securitySchemes/confluentSchemaRegistry'
 channels:
-  sp-commands:
-    address: sp-commands
+  streampay-commands:
+    address: streampay-commands
     messages:
-      SpCommandsSubscribe.message:
-        $ref: '#/components/messages/SpCommandsMessage'
+      StreampayCommands.message:
+        $ref: '#/components/messages/StreampayCommandsMessage'
     description: <nil>
     bindings:
       kafka:
@@ -61,11 +61,11 @@ channels:
           segment.ms: '604800000'
           unclean.leader.election.enable: 'false'
     x-messageCompatibility: BACKWARD
-  sp-replies:
-    address: sp-replies
+  streampay-replies:
+    address: streampay-replies
     messages:
-      SpRepliesSubscribe.message:
-        $ref: '#/components/messages/SpRepliesMessage'
+      StreampayReplies.message:
+        $ref: '#/components/messages/StreampayRepliesMessage'
     description: <nil>
     bindings:
       kafka:
@@ -106,11 +106,11 @@ channels:
           segment.ms: '604800000'
           unclean.leader.election.enable: 'false'
     x-messageCompatibility: BACKWARD
-  sp-user-balances:
-    address: sp-user-balances
+  streampay-balance-histories:
+    address: streampay-balance-histories
     messages:
-      SpUserBalancesSubscribe.message:
-        $ref: '#/components/messages/SpUserBalancesMessage'
+      StreampayBalanceHistories.message:
+        $ref: '#/components/messages/StreampayBalancesMessage'
     description: <nil>
     bindings:
       kafka:
@@ -151,11 +151,11 @@ channels:
           segment.ms: '604800000'
           unclean.leader.election.enable: 'false'
     x-messageCompatibility: BACKWARD
-  sp-users:
-    address: sp-users
+  streampay-users:
+    address: streampay-users
     messages:
-      SpUsersSubscribe.message:
-        $ref: '#/components/messages/SpUsersMessage'
+      StreampayUsers.message:
+        $ref: '#/components/messages/StreampayUsersMessage'
     description: <nil>
     bindings:
       kafka:
@@ -163,7 +163,7 @@ channels:
         partitions: 1
         topicConfiguration:
           cleanup.policy:
-            - delete
+            - compact
           retention.ms: 604800000
           retention.bytes: -1
           delete.retention.ms: 86400000
@@ -197,10 +197,10 @@ channels:
           unclean.leader.election.enable: 'false'
     x-messageCompatibility: BACKWARD
 operations:
-  SpCommandsSubscribe:
+  doStreampayCommands:
     action: send
     channel:
-      $ref: '#/channels/sp-commands'
+      $ref: '#/channels/streampay-commands'
     bindings:
       kafka:
         bindingVersion: 0.3.0
@@ -209,11 +209,14 @@ operations:
         clientId:
           type: string
     messages:
-      - $ref: '#/channels/sp-commands/messages/SpCommandsSubscribe.message'
-  SpRepliesSubscribe:
+      - $ref: '#/channels/streampay-commands/messages/StreampayCommands.message'
+    reply:
+      channel:
+        $ref: '#/channels/streampay-replies'
+  doStreampayBalanceHistories:
     action: send
     channel:
-      $ref: '#/channels/sp-replies'
+      $ref: '#/channels/streampay-balance-histories'
     bindings:
       kafka:
         bindingVersion: 0.3.0
@@ -222,11 +225,11 @@ operations:
         clientId:
           type: string
     messages:
-      - $ref: '#/channels/sp-replies/messages/SpRepliesSubscribe.message'
-  SpUserBalancesSubscribe:
-    action: send
+      - $ref: '#/channels/streampay-balance-histories/messages/StreampayBalanceHistories.message'
+  onStreampayBalanceHistories:
+    action: receive
     channel:
-      $ref: '#/channels/sp-user-balances'
+      $ref: '#/channels/streampay-balance-histories'
     bindings:
       kafka:
         bindingVersion: 0.3.0
@@ -235,11 +238,11 @@ operations:
         clientId:
           type: string
     messages:
-      - $ref: '#/channels/sp-user-balances/messages/SpUserBalancesSubscribe.message'
-  SpUsersSubscribe:
+      - $ref: '#/channels/streampay-balance-histories/messages/StreampayBalanceHistories.message'
+  doStreampayUsers:
     action: send
     channel:
-      $ref: '#/channels/sp-users'
+      $ref: '#/channels/streampay-users'
     bindings:
       kafka:
         bindingVersion: 0.3.0
@@ -248,10 +251,23 @@ operations:
         clientId:
           type: string
     messages:
-      - $ref: '#/channels/sp-users/messages/SpUsersSubscribe.message'
+      - $ref: '#/channels/streampay-users/messages/StreampayUsers.message'
+  onStreampayUsers:
+    action: receive
+    channel:
+      $ref: '#/channels/streampay-users'
+    bindings:
+      kafka:
+        bindingVersion: 0.3.0
+        groupId:
+          type: string
+        clientId:
+          type: string
+    messages:
+      - $ref: '#/channels/streampay-users/messages/StreampayUsers.message'
 components:
   messages:
-    SpCommandsMessage:
+    StreampayCommandsMessage:
       contentType: application/avro
       payload:
         schemaFormat: application/vnd.apache.avro;version=1.9.0
@@ -270,13 +286,13 @@ components:
           name: PaymentCommand
           namespace: com.example
           type: record
-      name: SpCommandsMessage
+      name: StreampayCommandsMessage
       bindings:
         kafka:
           bindingVersion: 0.3.0
           key:
             type: string
-    SpRepliesMessage:
+    StreampayRepliesMessage:
       contentType: application/avro
       payload:
         schemaFormat: application/vnd.apache.avro;version=1.9.0
@@ -289,32 +305,32 @@ components:
           name: Replies
           namespace: com.example
           type: record
-      name: SpRepliesMessage
+      name: StreampayRepliesMessage
       bindings:
         kafka:
           bindingVersion: 0.3.0
           key:
             type: string
-    SpUserBalancesMessage:
+    StreampayBalancesMessage:
       contentType: application/avro
       payload:
         schemaFormat: application/vnd.apache.avro;version=1.9.0
         schema:
           fields:
-            - name: userid
-              type: string
             - name: balance
               type: double
-          name: UserBalance
+            - name: timestamp
+              type: long
+          name: Balance
           namespace: com.example
           type: record
-      name: SpUserBalancesMessage
+      name: StreampayBalancesMessage
       bindings:
         kafka:
           bindingVersion: 0.3.0
           key:
             type: string
-    SpUsersMessage:
+    StreampayUsersMessage:
       contentType: application/avro
       payload:
         schemaFormat: application/vnd.apache.avro;version=1.9.0
@@ -329,7 +345,7 @@ components:
           name: User
           namespace: com.example
           type: record
-      name: SpUsersMessage
+      name: StreampayUsersMessage
       bindings:
         kafka:
           bindingVersion: 0.3.0

@@ -1,0 +1,275 @@
+asyncapi: 3.0.0
+id: 'tag:stream.oay.im,2023:api'
+info:
+  title: StreamPay API
+  version: 1.0.0
+servers:
+  plain_sse:
+    host: localhost:7114
+    protocol: sse
+  plain_http:
+    host: localhost:7114
+    protocol: http
+    security:
+      - $ref: '#/components/securitySchemes/httpBearerToken'  
+channels:
+  streampay-commands:
+    address: '/streampay-commands'
+    messages:
+      StreampayCommands.message:
+        $ref: '#/components/messages/StreampayCommandsMessage'
+    description: <nil>
+  streampay-commands-item:
+    address: '/streampay-commands/{id}'
+    messages:
+      StreampayCommands.message:
+        $ref: '#/components/messages/StreampayCommandsMessage'
+      StreampayEmpty.message:
+        $ref: '#/components/messages/StreampayEmptyMessage'
+    description: <nil>
+    parameters:
+      id:
+        description: Id of the streampay commands item.
+        examples:
+          - 53307860c3599d1de448e19d
+  streampay-users:
+    address: '/streampay-users'
+    messages:
+      StreampayUsers.message:
+        $ref: '#/components/messages/StreampayUsersMessage'
+    description: <nil>
+  streampay-users-item:
+    address: '/streampay-users/{id}'
+    messages:
+      StreampayUsers.message:
+        $ref: '#/components/messages/StreampayUsersMessage'
+      StreampayEmpty.message:
+        $ref: '#/components/messages/StreampayEmptyMessage'
+    description: <nil>
+    parameters:
+      id:
+        description: Id of the streampay users item.
+        examples:
+          - 53307860c3599d1de448e19d
+  streampay-balance-histories:
+    address: '/streampay-balance-histories'
+    messages:
+      StreampayBalances.message:
+        $ref: '#/components/messages/StreampayBalancesMessage'
+    description: <nil>
+  streampay-balance-histories-item:
+    address: '/streampay-balance-histories/{id}'
+    messages:
+      StreampayBalances.message:
+        $ref: '#/components/messages/StreampayBalancesMessage'
+      StreampayEmpty.message:
+        $ref: '#/components/messages/StreampayEmptyMessage'
+    description: <nil>
+    parameters:
+      id:
+        description: Id of the streampay balance histories item.
+        examples:
+          - 53307860c3599d1de448e19d
+operations:
+  doStreampayCommandsCreate:
+    action: send
+    channel:
+      $ref: '#/channels/streampay-commands'
+    bindings:
+      http:
+        method: POST
+    messages:
+      - $ref: '#/channels/streampay-commands/messages/StreampayCommands.message'
+  doStreampayCommandsUpdate:
+    action: send
+    channel:
+      $ref: '#/channels/streampay-commands-item'
+    bindings:
+      http:
+        method: PUT
+    messages:
+      - $ref: '#/channels/streampay-commands-item/messages/StreampayCommands.message'
+  doStreampayCommandsDelete:
+    action: send
+    channel:
+      $ref: '#/channels/streampay-commands-item'
+    bindings:
+      http:
+        method: DELETE
+    messages:
+      - $ref: '#/channels/streampay-commands-item/messages/StreampayEmpty.message'
+  doStreampayUsersCreate:
+    action: send
+    channel:
+      $ref: '#/channels/streampay-users'
+    bindings:
+      http:
+        method: POST
+    messages:
+      - $ref: '#/channels/streampay-users/messages/StreampayUsers.message'
+  onStreampayUserRead:
+    action: receive
+    channel:
+      $ref: '#/channels/streampay-users-item'
+    bindings:
+      http:
+        method: GET
+    messages:
+      - $ref: '#/channels/streampay-users-item/messages/StreampayUsers.message'
+  doStreampayUserUpdate:
+    action: send
+    channel:
+      $ref: '#/channels/streampay-users-item'
+    bindings:
+      http:
+        method: PUT
+    messages:
+      - $ref: '#/channels/streampay-users-item/messages/StreampayUsers.message'
+  doStreampayUserDelete:
+    action: send
+    channel:
+      $ref: '#/channels/streampay-users-item'
+    bindings:
+      http:
+        method: DELETE
+    messages:
+      - $ref: '#/channels/streampay-users-item/messages/StreampayEmpty.message'
+  doStreampayBalanceHistoryCreate:
+    action: send
+    channel:
+      $ref: '#/channels/streampay-balance-histories'
+    bindings:
+      http:
+        method: POST
+    messages:
+      - $ref: '#/channels/streampay-balance-histories/messages/StreampayBalances.message'
+  onStreampayBalanceHistoryRead:
+    action: receive
+    channel:
+      $ref: '#/channels/streampay-balance-histories-item'
+    bindings:
+      http:
+        method: GET
+    messages:
+      - $ref: '#/channels/streampay-balance-histories-item/messages/StreampayBalances.message'
+  doStreampayBalanceHistoryUpdate:
+    action: send
+    channel:
+      $ref: '#/channels/streampay-balance-histories-item'
+    bindings:
+      http:
+        method: PUT
+    messages:
+      - $ref: '#/channels/streampay-balance-histories-item/messages/StreampayBalances.message'
+  doStreampayBalanceHistoryDelete:
+    action: send
+    channel:
+      $ref: '#/channels/streampay-balance-histories-item'
+    bindings:
+      http:
+        method: DELETE
+    messages:
+      - $ref: '#/channels/streampay-balance-histories-item/messages/StreampayEmpty.message'
+  onStreampayBalanceHistories:
+    action: receive
+    channel:
+      $ref: '#/channels/streampay-balance-histories'
+    bindings:
+      http:
+        method: GET
+    messages:
+      - $ref: '#/channels/streampay-balance-histories/messages/StreampayBalances.message'
+components:
+  securitySchemes:
+    httpBearerToken:
+      type: http
+      scheme: bearer
+  messages:
+    StreampayCommandsMessage:
+      contentType: application/json
+      payload:
+        schemaFormat: application/schema+json;version=draft-07
+        schema:
+          type: object
+          properties:
+            type:
+              type: string
+            userid:
+              type: string
+            requestid:
+              type: string
+            amount:
+              type: number
+            notes:
+              type: string
+          name: PaymentCommand
+          namespace: com.example
+      name: StreampayCommandsMessage
+      bindings:
+        http:
+          headers:
+            type: object
+            properties:
+              Transfer-Encoding:
+                type: string
+                const: chunked
+              Trailer:
+                type: string
+                const: \r\n
+    StreampayUsersMessage:
+      contentType: application/json
+      payload:
+        schemaFormat: application/schema+json;version=draft-07
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            username:
+              type: string
+          name: User
+          namespace: com.example
+      name: StreampayUsersMessage
+      bindings:
+        http:
+          headers:
+            type: object
+            properties:
+              Transfer-Encoding:
+                type: string
+                const: chunked
+              Trailer:
+                type: string
+                const: \r\n
+    StreampayBalancesMessage:
+      contentType: application/json
+      payload:
+        schemaFormat: application/schema+json;version=draft-07
+        schema:
+          type: object
+          properties:
+            balance:
+              type: number
+            timepstamp:
+              type: number
+          name: Balance
+          namespace: com.example
+      name: StreampayBalancesMessage
+      bindings:
+        http:
+          headers:
+            type: object
+            properties:
+              Transfer-Encoding:
+                type: string
+                const: chunked
+              Trailer:
+                type: string
+                const: \r\n
+    StreampayEmptyMessage:
+      contentType: application/json
+      payload:
+        type: object
+        description: This is an empty message with no payload.

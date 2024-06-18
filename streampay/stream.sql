@@ -1,3 +1,26 @@
+-- CREATE TOPIC commands(
+--   VALUE UNION(
+--     send send_payment,
+--     request request_payment
+--   )
+-- )
+-- WITH (
+--   kafka_topic='commands',
+--   PARTITIONS=2,
+--   VALUE_FORMAT=avro
+-- );
+--
+-- #========
+--
+-- CREATE TOPIC replies(
+--   VALUE VARCHAR
+-- )
+-- WITH (
+--   PARTITIONS=2,
+--   VALUE_FORMAT=avro
+-- );
+
+
 CREATE SOURCE IF NOT EXISTS users
 WITH (
     connector='kafka',
@@ -25,7 +48,7 @@ WITH (
     schema.registry = 'http://localhost:8081'
 );
 
-CREATE SOURCE IF NOT EXISTS users_balance
+CREATE TABLE IF NOT EXISTS users_balance
 WITH (
     connector='kafka',
     topic='users-balance',
