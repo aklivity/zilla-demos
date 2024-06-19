@@ -75,7 +75,7 @@ bindings:
         with:
           api-id: kafka_api
           operation-id: onStreampayUsers
-      - - when:
+      - when:
           - api-id: http_api
             operation-id: doStreampayBalanceHistoryCreate
         exit: asyncapi_kafka0
