@@ -10,8 +10,6 @@ servers:
   plain_http:
     host: localhost:7114
     protocol: http
-    security:
-      - $ref: '#/components/securitySchemes/httpBearerToken'  
 channels:
   streampay-commands:
     address: '/streampay-commands'
@@ -180,10 +178,6 @@ operations:
     messages:
       - $ref: '#/channels/streampay-balance-histories/messages/StreampayBalances.message'
 components:
-  securitySchemes:
-    httpBearerToken:
-      type: http
-      scheme: bearer
   messages:
     StreampayCommandsMessage:
       contentType: application/json

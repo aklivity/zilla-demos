@@ -3,18 +3,9 @@ info:
   title: API Document for Confluent Cluster
   version: 1.0.0
 servers:
-  cluster:
-    host: 'pkc-41p56.asia-south1.gcp.confluent.cloud:443'
+  plain:
+    host: localhost:9092
     protocol: kafka
-    description: Confluent Kafka instance.
-    security:
-      - $ref: '#/components/securitySchemes/confluentBroker'
-  schema-registry:
-    host: psrc-e8157.us-east-2.aws.confluent.cloud
-    protocol: kafka
-    description: Confluent Kafka Schema Registry Server
-    security:
-      - $ref: '#/components/securitySchemes/confluentSchemaRegistry'
 channels:
   streampay-commands:
     address: streampay-commands

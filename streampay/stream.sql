@@ -33,6 +33,16 @@
 -- );
 
 
+-- CREATE TOPIC streampay-balance-histories(
+    balance DOUBLE PRECISION,
+    timestamp LONG
+-- )
+-- WITH (
+--   PARTITIONS=2,
+--   VALUE_FORMAT=avro
+-- );
+
+
 CREATE SOURCE IF NOT EXISTS users
 WITH (
     connector='kafka',
