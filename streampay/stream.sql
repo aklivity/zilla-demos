@@ -1,8 +1,9 @@
--- CREATE TOPIC commands(
---   VALUE UNION(
---     send send_payment,
---     request request_payment
---   )
+-- CREATE TOPIC streampay-commands(
+--   type VARCHAR,
+     userid VARCHAR,
+     requestid VARCHAR,
+     amount DOUBLE PRECISION,
+     notes VARCHAR
 -- )
 -- WITH (
 --   kafka_topic='commands',
@@ -10,10 +11,21 @@
 --   VALUE_FORMAT=avro
 -- );
 --
--- #========
 --
--- CREATE TOPIC replies(
---   VALUE VARCHAR
+-- CREATE TOPIC streampay-replies(
+--  status VARCHAR,
+    correlationid VARCHAR
+-- )
+-- WITH (
+--   PARTITIONS=2,
+--   VALUE_FORMAT=avro
+-- );
+
+
+-- CREATE TOPIC streampay-users(
+--  id VARCHAR,
+    name VARCHAR,
+    username VARCHAR
 -- )
 -- WITH (
 --   PARTITIONS=2,
@@ -24,7 +36,7 @@
 CREATE SOURCE IF NOT EXISTS users
 WITH (
     connector='kafka',
-    topic='users',
+    topic='streampay-users',
     properties.bootstrap.server='localhost:9092',
     scan.startup.mode='latest',
     scan.startup.timestamp.millis='140000000'
@@ -39,7 +51,7 @@ INCLUDE header 'stream:identity' AS owener_id
 INCLUDE timestamp as timestamp
 WITH (
     connector='kafka',
-    topic='commands',
+    topic='streampay-commands',
     properties.bootstrap.server='localhost:9092',
     scan.startup.mode='latest',
     scan.startup.timestamp.millis='140000000'
@@ -48,16 +60,11 @@ WITH (
     schema.registry = 'http://localhost:8081'
 );
 
-CREATE TABLE IF NOT EXISTS users_balance
-WITH (
-    connector='kafka',
-    topic='users-balance',
-    properties.bootstrap.server='localhost:9092',
-    scan.startup.mode='latest',
-    scan.startup.timestamp.millis='140000000'
-) FORMAT PLAIN ENCODE AVRO (
-    schema.registry = 'http://localhost:8081'
+CREATE TABLE users_balance(
+    userid VARCHAR,
+    balance DOUBLE PRECISION
 );
+
 
 create function bad_request_status() returns varchar language javascript as $$
     return '400';
@@ -74,6 +81,31 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS invalid_commands AS
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS valid_commands AS
     SELECT success_request_status() as status, correlationid::varchar as correlationid from commands where key IS NOT NULL AND type IN ('PayCommand', 'RequestCommand');
+
+CREATE SINK valid_replies
+FROM valid_commands
+WITH (
+    connector='kafka',
+    topic='streampay-replies',
+    properties.bootstrap.server='localhost:9092',
+    primary_key='correlationid'
+) FORMAT UPSERT
+ENCODE AVRO (
+    schema.registry = 'http://localhost:8081'
+);
+
+
+CREATE SINK invalid_replies
+FROM invalid_commands
+WITH (
+    connector='kafka',
+    topic='streampay-replies',
+    properties.bootstrap.server='localhost:9092',
+    primary_key='correlationid'
+) FORMAT UPSERT
+ENCODE AVRO (
+    schema.registry = 'http://localhost:8081'
+);
 
 create function generate_guid() returns varchar language javascript as $$
     var result, i, j;
@@ -117,15 +149,31 @@ FROM
     ) AS ub ON cmd.owenerid = ub.userid AND ub.balance >= cmd.amount;
 
 
-CREATE SINK replies
-FROM valid_commands
-WITH (
-    connector='kafka',
-    topic='replies',
-    properties.bootstrap.server='localhost:9092',
-    primary_key='correlationid'
-) FORMAT UPSERT
-ENCODE AVRO (
-    schema.registry = 'http://localhost:8081'
-);
+CREATE MATERIALIZED VIEW deposit_transaction as
+SELECT
+    generate_guid() as id,
+    cmd.userid as owenerid,
+    -(cmd.amount) as amount,
+    cmd.timestamp as timestamp,
+     owenerid::varchar as userid
+FROM
+    (
+        SELECT
+            userid,
+            owenerid::varchar as owenerid,
+            amount,
+            timestamp
+        FROM
+            commands
+        WHERE
+        KEY IS NOT NULL
+        AND type = 'PayCommand'
+    ) as cmd
+    LEFT JOIN (
+        SELECT
+            userid,
+            balance
+        FROM
+            users_balance
+    ) AS ub ON cmd.owenerid = ub.userid AND ub.balance >= cmd.amount;
 

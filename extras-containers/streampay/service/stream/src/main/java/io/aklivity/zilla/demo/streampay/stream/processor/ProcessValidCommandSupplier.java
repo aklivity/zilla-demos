@@ -224,7 +224,7 @@ public class ProcessValidCommandSupplier implements ProcessorSupplier<String, Co
             context.forward(reply, replyTo);
         }
 
-        private boolean     validateTransaction(
+        private boolean validateTransaction(
             String userId,
             double amount)
         {

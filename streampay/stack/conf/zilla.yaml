@@ -12,25 +12,105 @@ catalogs:
 bindings:
   http_asyncpi_server:
     type: asyncapi
-    kind: server
+    kind: proxy
     options:
       specs:
-        my-asyncapi-spec:
+        http_api:
           catalog:
             host_filesystem:
               subject: streampay_http
               version: latest
-    exit: kafka_asyncpi_server
-  kafka_asyncpi_server:
-    type: asyncapi
-    kind: client
-    options:
-      specs:
-        my-asyncapi-spec:
+        kafka_api:
           catalog:
             host_filesystem:
               subject: streampay_kafka
               version: latest
+    routes:
+      - when:
+          - api-id: http_api
+            operation-id: doStreampayCommandsCreate
+        exit: asyncapi_kafka0
+        with:
+          api-id: kafka_api
+          operation-id: doStreampayCommands
+      - when:
+          - api-id: http_api
+            operation-id: doStreampayCommandsUpdate
+        exit: asyncapi_kafka0
+        with:
+          api-id: kafka_api
+          operation-id: doStreampayCommands
+      - when:
+          - api-id: http_api
+            operation-id: doStreampayCommandsDelete
+        exit: asyncapi_kafka0
+        with:
+          api-id: kafka_api
+          operation-id: doStreampayCommands
+      - when:
+          - api-id: http_api
+            operation-id: doStreampayUsersCreate
+        exit: asyncapi_kafka0
+        with:
+          api-id: kafka_api
+          operation-id: doStreampayUsers
+      - when:
+          - api-id: http_api
+            operation-id: doStreampayUserUpdate
+        exit: asyncapi_kafka0
+        with:
+          api-id: kafka_api
+          operation-id: doStreampayUsers
+      - when:
+          - api-id: http_api
+            operation-id: doStreampayUserDelete
+        exit: asyncapi_kafka0
+        with:
+          api-id: kafka_api
+          operation-id: doStreampayUsers
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayUserRead
+        exit: asyncapi_kafka0
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayUsers
+      - - when:
+          - api-id: http_api
+            operation-id: doStreampayBalanceHistoryCreate
+        exit: asyncapi_kafka0
+        with:
+          api-id: kafka_api
+          operation-id: doStreampayBalanceHistories
+      - when:
+          - api-id: http_api
+            operation-id: doStreampayBalanceHistoryUpdate
+        exit: asyncapi_kafka0
+        with:
+          api-id: kafka_api
+          operation-id: doStreampayBalanceHistories
+      - when:
+          - api-id: http_api
+            operation-id: doStreampayBalanceHistoryDelete
+        exit: asyncapi_kafka0
+        with:
+          api-id: kafka_api
+          operation-id: doStreampayBalanceHistories
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayBalanceHistoryRead
+        exit: asyncapi_kafka0
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayBalanceHistories
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayBalanceHistories
+        exit: asyncapi_kafka0
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayBalanceHistories
+
 telemetry:
   exporters:
     stdout_logs_exporter:
