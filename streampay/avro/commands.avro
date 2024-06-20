@@ -1,7 +1,7 @@
 {
 	"type": "record",
 	"name": "PaymentCommand",
-	"namespace": "com.example",
+	"namespace": "io.aklivity.demos.streampay",
 	"fields": [
 		{
 			"name": "type",

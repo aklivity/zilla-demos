@@ -86,11 +86,11 @@ $$;
 
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS invalid_commands AS
-    SELECT bad_request_status() as status, correlationid::varchar as correlationid from commands where key IS NULL OR type NOT IN ('PayCommand', 'RequestCommand');
+    SELECT bad_request_status() as status, correlationid::varchar as correlationid from commands where key IS NULL OR type NOT IN ('SendPayment', 'RequestPayment');
 
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS valid_commands AS
-    SELECT success_request_status() as status, correlationid::varchar as correlationid from commands where key IS NOT NULL AND type IN ('PayCommand', 'RequestCommand');
+    SELECT success_request_status() as status, correlationid::varchar as correlationid from commands where key IS NOT NULL AND type IN ('SendPayment', 'RequestPayment');
 
 CREATE SINK valid_replies
 FROM valid_commands
@@ -177,7 +177,7 @@ FROM
             commands
         WHERE
         KEY IS NOT NULL
-        AND type = 'PayCommand'
+        AND type = 'SendPayment'
     ) as cmd
     LEFT JOIN (
         SELECT

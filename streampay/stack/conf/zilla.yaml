@@ -1,5 +1,5 @@
 ---
-name: zilla-mqtt-kafka-broker
+name: zilla-demos-streampay
 catalogs:
   host_filesystem:
     type: filesystem

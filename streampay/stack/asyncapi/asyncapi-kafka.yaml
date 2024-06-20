@@ -275,7 +275,7 @@ components:
             - name: notes
               type: string
           name: PaymentCommand
-          namespace: com.example
+          namespace: io.aklivity.demos.streampay
           type: record
       name: StreampayCommandsMessage
       bindings:
@@ -294,7 +294,7 @@ components:
             - name: correlationid
               type: string
           name: Replies
-          namespace: com.example
+          namespace: io.aklivity.demos.streampay
           type: record
       name: StreampayRepliesMessage
       bindings:
@@ -313,7 +313,7 @@ components:
             - name: timestamp
               type: long
           name: Balance
-          namespace: com.example
+          namespace: io.aklivity.demos.streampay
           type: record
       name: StreampayBalancesMessage
       bindings:
@@ -334,7 +334,7 @@ components:
             - name: username
               type: string
           name: User
-          namespace: com.example
+          namespace: io.aklivity.demos.streampay
           type: record
       name: StreampayUsersMessage
       bindings:

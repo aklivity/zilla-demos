@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class PayCommand implements Command
 {
     private String userId;
-    private String requestId;
     private double amount;
     private String notes;
+    private String requestId;
 }

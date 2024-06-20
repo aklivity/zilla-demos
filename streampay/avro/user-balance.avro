@@ -1,7 +1,7 @@
 {
 	"type": "record",
 	"name": "UserBalance",
-	"namespace": "com.example",
+	"namespace": "io.aklivity.demos.streampay",
 	"fields": [
 		{
 			"name": "userid",

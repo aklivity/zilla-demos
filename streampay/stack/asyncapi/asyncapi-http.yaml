@@ -1,5 +1,5 @@
 asyncapi: 3.0.0
-id: 'tag:stream.oay.im,2023:api'
+id: 'tag:stream.pay.im,2023:api'
 info:
   title: StreamPay API
   version: 1.0.0
@@ -28,8 +28,6 @@ channels:
     parameters:
       id:
         description: Id of the streampay commands item.
-        examples:
-          - 53307860c3599d1de448e19d
   streampay-users:
     address: '/streampay-users'
     messages:
@@ -47,8 +45,6 @@ channels:
     parameters:
       id:
         description: Id of the streampay users item.
-        examples:
-          - 53307860c3599d1de448e19d
   streampay-balance-histories:
     address: '/streampay-balance-histories'
     messages:
@@ -66,8 +62,6 @@ channels:
     parameters:
       id:
         description: Id of the streampay balance histories item.
-        examples:
-          - 53307860c3599d1de448e19d
 operations:
   doStreampayCommandsCreate:
     action: send
@@ -197,7 +191,7 @@ components:
             notes:
               type: string
           name: PaymentCommand
-          namespace: com.example
+          namespace: io.aklivity.demos.streampay
       name: StreampayCommandsMessage
       bindings:
         http:
@@ -224,7 +218,7 @@ components:
             username:
               type: string
           name: User
-          namespace: com.example
+          namespace: io.aklivity.demos.streampay
       name: StreampayUsersMessage
       bindings:
         http:
@@ -249,7 +243,7 @@ components:
             timepstamp:
               type: number
           name: Balance
-          namespace: com.example
+          namespace: io.aklivity.demos.streampay
       name: StreampayBalancesMessage
       bindings:
         http:
