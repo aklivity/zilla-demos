@@ -6,6 +6,9 @@ servers:
   plain:
     host: localhost:9092
     protocol: kafka
+    bindings:
+      kafka:
+        schemaRegistryUrl: 'http://localhost:8081'
 channels:
   streampay-commands:
     address: streampay-commands
@@ -261,96 +264,91 @@ components:
     StreampayCommandsMessage:
       contentType: application/avro
       payload:
-        schemaFormat: application/vnd.apache.avro;version=1.9.0
-        schema:
-          fields:
-            - name: type
-              type: string
-            - name: userid
-              type: string
-            - name: requestid
-              type: string
-            - name: amount
-              type: double
-            - name: notes
-              type: string
-          name: PaymentCommand
-          namespace: io.aklivity.demos.streampay
-          type: record
+        $ref: '#/components/schemas/streampay-commands-value'
       name: StreampayCommandsMessage
       bindings:
         kafka:
           bindingVersion: 0.3.0
-          key:
-            type: string
     StreampayRepliesMessage:
       contentType: application/avro
       payload:
-        schemaFormat: application/vnd.apache.avro;version=1.9.0
-        schema:
-          fields:
-            - name: status
-              type: string
-            - name: correlationid
-              type: string
-          name: Replies
-          namespace: io.aklivity.demos.streampay
-          type: record
+        $ref: '#/components/schemas/streampay-replies-value'
       name: StreampayRepliesMessage
       bindings:
         kafka:
           bindingVersion: 0.3.0
-          key:
-            type: string
     StreampayBalancesMessage:
       contentType: application/avro
       payload:
-        schemaFormat: application/vnd.apache.avro;version=1.9.0
-        schema:
-          fields:
-            - name: balance
-              type: double
-            - name: timestamp
-              type: long
-          name: Balance
-          namespace: io.aklivity.demos.streampay
-          type: record
+        $ref: '#/components/schemas/streampay-balances-value'
       name: StreampayBalancesMessage
       bindings:
         kafka:
           bindingVersion: 0.3.0
-          key:
-            type: string
     StreampayUsersMessage:
       contentType: application/avro
       payload:
-        schemaFormat: application/vnd.apache.avro;version=1.9.0
-        schema:
-          fields:
-            - name: id
-              type: string
-            - name: name
-              type: string
-            - name: username
-              type: string
-          name: User
-          namespace: io.aklivity.demos.streampay
-          type: record
+        $ref: '#/components/schemas/streampay-users-value'
       name: StreampayUsersMessage
       bindings:
         kafka:
-          bindingVersion: 0.3.0
           key:
+            $ref: '#/components/schemas/streampay-users-key'
+          bindingVersion: 0.3.0
+  schemas:
+    streampay-commands-value:
+      schemaFormat: application/vnd.apache.avro;version=1.9.0
+      schema:
+        fields:
+          - name: type
             type: string
-  securitySchemes:
-    confluentBroker:
-      type: userPassword
-      x-configs:
-        sasl.mechanisms: PLAIN
-        sasl.password: '{{CLUSTER_API_SECRET}}'
-        sasl.username: '{{CLUSTER_API_KEY}}'
-        security.protocol: sasl_ssl
-    confluentSchemaRegistry:
-      type: userPassword
-      x-configs:
-        basic.auth.user.info: '{{SCHEMA_REGISTRY_API_KEY}}:{{SCHEMA_REGISTRY_API_SECRET}}'
+          - name: userid
+            type: string
+          - name: requestid
+            type: string
+          - name: amount
+            type: double
+          - name: notes
+            type: string
+        name: PaymentCommand
+        namespace: com.example
+        type: record
+    streampay-replies-value:
+      schemaFormat: application/vnd.apache.avro;version=1.9.0
+      schema:
+        fields:
+          - name: status
+            type: string
+          - name: correlationid
+            type: string
+        name: Replies
+        namespace: com.example
+        type: record
+    streampay-users-key:
+      schemaFormat: application/vnd.apache.avro;version=1.9.0
+      schema:
+        type: string
+    streampay-users-value:
+      schemaFormat: application/vnd.apache.avro;version=1.9.0
+      schema:
+        fields:
+          - name: id
+            type: string
+          - name: name
+            type: string
+          - name: username
+            type: string
+        name: User
+        namespace: com.example
+        type: record
+    streampay-balances-value:
+      schemaFormat: application/vnd.apache.avro;version=1.9.0
+      schema:
+        fields:
+          - name: balance
+            type: double
+          - name: timestamp
+            type: long
+        name: Balance
+        namespace: com.example
+        type: record

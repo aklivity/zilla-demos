@@ -1,5 +1,5 @@
 asyncapi: 3.0.0
-id: 'tag:stream.pay.im,2023:api'
+id: 'tag:stream.oay.im,2023:api'
 info:
   title: StreamPay API
   version: 1.0.0
@@ -45,6 +45,8 @@ channels:
     parameters:
       id:
         description: Id of the streampay users item.
+        examples:
+          - 53307860c3599d1de448e19d
   streampay-balance-histories:
     address: '/streampay-balance-histories'
     messages:
@@ -62,6 +64,8 @@ channels:
     parameters:
       id:
         description: Id of the streampay balance histories item.
+        examples:
+          - 53307860c3599d1de448e19d
 operations:
   doStreampayCommandsCreate:
     action: send
@@ -176,22 +180,7 @@ components:
     StreampayCommandsMessage:
       contentType: application/json
       payload:
-        schemaFormat: application/schema+json;version=draft-07
-        schema:
-          type: object
-          properties:
-            type:
-              type: string
-            userid:
-              type: string
-            requestid:
-              type: string
-            amount:
-              type: number
-            notes:
-              type: string
-          name: PaymentCommand
-          namespace: io.aklivity.demos.streampay
+        $ref: '#/components/schemas/StreampayCommand'
       name: StreampayCommandsMessage
       bindings:
         http:
@@ -207,18 +196,7 @@ components:
     StreampayUsersMessage:
       contentType: application/json
       payload:
-        schemaFormat: application/schema+json;version=draft-07
-        schema:
-          type: object
-          properties:
-            id:
-              type: string
-            name:
-              type: string
-            username:
-              type: string
-          name: User
-          namespace: io.aklivity.demos.streampay
+        $ref: '#/components/schemas/StreampayUser'
       name: StreampayUsersMessage
       bindings:
         http:
@@ -234,16 +212,7 @@ components:
     StreampayBalancesMessage:
       contentType: application/json
       payload:
-        schemaFormat: application/schema+json;version=draft-07
-        schema:
-          type: object
-          properties:
-            balance:
-              type: number
-            timepstamp:
-              type: number
-          name: Balance
-          namespace: io.aklivity.demos.streampay
+        $ref: '#/components/schemas/StreampayBalance'
       name: StreampayBalancesMessage
       bindings:
         http:
@@ -259,5 +228,44 @@ components:
     StreampayEmptyMessage:
       contentType: application/json
       payload:
-        type: object
-        description: This is an empty message with no payload.
+        $ref: '#/components/schemas/StreampayEmpty'
+  schemas:
+    StreampayCommand:
+      type: object
+      properties:
+        type:
+          type: string
+        userid:
+          type: string
+        requestid:
+          type: string
+        amount:
+          type: number
+        notes:
+          type: string
+      name: PaymentCommand
+      namespace: com.example
+    StreampayUser:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        username:
+          type: string
+      name: User
+      namespace: com.example
+    StreampayBalance:
+      type: object
+      properties:
+        balance:
+          type: number
+        timepstamp:
+          type: number
+      name: Balance
+      namespace: com.example
+    StreampayEmpty:
+      type: object
+      name: Empty
+      namespace: com.example

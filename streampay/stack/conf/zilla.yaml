@@ -1,16 +1,27 @@
 ---
-name: zilla-demos-streampay
+name: zilla-http-kafka-broker
 catalogs:
   host_filesystem:
     type: filesystem
     options:
       subjects:
         streampay_http:
-          path: asyncapi/asyncapi-http.yaml
+          path: specs/asyncapi-http.yaml
         streampay_kafka:
-          path: asyncapi/asyncapi-kafka.yaml
+          path: specs/asyncapi-kafka.yaml
 bindings:
-  http_asyncpi_server:
+  http_syncapi_server:
+    type: asyncapi
+    kind: server
+    options:
+      specs:
+        http_api:
+          catalog:
+            host_filesystem:
+              subject: streampay_http
+              version: latest
+    exit: http_kafka_asyncapi_proxy
+  http_kafka_asyncapi_proxy:
     type: asyncapi
     kind: proxy
     options:
@@ -29,87 +40,97 @@ bindings:
       - when:
           - api-id: http_api
             operation-id: doStreampayCommandsCreate
-        exit: asyncapi_kafka0
+        exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
           operation-id: doStreampayCommands
       - when:
           - api-id: http_api
             operation-id: doStreampayCommandsUpdate
-        exit: asyncapi_kafka0
+        exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
           operation-id: doStreampayCommands
       - when:
           - api-id: http_api
             operation-id: doStreampayCommandsDelete
-        exit: asyncapi_kafka0
+        exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
           operation-id: doStreampayCommands
       - when:
           - api-id: http_api
             operation-id: doStreampayUsersCreate
-        exit: asyncapi_kafka0
+        exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
           operation-id: doStreampayUsers
       - when:
           - api-id: http_api
             operation-id: doStreampayUserUpdate
-        exit: asyncapi_kafka0
+        exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
           operation-id: doStreampayUsers
       - when:
           - api-id: http_api
             operation-id: doStreampayUserDelete
-        exit: asyncapi_kafka0
+        exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
           operation-id: doStreampayUsers
       - when:
           - api-id: http_api
             operation-id: onStreampayUserRead
-        exit: asyncapi_kafka0
+        exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
           operation-id: onStreampayUsers
       - when:
           - api-id: http_api
             operation-id: doStreampayBalanceHistoryCreate
-        exit: asyncapi_kafka0
+        exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
           operation-id: doStreampayBalanceHistories
       - when:
           - api-id: http_api
             operation-id: doStreampayBalanceHistoryUpdate
-        exit: asyncapi_kafka0
+        exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
           operation-id: doStreampayBalanceHistories
       - when:
           - api-id: http_api
             operation-id: doStreampayBalanceHistoryDelete
-        exit: asyncapi_kafka0
+        exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
           operation-id: doStreampayBalanceHistories
       - when:
           - api-id: http_api
             operation-id: onStreampayBalanceHistoryRead
-        exit: asyncapi_kafka0
+        exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
           operation-id: onStreampayBalanceHistories
       - when:
           - api-id: http_api
             operation-id: onStreampayBalanceHistories
-        exit: asyncapi_kafka0
+        exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
           operation-id: onStreampayBalanceHistories
+  kafka_asyncapi_client:
+    type: asyncapi
+    kind: client
+    options:
+      specs:
+        kafka_api:
+          catalog:
+            host_filesystem:
+              subject: streampay_kafka
+              version: latest
 
 telemetry:
   exporters:
