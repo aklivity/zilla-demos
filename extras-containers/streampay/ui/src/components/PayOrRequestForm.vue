@@ -98,7 +98,8 @@ export default defineComponent({
         if (balance.value - amount.value > 0) {
           const accessToken = await auth0.getAccessTokenSilently();
           const authorization = { Authorization: `Bearer ${accessToken}` };
-          api.post('/pay', {
+          api.post('/streampay-commands', {
+            type: 'PayCommand',
             userId: userOption.value?.value,
             amount: amount.value,
             notes: notes.value,
@@ -106,6 +107,7 @@ export default defineComponent({
           },{
             headers: {
               'Idempotency-Key': v4(),
+              'identity': 'test',
               ...authorization
             }}).then(function () {
             router.push({ path: '/main' });
@@ -132,13 +134,15 @@ export default defineComponent({
       async onRequest () {
         const accessToken = await auth0.getAccessTokenSilently();
         const authorization = { Authorization: `Bearer ${accessToken}` };
-        api.post('/request', {
+        api.post('/streampay-commands', {
+          type: 'SendPayment',
           userId: userOption.value?.value,
           amount: amount.value,
           notes: notes.value
         },{
           headers: {
             'Idempotency-Key': v4(),
+            'identity': 'test',
             ...authorization
         }}).then(function () {
           router.push({ path: '/main' });
@@ -174,8 +178,9 @@ export default defineComponent({
       };
 
       if (formRequestId) {
-        api.get('/payment-requests/' + formRequestId,{
+        api.get('/streampay-commands/' + formRequestId,{
           headers: {
+            'identity': 'test',
             ...authorization
           }
         })
@@ -208,9 +213,10 @@ export default defineComponent({
       const accessToken = await this.auth0.getAccessTokenSilently();
       const authorization = { Authorization: `Bearer ${accessToken}` };
 
-        await api.get('/users', {
+        await api.get('/streampay-users', {
           headers: {
-            ...authorization
+            'identity': 'test',
+            ...authorization,
           }
         })
         .then((response) => {

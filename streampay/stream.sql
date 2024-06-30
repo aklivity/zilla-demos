@@ -59,7 +59,11 @@
 -- );
 
 
-CREATE SOURCE IF NOT EXISTS users
+CREATE TABLE IF NOT EXISTS users(
+  *,
+  PRIMARY KEY (user_id)
+)
+INCLUDE KEY AS user_id
 WITH (
     connector='kafka',
     topic='streampay-users',
@@ -70,10 +74,10 @@ WITH (
     schema.registry = 'http://localhost:8081'
 );
 
-CREATE SOURCE IF NOT EXISTS commands
-INCLUDE header 'idempotency-key' AS key
+CREATE TABLE IF NOT EXISTS commands
+INCLUDE KEY AS key
 INCLUDE header'zilla:correlation-id' AS correlation_id
-INCLUDE header 'stream:identity' AS owener_id
+INCLUDE header 'identity' AS owener_id
 INCLUDE timestamp as timestamp
 WITH (
     connector='kafka',
@@ -101,14 +105,15 @@ create function success_request_status() returns varchar language javascript as 
 $$;
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS invalid_commands AS
-    SELECT bad_request_status() as status, correlationid::varchar as correlationid from commands where key IS NULL OR type NOT IN ('SendPayment', 'RequestPayment');
+    SELECT bad_request_status() as status, encode(correlation_id, 'escape') as correlationid from commands where key IS NULL OR type NOT IN ('SendPayment', 'RequestPayment');
 
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS valid_commands AS
-    SELECT success_request_status() as status, correlationid::varchar as correlationid from commands where key IS NOT NULL AND type IN ('SendPayment', 'RequestPayment');
+    SELECT success_request_status() as status,  encode(correlation_id, 'escape') as correlationid from commands where key IS NOT NULL AND type IN ('SendPayment', 'RequestPayment');
 
-CREATE SINK valid_replies
-FROM valid_commands
+
+CREATE SINK invalid_replies
+FROM invalid_commands
 WITH (
     connector='kafka',
     topic='streampay-replies',
@@ -119,9 +124,8 @@ ENCODE AVRO (
     schema.registry = 'http://localhost:8081'
 );
 
-
-CREATE SINK invalid_replies
-FROM invalid_commands
+CREATE SINK valid_replies
+FROM valid_commands
 WITH (
     connector='kafka',
     topic='streampay-replies',
@@ -233,3 +237,12 @@ WITH (
 ENCODE AVRO (
     schema.registry = 'http://localhost:8081'
 );
+
+drop table commands;
+
+drop MATERIALIZED VIEW valid_commands;
+drop MATERIALIZED VIEW invalid_commands;
+
+drop sink invalid_replies;
+drop sink valid_replies;
+

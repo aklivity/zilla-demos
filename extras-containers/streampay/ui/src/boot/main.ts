@@ -9,7 +9,7 @@ export default boot( ({ app}) => {
     createAuth0({
       domain,
       client_id,
-      redirect_uri: `${window.location.origin}/#/main`,
+      redirect_uri: `http://localhost:9090/#/main`,
       audience: 'https://localhost:9090/streampay',
       scope: 'read:users write:users read:payment-requests write:pay write:request read:activities read:balances'
     })
