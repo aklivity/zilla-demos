@@ -22,7 +22,7 @@
            <q-td  key="requester" :props="props">
              <div style="margin-bottom: 20px; margin-top: 20px;">
                <div class="text-h6">
-                 <b>{{ props.row.request.fromUserName }}</b> requested <b> ${{ props.row.request.amount.toFixed(2) }}</b>
+                 <b>{{ props.row.request.fromusername }}</b> requested <b> ${{ props.row.request.amount.toFixed(2) }}</b>
                </div>
                <div class="text-subtitle2">
                  {{ props.row.request.notes }}
@@ -90,7 +90,7 @@ export default defineComponent({
       const accessToken = await auth0.getAccessTokenSilently();
       const authorization = {Authorization: `Bearer ${accessToken}`};
 
-      await api.get('/current-payment-requests', {
+      await api.get('/streampay-request-payments', {
         headers: {
           ...authorization
         }

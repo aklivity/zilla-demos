@@ -1,0 +1,35 @@
+{
+	"type": "record",
+	"name": "RequestPayment",
+	"namespace": "io.aklivity.demos.streampay",
+	"fields": [
+		{
+			"name": "id",
+			"type": "string"
+		},
+		{
+			"name": "fromuserid",
+			"type": "string"
+		},
+		{
+			"name": "fromusername",
+			"type": "string"
+		},
+		{
+			"name": "touserid",
+			"type": "string"
+		},
+		{
+			"name": "tousername",
+			"type": "string"
+		},
+		{
+			"name": "amount",
+			"type": "double"
+		},
+		{
+			"name": "notes",
+			"type": "string"
+		}
+	]
+}

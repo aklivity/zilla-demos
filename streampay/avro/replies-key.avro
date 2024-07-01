@@ -1,0 +1,15 @@
+{
+	"type": "record",
+	"name": "Replies",
+	"namespace": "io.aklivity.demos.streampay",
+	"fields": [
+		{
+			"name": "status",
+			"type": "string"
+		},
+		{
+			"name": "correlationid",
+			"type": "string"
+		}
+	]
+}

@@ -1,0 +1,19 @@
+{
+	"type": "record",
+	"name": "User",
+	"namespace": "io.aklivity.demos.streampay",
+	"fields": [
+		{
+			"name": "id",
+			"type": "string"
+		},
+		{
+			"name": "name",
+			"type": "string"
+		},
+		{
+			"name": "username",
+			"type": "string"
+		}
+	]
+}

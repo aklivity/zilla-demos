@@ -98,14 +98,17 @@ export default defineComponent({
         if (balance.value - amount.value > 0) {
           const accessToken = await auth0.getAccessTokenSilently();
           const authorization = { Authorization: `Bearer ${accessToken}` };
-          api.post('/pay', {
-            userId: userOption.value?.value,
-            amount: amount.value,
-            notes: notes.value,
-            requestId: requestId.value
+          //requestId.value
+          api.post('/streampay-commands', {
+            type: 'SendPayment',
+            userid: userOption.value?.value,
+            requestid: "",
+            amount: +amount.value,
+            notes: notes.value
           },{
             headers: {
               'Idempotency-Key': v4(),
+              'identity': '3b3abf56-4b0e-4e4c-bfc6-bcba93d021d9',
               ...authorization
             }}).then(function () {
             router.push({ path: '/main' });
@@ -132,13 +135,16 @@ export default defineComponent({
       async onRequest () {
         const accessToken = await auth0.getAccessTokenSilently();
         const authorization = { Authorization: `Bearer ${accessToken}` };
-        api.post('/request', {
-          userId: userOption.value?.value,
-          amount: amount.value,
+        api.post('/streampay-commands', {
+          type: 'RequestPayment',
+          userid: userOption.value?.value,
+          requestid: "",
+          amount: +amount.value,
           notes: notes.value
         },{
           headers: {
             'Idempotency-Key': v4(),
+            'identity': '3b3abf56-4b0e-4e4c-bfc6-bcba93d021d9',
             ...authorization
         }}).then(function () {
           router.push({ path: '/main' });
@@ -166,16 +172,18 @@ export default defineComponent({
     async function readBalance() {
       const accessToken = await auth0.getAccessTokenSilently();
       const authorization = { Authorization: `Bearer ${accessToken}` };
-      balanceStream = new EventSource(`${streamingUrl}/current-balance?access_token=${accessToken}`);
+      balanceStream = new EventSource(`${streamingUrl}/streampay-balances`);
 
       balanceStream.onmessage = function (event: MessageEvent) {
         const balance = JSON.parse(event.data);
         updateBalance(balance.balance);
       };
 
+      console.log(formRequestId);
       if (formRequestId) {
-        api.get('/payment-requests/' + formRequestId,{
+        api.get('/streampay-request-payments/' + formRequestId,{
           headers: {
+            'identity': '3b3abf56-4b0e-4e4c-bfc6-bcba93d021d9',
             ...authorization
           }
         })
@@ -183,7 +191,7 @@ export default defineComponent({
           const request = response.data;
           updateAmount(request.amount);
 
-          fetchAndSetUsers(request.fromUserId);
+          fetchAndSetUsers(request.fromuserid);
         })
       } else {
         await fetchAndSetUsers();
@@ -208,15 +216,17 @@ export default defineComponent({
       const accessToken = await this.auth0.getAccessTokenSilently();
       const authorization = { Authorization: `Bearer ${accessToken}` };
 
-        await api.get('/users', {
+        const url = userId == null ? '/streampay-users' : '/streampay-users/' + userId;
+        await api.get(url, {
           headers: {
-            ...authorization
+            'identity': '3b3abf56-4b0e-4e4c-bfc6-bcba93d021d9',
+            ...authorization,
           }
         })
         .then((response) => {
           const users = response.data;
           for(let user of users) {
-            if (user.id != this.user.sub) {
+            if (user.id != '3b3abf56-4b0e-4e4c-bfc6-bcba93d021d9') {
               const newUserOption = {
                 label: user.name,
                 value: user.id

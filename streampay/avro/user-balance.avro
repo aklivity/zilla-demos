@@ -1,0 +1,15 @@
+{
+	"type": "record",
+	"name": "UserBalance",
+	"namespace": "io.aklivity.demos.streampay",
+	"fields": [
+		{
+			"name": "balance",
+			"type": "double"
+		},
+		{
+			"name": "timestamp",
+			"type": "long"
+		}
+	]
+}
