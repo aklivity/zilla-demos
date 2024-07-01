@@ -60,10 +60,9 @@
 
 
 CREATE TABLE IF NOT EXISTS users(
-  *,
-  PRIMARY KEY (user_id)
+  *
 )
-INCLUDE KEY AS user_id
+INCLUDE KEY AS user_key
 WITH (
     connector='kafka',
     topic='streampay-users',
@@ -77,7 +76,7 @@ WITH (
 CREATE TABLE IF NOT EXISTS commands
 INCLUDE KEY AS key
 INCLUDE header'zilla:correlation-id' AS correlation_id
-INCLUDE header 'identity' AS owener_id
+INCLUDE header 'identity' AS owenerid
 INCLUDE timestamp as timestamp
 WITH (
     connector='kafka',
@@ -88,11 +87,6 @@ WITH (
 ) FORMAT PLAIN ENCODE AVRO (
     message = 'PaymentCommand',
     schema.registry = 'http://localhost:8081'
-);
-
-CREATE TABLE users_balance(
-    userid VARCHAR,
-    balance DOUBLE PRECISION
 );
 
 
@@ -167,7 +161,7 @@ FROM
             commands
         WHERE
         KEY IS NOT NULL
-        AND type = 'PayCommand'
+        AND type = 'SendPayment'
     ) as cmd
     LEFT JOIN (
         SELECT
@@ -207,34 +201,36 @@ FROM
     ) AS ub ON cmd.owenerid = ub.userid AND ub.balance >= cmd.amount;
 
 
-CREATE MATERIALIZED VIEW payment_request as
+CREATE MATERIALIZED VIEW request_payment as
 SELECT
     generate_guid() as id,
-    userid as fromUserId,
-    (SELECT usename
-     FROM users
-     WHERE users.id = commands.userid) AS fromUsername
-    owenerid as toUserId,
-    (SELECT usename
-     FROM users
-     WHERE users.id = commands.owenerid) AS toUsername
+    encode(owenerid, 'escape') as fromUserId,
+    u2.username as fromUsername,
+    userid as toUserId,
+    u1.username as toUsername,
     amount,
-    timestamp,
-     owenerid::varchar as userid
+    notes
 FROM
     commands
-WHERE KEY IS NOT NULL AND type = 'RequestPayment'
+JOIN
+    users u1 ON u1.id = commands.userid
+JOIN
+    users u2 ON u2.id = encode(commands.owenerid, 'escape')
+WHERE
+    key IS NOT NULL
+    AND type = 'RequestPayment';
 
 
-CREATE SINK payment_request_sink
-FROM payment_request
+CREATE SINK request_payment_sink
+FROM request_payment
 WITH (
     connector='kafka',
-    topic='streampay-payment-requests',
+    topic='streampay-request-payments',
     properties.bootstrap.server='localhost:9092',
-    primary_key='correlationid'
+    primary_key='touserid'
 ) FORMAT UPSERT
 ENCODE AVRO (
+    key = 'touserid',
     schema.registry = 'http://localhost:8081'
 );
 

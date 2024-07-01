@@ -8,19 +8,19 @@
 			"type": "string"
 		},
 		{
-			"name": "fromUserId",
+			"name": "fromuserid",
 			"type": "string"
 		},
 		{
-			"name": "fromUserName",
+			"name": "fromusername",
 			"type": "string"
 		},
 		{
-			"name": "toUserId",
+			"name": "touserid",
 			"type": "string"
 		},
 		{
-			"name": "toUserName",
+			"name": "tousername",
 			"type": "string"
 		},
 		{
@@ -30,10 +30,6 @@
 		{
 			"name": "notes",
 			"type": "string"
-		},
-		{
-			"name": "timestamp",
-			"type": "long"
 		}
 	]
 }

@@ -4,12 +4,12 @@
 	"namespace": "io.aklivity.demos.streampay",
 	"fields": [
 		{
-			"name": "userid",
-			"type": "string"
-		},
-		{
 			"name": "balance",
 			"type": "double"
+		},
+		{
+			"name": "timestamp",
+			"type": "long"
 		}
 	]
 }

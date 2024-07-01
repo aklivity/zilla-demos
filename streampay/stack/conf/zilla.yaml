@@ -10,7 +10,7 @@ catalogs:
         streampay_kafka:
           path: specs/asyncapi-kafka.yaml
 bindings:
-  http_syncapi_server:
+  http_asyncapi_server:
     type: asyncapi
     kind: server
     options:
@@ -88,43 +88,84 @@ bindings:
           operation-id: onStreampayUsers
       - when:
           - api-id: http_api
-            operation-id: doStreampayBalanceHistoryCreate
+            operation-id: onStreampayUsersRead
         exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
-          operation-id: doStreampayBalanceHistories
+          operation-id: onStreampayUsers
       - when:
           - api-id: http_api
-            operation-id: doStreampayBalanceHistoryUpdate
+            operation-id: doStreampayBalanceCreate
         exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
-          operation-id: doStreampayBalanceHistories
+          operation-id: doStreampayBalances
       - when:
           - api-id: http_api
-            operation-id: doStreampayBalanceHistoryDelete
+            operation-id: doStreampayBalanceUpdate
         exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
-          operation-id: doStreampayBalanceHistories
+          operation-id: doStreampayBalances
       - when:
           - api-id: http_api
-            operation-id: onStreampayBalanceHistoryRead
+            operation-id: doStreampayBalanceDelete
         exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
-          operation-id: onStreampayBalanceHistories
+          operation-id: doStreampayBalances
       - when:
           - api-id: http_api
-            operation-id: onStreampayBalanceHistories
+            operation-id: onStreampayBalanceRead
         exit: kafka_asyncapi_client
         with:
           api-id: kafka_api
-          operation-id: onStreampayBalanceHistories
+          operation-id: onStreampayBalances
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayBalances
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayBalances
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayRequestPayment
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayRequestPayments
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayRequestPaymentReads
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayRequestPayments
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayRequestPaymentRead
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayRequestPayments
   kafka_asyncapi_client:
     type: asyncapi
     kind: client
     options:
+      kafka:
+        topics:
+          - name: streampay-replies
+            headers:
+              ':status': ${message.value.status}
+              'zilla:correlation-id': ${message.value.correlationid}
+            value:
+              view: json
+              model: avro
+              catalog:
+                catalog0:
+                - subject: streampay-replies-value
+                  version: latest
       specs:
         kafka_api:
           catalog:

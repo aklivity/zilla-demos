@@ -33,6 +33,8 @@ channels:
     messages:
       StreampayUsers.message:
         $ref: '#/components/messages/StreampayUsersMessage'
+      StreampayItemsUsers.message:
+        $ref: '#/components/messages/StreampayUsersItemsMessage'
     description: <nil>
   streampay-users-item:
     address: '/streampay-users/{id}'
@@ -47,14 +49,14 @@ channels:
         description: Id of the streampay users item.
         examples:
           - 53307860c3599d1de448e19d
-  streampay-balance-histories:
-    address: '/streampay-balance-histories'
+  streampay-balances:
+    address: '/streampay-balances'
     messages:
       StreampayBalances.message:
         $ref: '#/components/messages/StreampayBalancesMessage'
     description: <nil>
-  streampay-balance-histories-item:
-    address: '/streampay-balance-histories/{id}'
+  streampay-balances-item:
+    address: '/streampay-balances/{id}'
     messages:
       StreampayBalances.message:
         $ref: '#/components/messages/StreampayBalancesMessage'
@@ -63,7 +65,34 @@ channels:
     description: <nil>
     parameters:
       id:
-        description: Id of the streampay balance histories item.
+        description: Id of the streampay balance item.
+        examples:
+          - 53307860c3599d1de448e19d
+  streampay-request-payment:
+    address: '/streampay-request-payment'
+    messages:
+      StreampayRequestPayment.message:
+        $ref: '#/components/messages/StreampayRequestPaymentMessage'
+    description: <nil>
+  streampay-request-payments:
+    address: '/streampay-request-payments'
+    messages:
+      StreampayRequestPayment.message:
+        $ref: '#/components/messages/StreampayRequestPaymentMessage'
+      StreampayRequestPaymentsItemsMessage.message:
+        $ref: '#/components/messages/StreampayRequestPaymentsItemsMessage'
+    description: <nil>
+  streampay-request-payments-item:
+    address: '/streampay-request-payments/{id}'
+    messages:
+      StreampayRequestPayment.message:
+        $ref: '#/components/messages/StreampayRequestPaymentMessage'
+      StreampayEmpty.message:
+        $ref: '#/components/messages/StreampayEmptyMessage'
+    description: <nil>
+    parameters:
+      id:
+        description: Id of the streampay balance item.
         examples:
           - 53307860c3599d1de448e19d
 operations:
@@ -112,6 +141,15 @@ operations:
         method: GET
     messages:
       - $ref: '#/channels/streampay-users-item/messages/StreampayUsers.message'
+  onStreampayUsersRead:
+    action: receive
+    channel:
+      $ref: '#/channels/streampay-users'
+    bindings:
+      http:
+        method: GET
+    messages:
+      - $ref: '#/channels/streampay-users/messages/StreampayItemsUsers.message'
   doStreampayUserUpdate:
     action: send
     channel:
@@ -130,51 +168,72 @@ operations:
         method: DELETE
     messages:
       - $ref: '#/channels/streampay-users-item/messages/StreampayEmpty.message'
-  doStreampayBalanceHistoryCreate:
+  doStreampayBalanceCreate:
     action: send
     channel:
-      $ref: '#/channels/streampay-balance-histories'
+      $ref: '#/channels/streampay-balances'
     bindings:
       http:
         method: POST
     messages:
-      - $ref: '#/channels/streampay-balance-histories/messages/StreampayBalances.message'
-  onStreampayBalanceHistoryRead:
+      - $ref: '#/channels/streampay-balances/messages/StreampayBalances.message'
+  onStreampayBalanceRead:
     action: receive
     channel:
-      $ref: '#/channels/streampay-balance-histories-item'
+      $ref: '#/channels/streampay-balances-item'
     bindings:
       http:
         method: GET
     messages:
-      - $ref: '#/channels/streampay-balance-histories-item/messages/StreampayBalances.message'
-  doStreampayBalanceHistoryUpdate:
+      - $ref: '#/channels/streampay-balances-item/messages/StreampayBalances.message'
+  doStreampayBalanceUpdate:
     action: send
     channel:
-      $ref: '#/channels/streampay-balance-histories-item'
+      $ref: '#/channels/streampay-balances-item'
     bindings:
       http:
         method: PUT
     messages:
-      - $ref: '#/channels/streampay-balance-histories-item/messages/StreampayBalances.message'
-  doStreampayBalanceHistoryDelete:
+      - $ref: '#/channels/streampay-balances-item/messages/StreampayBalances.message'
+  doStreampayBalanceDelete:
     action: send
     channel:
-      $ref: '#/channels/streampay-balance-histories-item'
+      $ref: '#/channels/streampay-balances-item'
     bindings:
       http:
         method: DELETE
     messages:
-      - $ref: '#/channels/streampay-balance-histories-item/messages/StreampayEmpty.message'
-  onStreampayBalanceHistories:
+      - $ref: '#/channels/streampay-balances-item/messages/StreampayEmpty.message'
+  onStreampayBalances:
     action: receive
     channel:
-      $ref: '#/channels/streampay-balance-histories'
+      $ref: '#/channels/streampay-balances'
+    messages:
+      - $ref: '#/channels/streampay-balances/messages/StreampayBalances.message'
+  onStreampayRequestPayment:
+    action: receive
+    channel:
+      $ref: '#/channels/streampay-request-payment'
+    messages:
+      - $ref: '#/channels/streampay-request-payment/messages/StreampayRequestPayment.message'
+  onStreampayRequestPaymentsReads:
+    action: receive
+    channel:
+      $ref: '#/channels/streampay-request-payments'
     bindings:
       http:
         method: GET
     messages:
-      - $ref: '#/channels/streampay-balance-histories/messages/StreampayBalances.message'
+      - $ref: '#/channels/streampay-request-payments/messages/StreampayRequestPaymentsItemsMessage.message'
+  onStreampayRequestPaymentRead:
+    action: receive
+    channel:
+      $ref: '#/channels/streampay-request-payments-item'
+    bindings:
+      http:
+        method: GET
+    messages:
+      - $ref: '#/channels/streampay-request-payments-item/messages/StreampayRequestPayment.message'
 components:
   messages:
     StreampayCommandsMessage:
@@ -209,6 +268,22 @@ components:
               Trailer:
                 type: string
                 const: \r\n
+    StreampayUsersItemsMessage:
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/StreampayUsers'
+      name: StreampayUsersMessage
+      bindings:
+        http:
+          headers:
+            type: object
+            properties:
+              Transfer-Encoding:
+                type: string
+                const: chunked
+              Trailer:
+                type: string
+                const: \r\n
     StreampayBalancesMessage:
       contentType: application/json
       payload:
@@ -225,10 +300,53 @@ components:
               Trailer:
                 type: string
                 const: \r\n
+    StreampayRequestPaymentsItemsMessage:
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/StreampayRequestPayments'
+      name: StreampayRequestPayments
+      bindings:
+        http:
+          headers:
+            type: object
+            properties:
+              Transfer-Encoding:
+                type: string
+                const: chunked
+              Trailer:
+                type: string
+                const: \r\n
+    StreampayRequestPaymentMessage:
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/StreampayRequestPayment'
+      name: StreampayRequestPaymentMessage
+      bindings:
+        http:
+          headers:
+            type: object
+            properties:
+              Transfer-Encoding:
+                type: string
+                const: chunked
+              Trailer:
+                type: string
+                const: \r\n
     StreampayEmptyMessage:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/StreampayEmpty'
+      bindings:
+        http:
+          headers:
+            type: object
+            properties:
+              Transfer-Encoding:
+                type: string
+                const: chunked
+              Trailer:
+                type: string
+                const: \r\n
   schemas:
     StreampayCommand:
       type: object
@@ -256,14 +374,45 @@ components:
           type: string
       name: User
       namespace: com.example
+    StreampayUsers:
+      type: array
+      items:
+        $ref: "#/components/schemas/StreampayUser"
+      name: Users
+      namespace: com.example
     StreampayBalance:
+      type: object
+      properties:
+        id:
+          type: string
+        fromuserid:
+          type: string
+        fromusername:
+          type: string
+        touserid:
+          type: string
+        tousername:
+          type: string
+        amount:
+          type: number
+        notes:
+          type: string
+      name: Balance
+      namespace: com.example
+    StreampayRequestPayment:
       type: object
       properties:
         balance:
           type: number
         timepstamp:
           type: number
-      name: Balance
+      name: RequestPaymen
+      namespace: com.example
+    StreampayRequestPayments:
+      type: array
+      items:
+        $ref: "#/components/schemas/StreampayRequestPayment"
+      name: RequestPayments
       namespace: com.example
     StreampayEmpty:
       type: object
