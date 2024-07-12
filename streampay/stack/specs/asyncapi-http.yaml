@@ -198,7 +198,7 @@ operations:
       $ref: '#/channels/streampay-Average-transactions'
     messages:
       - $ref: '#/channels/streampay-Average-transactions/messages/StreampayBalances.message'
-  onStreampayBalanceHistoriesReaad:
+  onStreampayBalanceHistoriesRead:
     action: receive
     channel:
       $ref: '#/channels/streampay-current-balance'

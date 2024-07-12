@@ -192,11 +192,11 @@ channels:
           segment.ms: '604800000'
           unclean.leader.election.enable: 'false'
     x-messageCompatibility: BACKWARD
-  streampay-avarage-transactions:
-    address: avarage-transactions
+  streampay-average-transactions:
+    address: Average-transactions
     messages:
       StreampayTotalTransaction.message:
-        $ref: '#/components/messages/StreampayAvarageTransactionMessage'
+        $ref: '#/components/messages/StreampayAverageTransactionMessage'
     description: <nil>
     bindings:
       kafka:
@@ -515,10 +515,10 @@ operations:
           type: string
     messages:
       - $ref: '#/channels/streampay-total-transactions/messages/StreampayTotalTransaction.message'
-  onStreampayAvarageTransactions:
+  onStreampayAverageTransactions:
     action: receive
     channel:
-      $ref: '#/channels/streampay-total-transactions'
+      $ref: '#/channels/streampay-average-transactions'
     bindings:
       kafka:
         bindingVersion: 0.3.0
@@ -527,7 +527,7 @@ operations:
         clientId:
           type: string
     messages:
-      - $ref: '#/channels/streampay-total-transactions/messages/StreampayTotalTransaction.message'
+      - $ref: '#/channels/streampay-average-transactions/messages/StreampayTotalTransaction.message'
   onStreampayPaymentRequests:
     action: receive
     channel:
@@ -609,10 +609,10 @@ components:
       bindings:
         kafka:
           bindingVersion: 0.3.0
-    StreampayAvarageTransactionMessage:
+    StreampayAverageTransactionMessage:
       contentType: application/json
       payload:
-        $ref: '#/components/schemas/StreampayAvarageTransaction'
+        $ref: '#/components/schemas/StreampayAverageTransaction'
       name: StreampayTotalTransactionMessage
       bindings:
         kafka:
@@ -701,9 +701,9 @@ components:
           type: number
       name: StreampayTotalTransaction
       namespace: com.example
-    StreampayAvarageTransaction:
+    StreampayAverageTransaction:
       type: string
-      name: StreampayAvarageTransaction
+      name: StreampayAverageTransaction
       namespace: com.example
     StreampayActivity:
       type: object
