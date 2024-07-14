@@ -101,12 +101,12 @@ services:
         SPRING_KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
 
   zilla:
-    image: "ghcr.io/aklivity/zilla:latest"
+    image: "ghcr.io/aklivity/zilla:develop-SNAPSHOT"
     hostname: "zilla"
-    command: [ "start", "-v", "-e"]
+    command: [ "start", "-v", "-e", "-Pzilla.engine.verbose.composites", "-Pzilla.binding.kafka.client.produce.record.framing.size=1024", "-Pzilla.binding.kafka.client.connection.pool=false"]
     volumes:
       - ./conf:/etc/zilla:ro
-      - ../app/dist/spa:/app/dist:ro
+      - ../../extras-containers/streampay/ui/dist/spa:/app/dist:ro
     networks:
       - net0
     ports:

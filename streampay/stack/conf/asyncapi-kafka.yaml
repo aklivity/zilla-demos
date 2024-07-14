@@ -4,11 +4,8 @@ info:
   version: 1.0.0
 servers:
   plain:
-    host: localhost:9092
+    host: redpanda.internal.net:29092
     protocol: kafka
-    bindings:
-      kafka:
-        schemaRegistryUrl: 'http://localhost:8081'
 channels:
   streampay-commands:
     address: commands
@@ -193,7 +190,7 @@ channels:
           unclean.leader.election.enable: 'false'
     x-messageCompatibility: BACKWARD
   streampay-average-transactions:
-    address: Average-transactions
+    address: average-transactions
     messages:
       StreampayTotalTransaction.message:
         $ref: '#/components/messages/StreampayAverageTransactionMessage'

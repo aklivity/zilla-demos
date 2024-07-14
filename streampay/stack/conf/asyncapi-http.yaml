@@ -5,11 +5,15 @@ info:
   version: 1.0.0
 servers:
   plain_sse:
-    host: localhost:7114
-    protocol: sse
+    host: localhost:9090
+    protocol: secure-sse
+    security:
+      - $ref: '#/components/securitySchemes/httpOauth'
   plain_http:
-    host: localhost:7114
-    protocol: http
+    host: localhost:9090
+    protocol: https
+    security:
+      - $ref: '#/components/securitySchemes/httpOauth'
 channels:
   streampay-pay:
     address: '/pay'
@@ -56,8 +60,8 @@ channels:
       StreampayBalances.message:
         $ref: '#/components/messages/StreampayTotalTransactionMessage'
     description: <nil>
-  streampay-Average-transactions:
-    address: '/Average-transactions'
+  streampay-average-transactions:
+    address: '/average-transactions'
     messages:
       StreampayBalances.message:
         $ref: '#/components/messages/StreampayAverageTransactionMessage'
@@ -120,48 +124,47 @@ operations:
     channel:
       $ref: '#/channels/streampay-pay'
     bindings:
-      x-zilla-http-kakfa:
-        identity:
-          header: zilla:identity
+      x-zilla-http-kafka:
+        method: POST
         overrides:
-          zilla:domain-model: PayCommand
+          zilla:command: PayCommand
+          zilla:identity: "{identity}"
       http:
         method: POST
     messages:
       - $ref: '#/channels/streampay-pay/messages/StreampayPay.message'
     security:
-      - type: oauth2
-        flows: {}
-        scopes: 
-          - write:pay
+     - $ref: '#/components/securitySchemes/httpOauth'
   doStreampayRequestCommand:
     action: send
     channel:
       $ref: '#/channels/streampay-request'
     bindings:
-      x-zilla-http-kakfa:
-        identity:
-          header: zilla:identity
+      x-zilla-http-kafka:
+        method: POST
         overrides:
-          zilla:domain-model: RequestCommand
+          zilla:command: RequestCommand
+          zilla:identity: "{identity}"
       http:
         method: POST
     messages:
       - $ref: '#/channels/streampay-request/messages/StreampayRequest.message'
     security:
-      - type: oauth2
-        flows: {}
-        scopes: 
-          - write:pay
+     - $ref: '#/components/securitySchemes/httpOauth'
   doStreampayUsersUpdate:
     action: send
     channel:
       $ref: '#/channels/streampay-current-user'
     bindings:
+      x-zilla-http-kafka:
+        method: PUT
+        key: "{identity}"
       http:
         method: PUT
     messages:
       - $ref: '#/channels/streampay-current-user/messages/StreampayUsers.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayUsersRead:
     action: receive
     channel:
@@ -171,6 +174,8 @@ operations:
         method: GET
     messages:
       - $ref: '#/channels/streampay-users/messages/StreampayItemsUsers.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayBalanceRead:
     action: receive
     channel:
@@ -180,61 +185,115 @@ operations:
         method: GET
     messages:
       - $ref: '#/channels/streampay-balances-item/messages/StreampayBalances.message'
-  onStreampayBalancesRead:
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
+  onStreampayCurrentBalancesRead:
     action: receive
     channel:
       $ref: '#/channels/streampay-current-balance'
+    bindings:
+      x-zilla-sse-kafka:
+        filters:
+          - headers:
+              zilla:identity: "{identity}"
     messages:
       - $ref: '#/channels/streampay-current-balance/messages/StreampayBalances.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayTotalTransactionRead:
     action: receive
     channel:
       $ref: '#/channels/streampay-total-transactions'
     messages:
       - $ref: '#/channels/streampay-total-transactions/messages/StreampayBalances.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayAverageTransactionRead:
     action: receive
     channel:
-      $ref: '#/channels/streampay-Average-transactions'
+      $ref: '#/channels/streampay-average-transactions'
     messages:
-      - $ref: '#/channels/streampay-Average-transactions/messages/StreampayBalances.message'
+      - $ref: '#/channels/streampay-average-transactions/messages/StreampayBalances.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayBalanceHistoriesRead:
     action: receive
     channel:
-      $ref: '#/channels/streampay-current-balance'
+      $ref: '#/channels/streampay-balance-histories'
+    bindings:
+      x-zilla-sse-kafka:
+        filters:
+          - headers:
+              zilla:identity: "{identity}"
     messages:
-      - $ref: '#/channels/streampay-current-balance/messages/StreampayBalances.message'
+      - $ref: '#/channels/streampay-balance-histories/messages/StreampayBalances.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayActivitiesRead:
     action: receive
     channel:
       $ref: '#/channels/streampay-activities'
     messages:
       - $ref: '#/channels/streampay-activities/messages/StreampayActivity.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayPaymentRequest:
     action: receive
     channel:
       $ref: '#/channels/streampay-payment-request'
+    bindings:
+      x-zilla-sse-kafka:
+        filters:
+          - headers:
+              zilla:identity: "{identity}"
     messages:
       - $ref: '#/channels/streampay-payment-request/messages/StreampayPaymentRequest.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayPaymentRequestReads:
     action: receive
     channel:
       $ref: '#/channels/streampay-payment-requests'
     bindings:
+      x-zilla-http-kafka:
+        method: GET
+        filters:
+          - headers:
+              zilla:identity: "{identity}"
       http:
         method: GET
     messages:
       - $ref: '#/channels/streampay-payment-requests/messages/StreampayPaymentRequestsItemsMessage.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayPaymentRequestRead:
     action: receive
     channel:
       $ref: '#/channels/streampay-request-payments-item'
     bindings:
+      x-zilla-http-kafka:
+        method: GET
+        filters:
+            - key: "{identity}"
       http:
         method: GET
     messages:
       - $ref: '#/channels/streampay-request-payments-item/messages/StreampayPaymentRequest.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
 components:
+  securitySchemes:
+    httpOauth:
+      type: oauth2
+      flows: {}
+      scopes:
+        - write:pay
+        - write:request
+        - write:users
+        - read:users
+        - read:activities
+        - read:payment-requests
+        - read:balances
   messages:
     StreampayPayMessage:
       contentType: application/json

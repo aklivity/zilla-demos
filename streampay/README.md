@@ -54,7 +54,7 @@ which uses Auth0 platform.
 ### Build
 
 ```shell
-cd app
+cd extras-containers/streampay/ui
 npm i -g @quasar/cli
 npm install
 quasar build
