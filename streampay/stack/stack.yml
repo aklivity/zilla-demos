@@ -103,11 +103,12 @@ services:
   zilla:
     image: "ghcr.io/aklivity/zilla:latest"
     hostname: "zilla"
-    command: [ "start", "-v", "-e"]
+    command: [ "start", "-v", "-e", "-Pzilla.engine.verbose.composites", "-Pzilla.binding.kafka.client.produce.record.framing.size=2048", "-Pzilla.binding.kafka.client.connection.pool=false"]
     volumes:
       - ./conf:/etc/zilla:ro
-      - ../app/dist/spa:/app/dist:ro
+      - ../../extras-containers/streampay/ui/dist/spa:/app/dist:ro
     networks:
       - net0
     ports:
       - "9090:9090"
+      - "8081:8081"

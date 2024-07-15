@@ -56,7 +56,7 @@ public class ValidateCommandSupplier implements ProcessorSupplier<String, Comman
             final Headers headers = record.headers();
             final Header correlationId = headers.lastHeader("zilla:correlation-id");
             final Header idempotencyKey = headers.lastHeader("idempotency-key");
-            final Header userId = headers.lastHeader("stream:identity");
+            final Header userId = headers.lastHeader("zilla:identity");
 
             final Headers newHeaders = new RecordHeaders();
             newHeaders.add(correlationId);

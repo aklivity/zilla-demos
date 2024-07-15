@@ -1,301 +1,15 @@
-name: Example
+---
+name: zilla-streampay-demo-api
 vaults:
-  filesystem2814ec86-7736-49c9-babe-d8e6cedde0dc:
+  filesystem0:
     type: filesystem
     options:
       keys:
         store: localhost.p12
         type: pkcs12
         password: generated
-bindings:
-  tcp_servera3342d5b-71aa-44f4-b20d-59994b2482c1:
-    type: tcp
-    kind: server
-    options:
-      host: 0.0.0.0
-      port: 9090
-    exit: tls_servera3342d5b-71aa-44f4-b20d-59994b2482c1
-  tls_servera3342d5b-71aa-44f4-b20d-59994b2482c1:
-    type: tls
-    kind: server
-    vault: filesystem2814ec86-7736-49c9-babe-d8e6cedde0dc
-    options:
-      keys:
-        - localhost
-      sni:
-        - localhost
-      alpn:
-        - http/1.1
-        - h2
-    exit: http_servera3342d5b-71aa-44f4-b20d-59994b2482c1
-  http_servera3342d5b-71aa-44f4-b20d-59994b2482c1:
-    type: http
-    kind: server
-    options:
-      access-control:
-        policy: cross-origin
-      authorization:
-        jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
-          credentials:
-            headers:
-              authorization: Bearer {credentials}
-            query:
-              access_token: "{credentials}"
-    routes:
-      - when:
-          - headers:
-              :method: GET
-              :path: /activities
-          - headers:
-              :method: GET
-              :path: /payment-requests
-          - headers:
-              :method: GET
-              :path: /current-balance
-          - headers:
-              :method: GET
-              :path: /balance-histories
-          - headers:
-              :method: GET
-              :path: /total-transactions
-          - headers:
-              :method: GET
-              :path: /average-transactions
-        exit: sse_servera3342d5b-71aa-44f4-b20d-59994b2482c1
-      - when:
-          - headers:
-              :method: POST
-              :path: /pay
-          - headers:
-              :method: POST
-              :path: /request
-          - headers:
-              :method: PUT
-              :path: /current-user
-          - headers:
-              :method: GET
-              :path: /users
-          - headers:
-              :method: GET
-              :path: /current-payment-requests
-          - headers:
-              :method: GET
-              :path: /payment-requests/*
-        exit: http-kafka_proxya3342d5b-71aa-44f4-b20d-59994b2482c1
-    exit: http_filesystem_proxya3342d5b-71aa-44f4-b20d-59994b2482c1
-  http_filesystem_proxya3342d5b-71aa-44f4-b20d-59994b2482c1:
-    type: http-filesystem
-    kind: proxy
-    routes:
-      - when:
-          - path: /
-        exit: filesystem_servera3342d5b-71aa-44f4-b20d-59994b2482c1
-        with:
-          path: index.html
-      - when:
-          - path: /{path}
-        exit: filesystem_servera3342d5b-71aa-44f4-b20d-59994b2482c1
-        with:
-          path: ${params.path}
-  filesystem_servera3342d5b-71aa-44f4-b20d-59994b2482c1:
-    type: filesystem
-    kind: server
-    options:
-      location: /app/dist/
-  sse_servera3342d5b-71aa-44f4-b20d-59994b2482c1:
-    type: sse
-    kind: server
-    exit: sse-kafka_proxya3342d5b-71aa-44f4-b20d-59994b2482c1
-  sse-kafka_proxya3342d5b-71aa-44f4-b20d-59994b2482c1:
-    type: sse-kafka
-    kind: proxy
-    routes:
-      - when:
-          - path: /activities
-        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
-        with:
-          event:
-            id: '["${base64(key)}","${etag}"]'
-          topic: activities
-        guarded:
-          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
-            - read:activities
-      - when:
-          - path: /payment-requests
-        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
-        with:
-          event:
-            id: '["${base64(key)}","${etag}"]'
-          topic: payment-requests
-          filters:
-            - headers:
-                zilla:identity: ${guarded['jwt3dc23de6-5185-46f8-86f7-717c3b023d8a'].identity}
-        guarded:
-          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
-            - read:payment-requests
-      - when:
-          - path: /current-balance
-        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
-        with:
-          event:
-            id: '["${base64(key)}","${etag}"]'
-          topic: balances
-          filters:
-            - key: ${guarded['jwt3dc23de6-5185-46f8-86f7-717c3b023d8a'].identity}
-        guarded:
-          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
-            - read:balances
-      - when:
-          - path: /balance-histories
-        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
-        with:
-          event:
-            id: '["${base64(key)}","${etag}"]'
-          topic: balance-histories
-          filters:
-            - key: ${guarded['jwt3dc23de6-5185-46f8-86f7-717c3b023d8a'].identity}
-        guarded:
-          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
-            - read:balances
-      - when:
-          - path: /total-transactions
-        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
-        with:
-          event:
-            id: '["${base64(key)}","${etag}"]'
-          topic: total-transactions
-        guarded:
-          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
-            - read:balances
-      - when:
-          - path: /average-transactions
-        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
-        with:
-          event:
-            id: '["${base64(key)}","${etag}"]'
-          topic: average-transactions
-        guarded:
-          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
-            - read:balances
-  http-kafka_proxya3342d5b-71aa-44f4-b20d-59994b2482c1:
-    type: http-kafka
-    kind: proxy
-    routes:
-      - when:
-          - method: POST
-            path: /pay
-        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
-        with:
-          capability: produce
-          reply-to: replies
-          topic: commands
-          key: ${idempotencyKey}
-          overrides:
-            zilla:domain-model: PayCommand
-            zilla:identity: ${guarded['jwt3dc23de6-5185-46f8-86f7-717c3b023d8a'].identity}
-        guarded:
-          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
-            - write:pay
-      - when:
-          - method: POST
-            path: /request
-        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
-        with:
-          capability: produce
-          reply-to: replies
-          topic: commands
-          key: ${idempotencyKey}
-          overrides:
-            zilla:domain-model: RequestCommand
-            zilla:identity: ${guarded['jwt3dc23de6-5185-46f8-86f7-717c3b023d8a'].identity}
-        guarded:
-          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
-            - write:request
-      - when:
-          - method: PUT
-            path: /current-user
-        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
-        with:
-          capability: produce
-          topic: users
-          overrides: {}
-          key: ${guarded['jwt3dc23de6-5185-46f8-86f7-717c3b023d8a'].identity}
-        guarded:
-          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
-            - write:users
-      - when:
-          - method: GET
-            path: /users
-        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
-        with:
-          capability: fetch
-          topic: users
-          merge:
-            content-type: application/json
-        guarded:
-          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
-            - read:users
-      - when:
-          - method: GET
-            path: /payment-requests/{id}
-        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
-        with:
-          capability: fetch
-          topic: payment-requests
-          filters:
-            - key: ${params.id}
-        guarded:
-          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
-            - read:payment-requests
-      - when:
-          - method: GET
-            path: /current-payment-requests
-        exit: kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3
-        with:
-          capability: fetch
-          topic: payment-requests
-          merge:
-            content-type: application/json
-          filters:
-            - headers:
-                zilla:identity: ${guarded['jwt3dc23de6-5185-46f8-86f7-717c3b023d8a'].identity}
-        guarded:
-          jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
-            - read:payment-requests
-  kafka_cache_client1808eec1-480a-4f24-af7d-3a99101cc5b3:
-    type: kafka
-    kind: cache_client
-    exit: kafka_cache_server1808eec1-480a-4f24-af7d-3a99101cc5b3
-  kafka_cache_server1808eec1-480a-4f24-af7d-3a99101cc5b3:
-    type: kafka
-    kind: cache_server
-    options:
-      bootstrap:
-        - replies
-        - payment-requests
-        - balances
-        - users
-    exit: kafka_client1808eec1-480a-4f24-af7d-3a99101cc5b3
-  kafka_client1808eec1-480a-4f24-af7d-3a99101cc5b3:
-    type: kafka
-    kind: client
-    exit: tcp_client1808eec1-480a-4f24-af7d-3a99101cc5b3
-    options:
-      sasl:
-        mechanism: scram-sha-256
-        username: user
-        password: redpanda
-  tcp_client1808eec1-480a-4f24-af7d-3a99101cc5b3:
-    type: tcp
-    kind: client
-    options:
-      host: redpanda.internal.net
-      port: 29092
-    routes:
-      - when:
-          - cidr: 0.0.0.0/0
 guards:
-  jwt3dc23de6-5185-46f8-86f7-717c3b023d8a:
+  jwt0:
     type: jwt
     options:
       issuer: https://aklivity.us.auth0.com/
@@ -319,3 +33,201 @@ guards:
           x5t: vfM0DKkRNUmYxs13GJnM-NlADuU
           x5c:
             - MIIDBTCCAe2gAwIBAgIJevGCW7bs17g5MA0GCSqGSIb3DQEBCwUAMCAxHjAcBgNVBAMTFWFrbGl2aXR5LnVzLmF1dGgwLmNvbTAeFw0yMjA1MzEyMTI5MzZaFw0zNjAyMDcyMTI5MzZaMCAxHjAcBgNVBAMTFWFrbGl2aXR5LnVzLmF1dGgwLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM5cdCHhvBs8O+wTwrkfTL2VUm0k0ZH5HAJJUtt66CK+JsS6/JuSNkNmzo+eqh87VfH6z1U2dBsnrMcEnHWkkZDaJhdp584m1kWm3HpOdFJh26YHgN3VwJsQjFEfk2odMPngkrG17uj27aVpi5v+54kiZ0XneOce2/O+hNhvw4rUBRKxjGWi5khu3sBdGh8/oJ9+1IqNpe9fqF577IaQu2Ne/k1GFAyiIpKOj9VCrGO31ARGmZPfoXuiobJ8uymFJHGdReOatFipRsImcmY1PIz4TRjyHPKo+kJoxISdOyM4w0eMfKWTdxeIKOpigdbYVloRlq5GiyPFJpbhw3A990UCAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUt/86Q4B1Xalsr8077ehQ9iqi3rkwDgYDVR0PAQH/BAQDAgKEMA0GCSqGSIb3DQEBCwUAA4IBAQBC6ejNbo9u7+qFvh+j1Zh7YZW+uz06Gd4WnwCU+926JP6U7NMNt3guvPVPYtFXSpKhdAom2t/UjBVZh3l7DATU48rE4E/9pzLu8Urg9AVkfRHhLQi+6JZv7ZXDyEcUPtl6jENYZhT1CS2lPsDQ35Ap4BUgWVV8AOOacLVsomHRtS8Q1MtKbNvR+7tJeUEqRxCE7RNXM+FXMDPtwtn5DeKgdDF1HJh95G2Pw4m2W0ZtV1h6NtTuMZMgJtQSqF2IDwaPghLCqdznecLtwuUrVZxjxpuxX2vdYlmtLi2SPf1coKhRHYb4AMj8NNKmBZs9hgPOJxkvQxu8sh7XFbKSQ0gY
+catalogs:
+  host_filesystem:
+    type: filesystem
+    options:
+      subjects:
+        streampay_http:
+          path: asyncapi-http.yaml
+        streampay_kafka:
+          path: asyncapi-kafka.yaml
+bindings:
+  http_asyncapi_server:
+    type: asyncapi
+    kind: server
+    vault: filesystem0
+    options:
+      tls:
+        keys:
+          - localhost
+        sni:
+          - http.example.net
+        alpn:
+          - h2
+      http:
+        authorization:
+          jwt0:
+            credentials:
+              headers:
+                authorization: Bearer {credentials}
+              query:
+                access_token: "{credentials}"
+      specs:
+        http_api:
+          catalog:
+            host_filesystem:
+              subject: streampay_http
+              version: latest
+    exit: http_kafka_asyncapi_proxy
+  http_kafka_asyncapi_proxy:
+    type: asyncapi
+    kind: proxy
+    options:
+      specs:
+        http_api:
+          catalog:
+            host_filesystem:
+              subject: streampay_http
+              version: latest
+        kafka_api:
+          catalog:
+            host_filesystem:
+              subject: streampay_kafka
+              version: latest
+    routes:
+      - when:
+          - api-id: http_api
+            operation-id: doStreampayPayCommand
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: doStreampayPayCommand
+      - when:
+          - api-id: http_api
+            operation-id: doStreampayRequestCommand
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: doStreampayRequestCommand
+      - when:
+          - api-id: http_api
+            operation-id: doStreampayUsersUpdate
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: doStreampayUsers
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayUsersRead
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayUsers
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayBalanceRead
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayBalances
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayCurrentBalancesRead
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayBalances
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayTotalTransactionRead
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayTotalTransactions
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayAverageTransactionRead
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayAverageTransactions
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayBalanceHistoriesRead
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayBalanceHistories
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayActivitiesRead
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayActivities
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayPaymentRequest
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayPaymentRequests
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayPaymentRequestReads
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayPaymentRequests
+      - when:
+          - api-id: http_api
+            operation-id: onStreampayPaymentRequestRead
+        exit: kafka_asyncapi_client
+        with:
+          api-id: kafka_api
+          operation-id: onStreampayPaymentRequests
+  kafka_asyncapi_client:
+    type: asyncapi
+    kind: client
+    options:
+      kafka:
+        sasl:
+          mechanism: scram-sha-256
+          username: user
+          password: redpanda
+      specs:
+        kafka_api:
+          catalog:
+            host_filesystem:
+              subject: streampay_kafka
+              version: latest
+
+telemetry:
+  exporters:
+    stdout_logs_exporter:
+      type: stdout
+
+---
+name: zilla-streampay-demo-ui
+bindings:
+  tcp_server0:
+    type: tcp
+    kind: server
+    options:
+      host: 0.0.0.0
+      port: 8081
+    exit: http_server0
+  http_server0:
+    type: http
+    kind: server
+    exit: http_filesystem_proxy0
+  http_filesystem_proxy0:
+    type: http-filesystem
+    kind: proxy
+    routes:
+      - when:
+          - path: /
+        exit: filesystem_server0
+        with:
+          path: index.html
+      - when:
+          - path: /{path}
+        exit: filesystem_server0
+        with:
+          path: ${params.path}
+  filesystem_server0:
+    type: filesystem
+    kind: server
+    options:
+      location: /app/dist/
