@@ -100,7 +100,7 @@ export default defineComponent({
           const authorization = { Authorization: `Bearer ${accessToken}` };
           api.post('/pay', {
             userId: userOption.value?.value,
-            amount: amount.value,
+            amount: +amount.value,
             notes: notes.value,
             requestId: requestId.value
           },{
@@ -134,7 +134,7 @@ export default defineComponent({
         const authorization = { Authorization: `Bearer ${accessToken}` };
         api.post('/request', {
           userId: userOption.value?.value,
-          amount: amount.value,
+          amount: +amount.value,
           notes: notes.value
         },{
           headers: {

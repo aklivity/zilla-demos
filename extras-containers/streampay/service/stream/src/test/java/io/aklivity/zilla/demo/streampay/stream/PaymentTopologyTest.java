@@ -114,8 +114,8 @@ public class PaymentTopologyTest
     {
         final Headers headers = new RecordHeaders(
             new Header[]{
-                new RecordHeader("stream-command:operation", "PayCommand".getBytes()),
-                new RecordHeader("stream:identity", "user1".getBytes()),
+                new RecordHeader("zilla:domain-model", "PayCommand".getBytes()),
+                new RecordHeader("zilla:identity", "user1".getBytes()),
                 new RecordHeader("zilla:correlation-id", "1".getBytes()),
                 new RecordHeader("idempotency-key", "pay1".getBytes()),
                 new RecordHeader(":path", "/pay".getBytes())
@@ -152,8 +152,8 @@ public class PaymentTopologyTest
 
         final Headers headers = new RecordHeaders(
             new Header[]{
-                new RecordHeader("stream-command:operation", "RequestCommand".getBytes()),
-                new RecordHeader("stream:identity", "alice".getBytes()),
+                new RecordHeader("zilla:domain-model", "RequestCommand".getBytes()),
+                new RecordHeader("zilla:identity", "alice".getBytes()),
                 new RecordHeader("zilla:correlation-id", "1".getBytes()),
                 new RecordHeader("idempotency-key", "request1".getBytes()),
                 new RecordHeader(":path", "/request".getBytes())

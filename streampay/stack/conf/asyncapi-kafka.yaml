@@ -56,9 +56,6 @@ channels:
     x-messageCompatibility: BACKWARD
   streampay-replies:
     address: replies
-    messages:
-      StreampayReplies.message:
-        $ref: '#/components/messages/StreampayReplyMessage'
     description: <nil>
     bindings:
       kafka:
@@ -191,9 +188,6 @@ channels:
     x-messageCompatibility: BACKWARD
   streampay-average-transactions:
     address: average-transactions
-    messages:
-      StreampayTotalTransaction.message:
-        $ref: '#/components/messages/StreampayAverageTransactionMessage'
     description: <nil>
     bindings:
       kafka:
@@ -523,8 +517,6 @@ operations:
           type: string
         clientId:
           type: string
-    messages:
-      - $ref: '#/channels/streampay-average-transactions/messages/StreampayTotalTransaction.message'
   onStreampayPaymentRequests:
     action: receive
     channel:
@@ -582,14 +574,6 @@ components:
       bindings:
         kafka:
           bindingVersion: 0.3.0
-    StreampayReplyMessage:
-      contentType: application/json
-      payload:
-        $ref: '#/components/schemas/StreampayReply'
-      name: StreampayReplyMessage
-      bindings:
-        kafka:
-          bindingVersion: 0.3.0
     StreampayBalanceMessage:
       contentType: application/json
       payload:
@@ -608,8 +592,6 @@ components:
           bindingVersion: 0.3.0
     StreampayAverageTransactionMessage:
       contentType: application/json
-      payload:
-        $ref: '#/components/schemas/StreampayAverageTransaction'
       name: StreampayTotalTransactionMessage
       bindings:
         kafka:
@@ -660,15 +642,6 @@ components:
           type: string
       name: StreampayPayCommand
       namespace: com.example
-    StreampayReply:
-      type: object
-      properties:
-        status:
-          type: string
-        correlationid:
-          type: string
-      name: StreampayReply
-      namespace: com.example
     StreampayUser:
       type: object
       properties:
@@ -697,10 +670,6 @@ components:
         timestamp:
           type: number
       name: StreampayTotalTransaction
-      namespace: com.example
-    StreampayAverageTransaction:
-      type: string
-      name: StreampayAverageTransaction
       namespace: com.example
     StreampayActivity:
       type: object

@@ -29,7 +29,7 @@ public class CommandJsonDeserializer implements Deserializer<Command>
         Headers headers,
         byte[] data)
     {
-        Header domainModelHeader = headers.lastHeader("stream-command:operation");
+        Header domainModelHeader = headers.lastHeader("zilla:domain-model");
         String domainModel = new String(domainModelHeader.value());
         JavaType type = null;
         switch (domainModel)

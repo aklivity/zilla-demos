@@ -6,7 +6,7 @@ info:
 servers:
   plain_sse:
     host: localhost:9090
-    protocol: secure-sse
+    protocol: sse-secure
     security:
       - $ref: '#/components/securitySchemes/httpOauth'
   plain_http:
@@ -36,7 +36,7 @@ channels:
         $ref: '#/components/messages/StreampayUsersItemsMessage'
     description: <nil>
   streampay-current-user:
-    address: '/users'
+    address: '/current-user'
     messages:
       StreampayUsers.message:
         $ref: '#/components/messages/StreampayUsersMessage'
@@ -62,9 +62,6 @@ channels:
     description: <nil>
   streampay-average-transactions:
     address: '/average-transactions'
-    messages:
-      StreampayBalances.message:
-        $ref: '#/components/messages/StreampayAverageTransactionMessage'
     description: <nil>
   streampay-balance-histories:
     address: '/balance-histories'
@@ -98,12 +95,10 @@ channels:
         $ref: '#/components/messages/StreampayPaymentRequestMessage'
     description: <nil>
   streampay-payment-requests:
-    address: '/payment-requests'
+    address: '/current-payment-requests'
     messages:
-      StreampayPaymentRequest.message:
-        $ref: '#/components/messages/StreampayPaymentRequestMessage'
-      StreampayPaymentRequestsItemsMessage.message:
-        $ref: '#/components/messages/StreampayPaymentRequestsItemsMessage'
+      StreampayPaymentRequests.message:
+        $ref: '#/components/messages/StreampayPaymentRequestsMessage'
     description: <nil>
   streampay-request-payments-item:
     address: '/payment-requests/{id}'
@@ -127,7 +122,7 @@ operations:
       x-zilla-http-kafka:
         method: POST
         overrides:
-          zilla:command: PayCommand
+          zilla:domain-model: PayCommand
           zilla:identity: "{identity}"
       http:
         method: POST
@@ -143,7 +138,7 @@ operations:
       x-zilla-http-kafka:
         method: POST
         overrides:
-          zilla:command: RequestCommand
+          zilla:domain-model: RequestCommand
           zilla:identity: "{identity}"
       http:
         method: POST
@@ -193,9 +188,9 @@ operations:
       $ref: '#/channels/streampay-current-balance'
     bindings:
       x-zilla-sse-kafka:
+        method: GET
         filters:
-          - headers:
-              zilla:identity: "{identity}"
+          - key: "{identity}"
     messages:
       - $ref: '#/channels/streampay-current-balance/messages/StreampayBalances.message'
     security:
@@ -212,8 +207,6 @@ operations:
     action: receive
     channel:
       $ref: '#/channels/streampay-average-transactions'
-    messages:
-      - $ref: '#/channels/streampay-average-transactions/messages/StreampayBalances.message'
     security:
      - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayBalanceHistoriesRead:
@@ -222,6 +215,7 @@ operations:
       $ref: '#/channels/streampay-balance-histories'
     bindings:
       x-zilla-sse-kafka:
+        method: GET
         filters:
           - headers:
               zilla:identity: "{identity}"
@@ -243,6 +237,7 @@ operations:
       $ref: '#/channels/streampay-payment-request'
     bindings:
       x-zilla-sse-kafka:
+        method: GET
         filters:
           - headers:
               zilla:identity: "{identity}"
@@ -263,7 +258,7 @@ operations:
       http:
         method: GET
     messages:
-      - $ref: '#/channels/streampay-payment-requests/messages/StreampayPaymentRequestsItemsMessage.message'
+      - $ref: '#/channels/streampay-payment-requests/messages/StreampayPaymentRequests.message'
     security:
      - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayPaymentRequestRead:
@@ -271,10 +266,6 @@ operations:
     channel:
       $ref: '#/channels/streampay-request-payments-item'
     bindings:
-      x-zilla-http-kafka:
-        method: GET
-        filters:
-            - key: "{identity}"
       http:
         method: GET
     messages:
@@ -388,14 +379,6 @@ components:
       bindings:
         kafka:
           bindingVersion: 0.3.0
-    StreampayAverageTransactionMessage:
-      contentType: application/json
-      payload:
-        $ref: '#/components/schemas/StreampayAverageTransaction'
-      name: StreampayTotalTransactionMessage
-      bindings:
-        kafka:
-          bindingVersion: 0.3.0
     StreampayPaymentRequestsItemsMessage:
       contentType: application/json
       payload:
@@ -417,6 +400,22 @@ components:
       payload:
         $ref: '#/components/schemas/StreampayPaymentRequest'
       name: StreampayPaymentRequestMessage
+      bindings:
+        http:
+          headers:
+            type: object
+            properties:
+              Transfer-Encoding:
+                type: string
+                const: chunked
+              Trailer:
+                type: string
+                const: \r\n
+    StreampayPaymentRequestsMessage:
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/StreampayPaymentRequests'
+      name: StreampayPaymentRequestsMessage
       bindings:
         http:
           headers:
@@ -546,10 +545,6 @@ components:
         timestamp:
           type: number
       name: StreampayTotalTransaction
-      namespace: com.example
-    StreampayAverageTransaction:
-      type: string
-      name: StreampayAverageTransaction
       namespace: com.example
     StreampayEmpty:
       type: object

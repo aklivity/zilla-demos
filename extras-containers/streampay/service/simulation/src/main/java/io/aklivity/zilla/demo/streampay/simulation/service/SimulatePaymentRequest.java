@@ -60,7 +60,7 @@ public class SimulatePaymentRequest
                 .setHeader(KafkaHeaders.TOPIC, paymentRequestsTopic)
                 .setHeader(KafkaHeaders.KEY, key)
                 .setHeader("content-type", "application/json")
-                .setHeader("stream:identity", paymentRequest.getToUserId())
+                .setHeader("zilla:identity", paymentRequest.getToUserId())
                 .build();
             kafkaTemplate.send(message);
         }

@@ -103,7 +103,7 @@ services:
   zilla:
     image: "ghcr.io/aklivity/zilla:develop-SNAPSHOT"
     hostname: "zilla"
-    command: [ "start", "-v", "-e", "-Pzilla.engine.verbose.composites", "-Pzilla.binding.kafka.client.produce.record.framing.size=1024", "-Pzilla.binding.kafka.client.connection.pool=false"]
+    command: [ "start", "-v", "-e", "-Pzilla.engine.verbose.composites", "-Pzilla.binding.kafka.client.produce.record.framing.size=2048", "-Pzilla.binding.kafka.client.connection.pool=false"]
     volumes:
       - ./conf:/etc/zilla:ro
       - ../../extras-containers/streampay/ui/dist/spa:/app/dist:ro
