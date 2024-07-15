@@ -101,7 +101,7 @@ services:
         SPRING_KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
 
   zilla:
-    image: "ghcr.io/aklivity/zilla:develop-SNAPSHOT"
+    image: "ghcr.io/aklivity/zilla:latest"
     hostname: "zilla"
     command: [ "start", "-v", "-e", "-Pzilla.engine.verbose.composites", "-Pzilla.binding.kafka.client.produce.record.framing.size=2048", "-Pzilla.binding.kafka.client.connection.pool=false"]
     volumes:
