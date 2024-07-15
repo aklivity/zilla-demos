@@ -51,8 +51,6 @@ bindings:
       tls:
         keys:
           - localhost
-        sni:
-          - http.example.net
         alpn:
           - h2
       http:
