@@ -7,7 +7,7 @@ vaults:
       keys:
         store: localhost.p12
         type: pkcs12
-        password: generated
+        password: ${{env.VAULT_KEYSTORE_PASSWORD}}
 guards:
   jwt0:
     type: jwt
@@ -182,8 +182,8 @@ bindings:
       kafka:
         sasl:
           mechanism: scram-sha-256
-          username: user
-          password: redpanda
+          username: ${{env.KAFKA_SASL_USER}}
+          password: ${{env.KAFKA_SASL_PASSWORD}}
       specs:
         kafka_api:
           catalog:

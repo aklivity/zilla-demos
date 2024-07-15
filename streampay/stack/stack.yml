@@ -114,3 +114,6 @@ services:
       - "8081:8081"
     environment:
       ZILLA_INCUBATOR_ENABLED: "true"
+      VAULT_KEYSTORE_PASSWORD: "generated"
+      KAFKA_SASL_USER: "user"
+      KAFKA_SASL_PASSWORD: "redpanda"
