@@ -1,15 +1,15 @@
 asyncapi: 3.0.0
 id: 'tag:stream.oay.im,2023:api'
 info:
-  title: StreamPay API
+  title: StreamPay HTTP API
   version: 1.0.0
 servers:
-  plain_sse:
+  secure_sse:
     host: localhost:9090
     protocol: sse-secure
     security:
       - $ref: '#/components/securitySchemes/httpOauth'
-  plain_http:
+  secure_http:
     host: localhost:9090
     protocol: https
     security:
