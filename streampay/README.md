@@ -41,11 +41,15 @@ services which have reference to `image: "streampay-stream:develop-SNAPSHOT"` an
 should be built locally. Please run the below command to build the images.
 
 ```shell
-cd service
+cd extras-containers/streampay/service
 ./mvnw clean install
+cd stream
+docker build -t streampay-stream:develop-SNAPSHOT . --platform linux/x86_64
 cd ..
+cd simulation
+docker build -t streampay-simulation:develop-SNAPSHOT . --platform linux/x86_64
 ```
-The above command generates `streampay-service:develop-SNAPSHOT` and `streampay-simulation:develop-SNAPSHOT` images.
+The above command generates `streampay-stream:develop-SNAPSHOT` and `streampay-simulation:develop-SNAPSHOT` images.
 
 ## StreamPay UI
 This app is build using `Vue.js` and `Quasar` frameworks and contains user authentication component as well
@@ -54,11 +58,11 @@ which uses Auth0 platform.
 ### Build
 
 ```shell
-cd extras-containers/streampay/ui
+cd ../../ui/
 npm i -g @quasar/cli
 npm install
 quasar build
-cd ..
+cd ../../../streampay/stack/
 ```
 
 The above command generates `dist` folder with all the necessary files to be hosted by Zilla API Gateway.
@@ -84,22 +88,21 @@ Zilla API Gateway hosts both app UI and APIs. Following endpoints are configured
 Run following command to launch the stack:
 
 ```shell
-cd stack
-docker stack deploy -c stack.yml example --resolve-image never
+docker stack deploy -c stack.yml streampay --resolve-image never
 ```
 
 ```shell
 #Output
-Creating network example_net0
-Creating service example_zilla
-Creating service example_redpanda
-Creating service example_init-redpanda
-Creating service example_streampay-service
+Creating network streampay_net0
+Creating service streampay_zilla
+Creating service streampay_redpanda
+Creating service streampay_init-redpanda
+Creating service streampay_streampay-service
 ```
 
 # Test
 
-Navigate to `https://localhost:9090` in the browser.
+Navigate to `http://localhost:8081` in the browser.
 
 ![screenshot](./assets/screenshot.png)
 
