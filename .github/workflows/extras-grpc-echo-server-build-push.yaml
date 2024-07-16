@@ -1,0 +1,19 @@
+name: Build and Push grpc-echo-server image
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'extras-containers/grpc-echo-server/**/*'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  docker-buildx-push:
+    uses: ./.github/workflows/extras-container-build.yaml
+    with:
+      image-name: extras-grpc-echo-server
+      dockerfile-context: extras-containers/grpc-echo-server
