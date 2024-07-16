@@ -7,7 +7,7 @@ networks:
 services:
 
   redpanda:
-    image: 'docker.vectorized.io/vectorized/redpanda:v22.3.4'
+    image: 'docker.vectorized.io/vectorized/redpanda:v24.1.9'
     hostname: "redpanda.internal.net"
     command:
       - redpanda
@@ -33,7 +33,7 @@ services:
       - '9644:9644'
 
   init-redpanda:
-    image: "docker.vectorized.io/vectorized/redpanda:v22.3.4"
+    image: "docker.vectorized.io/vectorized/redpanda:v24.1.9"
     networks:
       - net0
     deploy:
