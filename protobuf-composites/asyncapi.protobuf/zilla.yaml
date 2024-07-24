@@ -1,0 +1,81 @@
+---
+name: example
+catalogs:
+  host_filesystem:
+    type: filesystem
+    options:
+      subjects:
+        echo:
+          path: echo.proto
+bindings:
+  north_kafka_cache_client:
+    type: kafka
+    kind: cache_client
+    options:
+      topics:
+        - name: example.EchoService.EchoSimple
+          value:
+            model: protobuf
+            catalog:
+              host_filesystem:
+                - subject: echo
+                  record: EchoMessage
+    exit: south_kafka_cache_server
+  south_kafka_cache_server:
+    type: kafka
+    kind: cache_server
+    options:
+      topics:
+        - name: example.EchoService.EchoSimple
+          value:
+            model: protobuf
+            catalog:
+              host_filesystem:
+                - subject: echo
+                  record: EchoMessage
+    exit: south_kafka_client
+  south_kafka_client:
+    type: kafka
+    kind: client
+    options:
+      servers:
+        - kafka:29092
+    exit: south_tcp_client
+  south_tcp_client:
+    type: tcp
+    kind: client
+  west_kafka_grpc_remote_server:
+    type: kafka-grpc
+    kind: remote_server
+    entry: north_kafka_cache_client
+    options:
+      acks: leader_only
+    routes:
+      - exit: west_grpc_client
+        when:
+          - topic: example.EchoService.EchoSimple.requests
+            reply-to: example.EchoService.EchoSimple.responses
+            method: example.EchoService/EchoSimple
+        with:
+          scheme: http
+          authority: localhost:7153
+  west_grpc_client:
+    type: grpc
+    kind: client
+    routes:
+      - exit: west_http_client
+        when:
+          - method: example.EchoService/EchoSimple
+  west_http_client:
+    type: http
+    kind: client
+    options:
+      versions:
+        - h2
+    exit: west_tcp_client
+  west_tcp_client:
+    type: tcp
+    kind: client
+    options:
+      host: grpc-echo
+      port: 8080

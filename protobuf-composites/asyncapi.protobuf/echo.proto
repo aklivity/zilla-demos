@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package example;
+
+service EchoService
+{
+  rpc EchoSimple(EchoMessageRequest) returns (EchoMessageResponse);
+}
+
+message EchoMessageRequest
+{
+  string query = 1;
+}
+
+message EchoMessageResponse
+{
+  string result = 1;
+}
+

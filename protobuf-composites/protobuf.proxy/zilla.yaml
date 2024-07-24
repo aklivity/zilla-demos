@@ -1,0 +1,62 @@
+---
+name: example
+catalogs:
+  host_filesystem:
+    type: filesystem
+    options:
+      subjects:
+        echo:
+          path: proto/echo.proto
+bindings:
+  north_tcp_server:
+    type: tcp
+    kind: server
+    options:
+      host: 0.0.0.0
+      port: 7153
+    exit: north_http_server
+  north_http_server:
+    type: http
+    kind: server
+    options:
+      versions:
+        - h2
+      access-control:
+        policy: cross-origin
+    routes:
+      - exit: north_grpc_server
+        when:
+          - headers:
+              :scheme: https
+              :authority: localhost:7153
+  north_grpc_server:
+    type: grpc
+    kind: server
+    catalog:
+      host_filesystem:
+        - subject: echo
+    routes:
+      - when:
+          - method: example.EchoService/EchoSimple
+        exit: south_grpc_client
+  south_grpc_client:
+    type: grpc
+    kind: client
+    exit: south_http_client
+  south_http_client:
+    type: http
+    kind: client
+    options:
+      versions:
+        - h2
+    exit: south_tcp_client
+  south_tcp_client:
+    type: tcp
+    kind: client
+    options:
+      host: grpc-echo
+      port: 8080
+telemetry:
+  exporters:
+    stdout_logs_exporter:
+      type: stdout

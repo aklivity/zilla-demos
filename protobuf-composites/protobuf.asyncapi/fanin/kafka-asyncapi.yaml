@@ -1,0 +1,32 @@
+asyncapi: 3.0.0
+info:
+  title: Zilla Taxi Hailing Kafka Spec
+  description: Zilla implements the Petstore Kafka spec
+  version: 1.0.0
+servers:
+  local-connections:
+    host: kafka:9092
+    protocol: kafka
+    description: Local broker
+channels:
+  FaninServerStream:
+    address: example.FaninService.FaninServerStream
+    messages:
+      faninMessage:
+        $ref: "#/components/messages/FaninMessage"
+operations:
+  FaninServerStream:
+    action: send
+    channel:
+      $ref: "#/channels/FaninServerStream"
+components:
+  messages:
+    FaninMessage:
+      contentType: application/vnd.google.protobuf;version=3
+      payload:
+        schemaFormat: application/vnd.google.protobuf;version=3
+        schema: |
+            message FaninMessage
+            {
+              string message = 1;
+            }

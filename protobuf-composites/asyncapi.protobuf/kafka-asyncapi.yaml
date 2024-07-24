@@ -1,0 +1,50 @@
+asyncapi: 3.0.0
+info:
+  title: Zilla Taxi Hailing Kafka Spec
+  description: Zilla implements the Petstore Kafka spec
+  version: 1.0.0
+servers:
+  local-connections:
+    host: kafka:9092
+    protocol: kafka
+    description: Local broker
+channels:
+  echoMessagesRequests:
+    address: example.EchoService.EchoSimple.requests
+    messages:
+      locationUpdate:
+        $ref: "#/components/messages/EchoMessageRequest"
+  echoMessagesResponse:
+    address: example.EchoService.EchoSimple.responses
+    messages:
+      locationUpdate:
+        $ref: "#/components/messages/EchoMessageResponse"
+operations:
+  EchoSimpleRequest:
+    action: send
+    channel:
+      $ref: "#/channels/echoMessagesRequests"
+  EchoSimpleResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/echoMessagesResponse"
+components:
+  messages:
+    EchoMessageRequest:
+      contentType: application/vnd.google.protobuf;version=3
+      payload:
+        schemaFormat: application/vnd.google.protobuf;version=3
+        schema: |
+            message EchoMessageRequest
+            {
+              string query = 1;
+            }
+    EchoMessageResponse:
+      contentType: application/vnd.google.protobuf;version=3
+      payload:
+        schemaFormat: application/vnd.google.protobuf;version=3
+        schema: |
+            message EchoMessageResponse
+            {
+              string result = 1;
+            }

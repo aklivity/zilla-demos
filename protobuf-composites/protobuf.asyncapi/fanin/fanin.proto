@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package example;
+
+import "google/protobuf/empty.proto";
+
+service FaninService
+{
+  rpc FaninServerStream(stream FaninMessage) returns (google.protobuf.Empty);
+}
+
+message FaninMessage
+{
+  string message = 1;
+}
