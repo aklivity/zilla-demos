@@ -53,19 +53,6 @@ Created topic sse_messages.
 
 Zilla will print a copy of the `zilla.yaml` file that was installed then print a line `Started` once zilla is ready for connections.
 
-> If you don't see `Started` at the end of the zilla container output there is a know problem with macOS. Restarting the demo using the statup command should fix it. Run `docker-compose restart zilla` if this happens.
-
-Note!
-> If you see
-> 
-> ```text
->{
->  "name": "default"
->}
-> ```
->
-> then Zilla hasn't pulled in the correct zilla.yaml file
-
 ### grpc_client & kafka_event_translator
 
 #### On startup

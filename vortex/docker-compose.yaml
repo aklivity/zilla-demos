@@ -1,4 +1,3 @@
-version: "3"
 services:
   kafka:
     image: docker.io/bitnami/kafka:latest
