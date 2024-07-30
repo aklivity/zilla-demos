@@ -4,12 +4,16 @@ info:
   title: StreamPay API
   version: 1.0.0
 servers:
-  plain_sse:
-    host: localhost:7114
-    protocol: sse
-  plain_http:
-    host: localhost:7114
-    protocol: http
+  secure_sse:
+    host: localhost:9090
+    protocol: sse-secure
+    security:
+      - $ref: '#/components/securitySchemes/httpOauth'
+  secure_http:
+    host: localhost:9090
+    protocol: https
+    security:
+      - $ref: '#/components/securitySchemes/httpOauth'
 channels:
   streampay-commands:
     address: '/streampay-commands'
@@ -95,6 +99,12 @@ channels:
         description: Id of the streampay balance item.
         examples:
           - 53307860c3599d1de448e19d
+  streampay-activities:
+    address: '/streampay-activities'
+    messages:
+      StreampayActivity.message:
+        $ref: '#/components/messages/StreampayActivityMessage'
+    description: <nil>
 operations:
   doStreampayCommandsCreate:
     action: send
@@ -234,7 +244,27 @@ operations:
         method: GET
     messages:
       - $ref: '#/channels/streampay-request-payments-item/messages/StreampayRequestPayment.message'
+  onStreampayActivitiesRead:
+    action: receive
+    channel:
+      $ref: '#/channels/streampay-activities'
+    messages:
+      - $ref: '#/channels/streampay-activities/messages/StreampayActivity.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
 components:
+  securitySchemes:
+    httpOauth:
+      type: oauth2
+      flows: {}
+      scopes:
+        - write:pay
+        - write:request
+        - write:users
+        - read:users
+        - read:activities
+        - read:payment-requests
+        - read:balances
   messages:
     StreampayCommandsMessage:
       contentType: application/json
@@ -332,6 +362,22 @@ components:
               Trailer:
                 type: string
                 const: \r\n
+    StreampayActivityMessage:
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/StreampayActivity'
+      name: StreampayActivityMessage
+      bindings:
+        http:
+          headers:
+            type: object
+            properties:
+              Transfer-Encoding:
+                type: string
+                const: chunked
+              Trailer:
+                type: string
+                const: \r\n
     StreampayEmptyMessage:
       contentType: application/json
       payload:
@@ -413,6 +459,25 @@ components:
       items:
         $ref: "#/components/schemas/StreampayRequestPayment"
       name: RequestPayments
+      namespace: com.example
+    StreampayActivity:
+      type: object
+      properties:
+        eventName:
+          type: string
+        fromUserId:
+          type: string
+        fromUserName:
+          type: string
+        toUserId:
+          type: string
+        toUserName:
+          type: string
+        amount:
+          type: number
+        timestamp:
+          type: number
+      name: StreampayActivity
       namespace: com.example
     StreampayEmpty:
       type: object

@@ -98,17 +98,15 @@ export default defineComponent({
         if (balance.value - amount.value > 0) {
           const accessToken = await auth0.getAccessTokenSilently();
           const authorization = { Authorization: `Bearer ${accessToken}` };
-          //requestId.value
           api.post('/streampay-commands', {
             type: 'SendPayment',
             userid: userOption.value?.value,
-            requestid: "",
+            requestid: requestId?.value,
             amount: +amount.value,
             notes: notes.value
           },{
             headers: {
               'Idempotency-Key': v4(),
-              'identity': '3b3abf56-4b0e-4e4c-bfc6-bcba93d021d9',
               ...authorization
             }}).then(function () {
             router.push({ path: '/main' });
@@ -144,7 +142,6 @@ export default defineComponent({
         },{
           headers: {
             'Idempotency-Key': v4(),
-            'identity': '3b3abf56-4b0e-4e4c-bfc6-bcba93d021d9',
             ...authorization
         }}).then(function () {
           router.push({ path: '/main' });
@@ -172,7 +169,7 @@ export default defineComponent({
     async function readBalance() {
       const accessToken = await auth0.getAccessTokenSilently();
       const authorization = { Authorization: `Bearer ${accessToken}` };
-      balanceStream = new EventSource(`${streamingUrl}/streampay-balances`);
+      balanceStream = new EventSource(`${streamingUrl}/streampay-balances?access_token=${accessToken}`);
 
       balanceStream.onmessage = function (event: MessageEvent) {
         const balance = JSON.parse(event.data);
@@ -183,7 +180,6 @@ export default defineComponent({
       if (formRequestId) {
         api.get('/streampay-request-payments/' + formRequestId,{
           headers: {
-            'identity': '3b3abf56-4b0e-4e4c-bfc6-bcba93d021d9',
             ...authorization
           }
         })
@@ -219,14 +215,13 @@ export default defineComponent({
         const url = userId == null ? '/streampay-users' : '/streampay-users/' + userId;
         await api.get(url, {
           headers: {
-            'identity': '3b3abf56-4b0e-4e4c-bfc6-bcba93d021d9',
             ...authorization,
           }
         })
         .then((response) => {
           const users = response.data;
           for(let user of users) {
-            if (user.id != '3b3abf56-4b0e-4e4c-bfc6-bcba93d021d9') {
+            if (user.id != userId) {
               const newUserOption = {
                 label: user.name,
                 value: user.id
