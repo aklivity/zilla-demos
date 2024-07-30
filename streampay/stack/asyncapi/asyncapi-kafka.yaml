@@ -8,7 +8,7 @@ servers:
     protocol: kafka
     bindings:
       kafka:
-        schemaRegistryUrl: 'http://localhost:8081'
+        schemaRegistryUrl: 'http://localhost:8083'
 channels:
   streampay-commands:
     address: streampay-commands
@@ -494,19 +494,6 @@ operations:
           type: string
     messages:
       - $ref: '#/channels/streampay-balances/messages/StreampayBalances.message'
-  doStreampayBalanceHistories:
-    action: send
-    channel:
-      $ref: '#/channels/streampay-balance-histories'
-    bindings:
-      kafka:
-        bindingVersion: 0.3.0
-        groupId:
-          type: string
-        clientId:
-          type: string
-    messages:
-      - $ref: '#/channels/streampay-balance-histories/messages/StreampayBalanceHistory.message'
   onStreampayBalanceHistories:
     action: receive
     channel:
@@ -520,19 +507,6 @@ operations:
           type: string
     messages:
       - $ref: '#/channels/streampay-balance-histories/messages/StreampayBalanceHistory.message'
-  doStreampayActivities:
-    action: send
-    channel:
-      $ref: '#/channels/streampay-activities'
-    bindings:
-      kafka:
-        bindingVersion: 0.3.0
-        groupId:
-          type: string
-        clientId:
-          type: string
-    messages:
-      - $ref: '#/channels/streampay-activities/messages/StreampayActivity.message'
   onStreampayActivities:
     action: receive
     channel:
@@ -546,19 +520,6 @@ operations:
           type: string
     messages:
       - $ref: '#/channels/streampay-activities/messages/StreampayActivity.message'
-  doStreampayTotalTransactions:
-    action: send
-    channel:
-      $ref: '#/channels/streampay-total-transactions'
-    bindings:
-      kafka:
-        bindingVersion: 0.3.0
-        groupId:
-          type: string
-        clientId:
-          type: string
-    messages:
-      - $ref: '#/channels/streampay-total-transactions/messages/StreampayTotalTransaction.message'
   onStreampayTotalTransactions:
     action: receive
     channel:
@@ -572,17 +533,6 @@ operations:
           type: string
     messages:
       - $ref: '#/channels/streampay-total-transactions/messages/StreampayTotalTransaction.message'
-  doStreampayAverageTransactions:
-    action: send
-    channel:
-      $ref: '#/channels/streampay-average-transactions'
-    bindings:
-      kafka:
-        bindingVersion: 0.3.0
-        groupId:
-          type: string
-        clientId:
-          type: string
   onStreampayAverageTransactions:
     action: receive
     channel:

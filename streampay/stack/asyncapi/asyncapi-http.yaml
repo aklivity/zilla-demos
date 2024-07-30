@@ -111,46 +111,31 @@ operations:
     channel:
       $ref: '#/channels/streampay-commands'
     bindings:
+      x-zilla-http-kafka:
+        method: POST
+        overrides:
+          zilla:identity: "{identity}"
       http:
         method: POST
     messages:
       - $ref: '#/channels/streampay-commands/messages/StreampayCommands.message'
-  doStreampayCommandsUpdate:
-    action: send
-    channel:
-      $ref: '#/channels/streampay-commands-item'
-    bindings:
-      http:
-        method: PUT
-    messages:
-      - $ref: '#/channels/streampay-commands-item/messages/StreampayCommands.message'
-  doStreampayCommandsDelete:
-    action: send
-    channel:
-      $ref: '#/channels/streampay-commands-item'
-    bindings:
-      http:
-        method: DELETE
-    messages:
-      - $ref: '#/channels/streampay-commands-item/messages/StreampayEmpty.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   doStreampayUsersCreate:
     action: send
     channel:
       $ref: '#/channels/streampay-users'
     bindings:
+      x-zilla-http-kafka:
+        method: POST
+        overrides:
+          zilla:identity: "{identity}"
       http:
         method: POST
     messages:
       - $ref: '#/channels/streampay-users/messages/StreampayUsers.message'
-  onStreampayUserRead:
-    action: receive
-    channel:
-      $ref: '#/channels/streampay-users-item'
-    bindings:
-      http:
-        method: GET
-    messages:
-      - $ref: '#/channels/streampay-users-item/messages/StreampayUsers.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayUsersRead:
     action: receive
     channel:
@@ -160,64 +145,32 @@ operations:
         method: GET
     messages:
       - $ref: '#/channels/streampay-users/messages/StreampayItemsUsers.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   doStreampayUserUpdate:
     action: send
     channel:
       $ref: '#/channels/streampay-users-item'
     bindings:
+      x-zilla-http-kafka:
+        method: PUT
+        overrides:
+          zilla:identity: "{identity}"
       http:
         method: PUT
     messages:
       - $ref: '#/channels/streampay-users-item/messages/StreampayUsers.message'
-  doStreampayUserDelete:
-    action: send
-    channel:
-      $ref: '#/channels/streampay-users-item'
-    bindings:
-      http:
-        method: DELETE
-    messages:
-      - $ref: '#/channels/streampay-users-item/messages/StreampayEmpty.message'
-  doStreampayBalanceCreate:
-    action: send
-    channel:
-      $ref: '#/channels/streampay-balances'
-    bindings:
-      http:
-        method: POST
-    messages:
-      - $ref: '#/channels/streampay-balances/messages/StreampayBalances.message'
-  onStreampayBalanceRead:
-    action: receive
-    channel:
-      $ref: '#/channels/streampay-balances-item'
-    bindings:
-      http:
-        method: GET
-    messages:
-      - $ref: '#/channels/streampay-balances-item/messages/StreampayBalances.message'
-  doStreampayBalanceUpdate:
-    action: send
-    channel:
-      $ref: '#/channels/streampay-balances-item'
-    bindings:
-      http:
-        method: PUT
-    messages:
-      - $ref: '#/channels/streampay-balances-item/messages/StreampayBalances.message'
-  doStreampayBalanceDelete:
-    action: send
-    channel:
-      $ref: '#/channels/streampay-balances-item'
-    bindings:
-      http:
-        method: DELETE
-    messages:
-      - $ref: '#/channels/streampay-balances-item/messages/StreampayEmpty.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayBalances:
     action: receive
     channel:
       $ref: '#/channels/streampay-balances'
+    bindings:
+      x-zilla-sse-kafka:
+        method: GET
+        filters:
+          - key: "{identity}"
     messages:
       - $ref: '#/channels/streampay-balances/messages/StreampayBalances.message'
   onStreampayRequestPayment:
@@ -226,6 +179,8 @@ operations:
       $ref: '#/channels/streampay-request-payment'
     messages:
       - $ref: '#/channels/streampay-request-payment/messages/StreampayRequestPayment.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayRequestPaymentsReads:
     action: receive
     channel:
@@ -235,6 +190,8 @@ operations:
         method: GET
     messages:
       - $ref: '#/channels/streampay-request-payments/messages/StreampayRequestPaymentsItemsMessage.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayRequestPaymentRead:
     action: receive
     channel:
@@ -244,6 +201,8 @@ operations:
         method: GET
     messages:
       - $ref: '#/channels/streampay-request-payments-item/messages/StreampayRequestPayment.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayActivitiesRead:
     action: receive
     channel:
