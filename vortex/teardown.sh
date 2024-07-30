@@ -1,2 +1,5 @@
 #!/bin/bash
-docker-compose down --remove-orphans
+
+NAMESPACE="${NAMESPACE:-zilla-vortex-demo}"
+
+docker compose -p $NAMESPACE down --remove-orphans

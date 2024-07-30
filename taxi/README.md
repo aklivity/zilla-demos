@@ -72,7 +72,7 @@ flowchart LR
 
 ### Setup
 
-1. Start all of the services using `docker-compose`. The `startup.sh` script will `build` and `start` all the services. This command will also `restart` an existing stack.
+1. Start all of the services using Docker `compose`. The `startup.sh` script will `build` and `start` all the services. This command will also `restart` an existing stack.
 
    - You can run this demo with [Redpanda](https://docs.redpanda.com/current/reference/docker-compose/) by adding the `--redpanda` flag
 

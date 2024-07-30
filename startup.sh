@@ -55,10 +55,6 @@ if ! [[ -x "$(command -v docker)" ]]; then
     echo "Docker is required to run this setup."
     exit
 fi
-if ! [[ -x "$(command -v docker-compose)" ]]; then
-    echo "Docker Compose is required to run this setup."
-    exit
-fi
 
 echo "==== Starting Zilla Demo $DEMO_FOLDER at $WORKDIR ===="
 
