@@ -3,7 +3,6 @@
 CREATE TABLE IF NOT EXISTS users(
   *
 )
-INCLUDE KEY AS user_key
 WITH (
     connector='kafka',
     topic='streampay-users',
@@ -14,8 +13,19 @@ WITH (
     schema.registry = 'http://localhost:8081'
 );
 
-CREATE TABLE IF NOT EXISTS commands
-INCLUDE KEY AS key
+CREATE TABLE IF NOT EXISTS balances
+INCLUDE timestamp as timestamp
+WITH (
+    connector='kafka',
+    topic='streampay-balances',
+    properties.bootstrap.server='localhost:9092',
+    scan.startup.mode='latest',
+    scan.startup.timestamp.millis='140000000'
+) FORMAT PLAIN ENCODE AVRO (
+    schema.registry = 'http://localhost:8081'
+);
+
+CREATE SOURCE IF NOT EXISTS commands
 INCLUDE header'zilla:correlation-id' AS correlation_id
 INCLUDE header 'identity' AS ownerid
 INCLUDE timestamp as timestamp
@@ -229,5 +239,3 @@ drop MATERIALIZED VIEW request_payment;
 drop sink invalid_replies;
 drop sink valid_replies;
 drop sink request_payment_sink;
-
-
