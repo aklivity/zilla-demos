@@ -59,6 +59,26 @@
 -- );
 
 
+create function bad_request_status() returns varchar language javascript as $$
+    return '400';
+$$;
+
+create function success_request_status() returns varchar language javascript as $$
+    return '200';
+$$;
+
+create function generate_guid() returns varchar language javascript as $$
+    var result, i, j;
+    result = '';
+    for(j=0; j<32; j++) {
+        if( j == 8 || j == 12 || j == 16 || j == 20)
+          result = result + '-';
+        i = Math.floor(Math.random()*16).toString(16).toUpperCase();
+        result = result + i;
+    }
+  return result;
+$$;
+
 CREATE TABLE IF NOT EXISTS users(
   *
 )
@@ -89,14 +109,6 @@ WITH (
     schema.registry = 'http://localhost:8081'
 );
 
-
-create function bad_request_status() returns varchar language javascript as $$
-    return '400';
-$$;
-
-create function success_request_status() returns varchar language javascript as $$
-    return '200';
-$$;
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS invalid_commands AS
     SELECT bad_request_status() as status, encode(correlation_id, 'escape') as correlationid from commands where key IS NULL OR type NOT IN ('SendPayment', 'RequestPayment');
@@ -129,19 +141,6 @@ WITH (
 ENCODE AVRO (
     schema.registry = 'http://localhost:8081'
 );
-
-create function generate_guid() returns varchar language javascript as $$
-    var result, i, j;
-    result = '';
-    for(j=0; j<32; j++) {
-        if( j == 8 || j == 12 || j == 16 || j == 20)
-          result = result + '-';
-        i = Math.floor(Math.random()*16).toString(16).toUpperCase();
-        result = result + i;
-    }
-  return result;
-$$;
-
 
 CREATE MATERIALIZED VIEW withdrawals_transaction as
 SELECT
@@ -227,18 +226,21 @@ WITH (
     connector='kafka',
     topic='streampay-request-payments',
     properties.bootstrap.server='localhost:9092',
-    primary_key='touserid'
+    primary_key='id'
 ) FORMAT UPSERT
 ENCODE AVRO (
-    key = 'touserid',
     schema.registry = 'http://localhost:8081'
 );
 
+drop table users;
 drop table commands;
 
 drop MATERIALIZED VIEW valid_commands;
 drop MATERIALIZED VIEW invalid_commands;
+drop MATERIALIZED VIEW request_payment;
 
 drop sink invalid_replies;
 drop sink valid_replies;
+drop sink request_payment_sink;
+
 

@@ -1,0 +1,11 @@
+{
+	"type": "record",
+	"name": "RepliesKey",
+	"namespace": "io.aklivity.demos.streampay",
+	"fields": [
+		{
+			"name": "id",
+			"type": "string"
+		}
+	]
+}

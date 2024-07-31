@@ -97,7 +97,7 @@ export default defineComponent({
 
     async function readActivities() {
       const accessToken = await auth0.getAccessTokenSilently();
-      activitiesStream = new EventSource(`${streamingUrl}/activities?access_token=${accessToken}`);
+      activitiesStream = new EventSource(`${streamingUrl}/streampay-activities?access_token=${accessToken}`);
 
       activitiesStream.onopen = function () {
         activities.splice(0);

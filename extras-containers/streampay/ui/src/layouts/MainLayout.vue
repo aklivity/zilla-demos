@@ -120,7 +120,7 @@ export default defineComponent({
     async function authenticatePage() {
       const accessToken = await auth0.getAccessTokenSilently();
 
-      const requestStream = new EventSource(`${streamingUrl}/streampay-request-payment`);
+      const requestStream = new EventSource(`${streamingUrl}/streampay-request-payment?access_token=${accessToken}`);
 
       requestStream.addEventListener('delete', (event: MessageEvent) => {
         decRequests();
@@ -130,24 +130,25 @@ export default defineComponent({
         incRequests();
       };
 
-      const balanceStream = new EventSource(`${streamingUrl}/streampay-balances`);
+      const balanceStream = new EventSource(`${streamingUrl}/streampay-balances?access_token=${accessToken}`);
 
       balanceStream.onmessage = function (event: MessageEvent) {
         const balance = JSON.parse(event.data);
         updateBalance(balance.balance);
       };
 
-      // const authorization = { Authorization: `Bearer ${accessToken}` };
-      // await api.put(`/streampay-users/`, {
-      //   'id': auth0.user.value.sub,
-      //   'name': auth0.user.value.name,
-      //   'username': auth0.user.value.nickname
-      // }, {
-      //   headers: {
-      //     'Idempotency-Key': v4(),
-      //     ...authorization
-      //   }
-      // })
+      const authorization = { Authorization: `Bearer ${accessToken}` };
+      const userId = auth0.user.value.sub;
+      await api.put(`${streamingUrl}/streampay-users/${userId}`, {
+        'id': userId,
+        'name': auth0.user.value.name,
+        'username': auth0.user.value.nickname
+      }, {
+        headers: {
+          'Idempotency-Key': v4(),
+          ...authorization
+        }
+      })
     }
 
     if (auth0.isAuthenticated.value)
