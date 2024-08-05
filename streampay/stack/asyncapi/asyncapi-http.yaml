@@ -136,6 +136,17 @@ operations:
       - $ref: '#/channels/streampay-users/messages/StreampayUsers.message'
     security:
      - $ref: '#/components/securitySchemes/httpOauth'
+  onStreampayUserRead:
+    action: receive
+    channel:
+      $ref: '#/channels/streampay-users'
+    bindings:
+      http:
+        method: GET
+    messages:
+      - $ref: '#/channels/streampay-users/messages/StreampayItemsUsers.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayUsersRead:
     action: receive
     channel:
@@ -173,6 +184,8 @@ operations:
           - key: "{identity}"
     messages:
       - $ref: '#/channels/streampay-balances/messages/StreampayBalances.message'
+    security:
+     - $ref: '#/components/securitySchemes/httpOauth'
   onStreampayRequestPayment:
     action: receive
     channel:
@@ -181,7 +194,7 @@ operations:
       - $ref: '#/channels/streampay-request-payment/messages/StreampayRequestPayment.message'
     security:
      - $ref: '#/components/securitySchemes/httpOauth'
-  onStreampayRequestPaymentsReads:
+  onStreampayRequestPaymentReads:
     action: receive
     channel:
       $ref: '#/channels/streampay-request-payments'

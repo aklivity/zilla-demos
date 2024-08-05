@@ -101,7 +101,7 @@ export default defineComponent({
           api.post('/streampay-commands', {
             type: 'SendPayment',
             userid: userOption.value?.value,
-            requestid: requestId?.value,
+            requestid: "",
             amount: +amount.value,
             notes: notes.value
           },{
