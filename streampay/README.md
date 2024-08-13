@@ -85,20 +85,23 @@ Zilla API Gateway hosts both app UI and APIs. Following endpoints are configured
 
 
 ## Launch the stack
-Run following command to launch the stack:
+Run following command to launch the docker compose stack:
 
 ```shell
-docker stack deploy -c stack.yml streampay --resolve-image never
+docker compose up -d
 ```
 
 ```shell
 #Output
-Creating network streampay_net0
-Creating service streampay_zilla
-Creating service streampay_redpanda
-Creating service streampay_init-redpanda
-Creating service streampay_streampay-service
-```
+[+] Running 7/7
+ ✔ Network stack_net0                      Created             0.2s
+ ✔ Container stack-streampay-stream-1      Started             1.0s
+ ✔ Container stack-zilla-1                 Started             1.0s
+ ✔ Container stack-redpanda-1              Started             1.1s
+ ✔ Container stack-streampay-simulation-1  Started             1.0s
+ ✔ Container stack-redpanda-console-1      Started             1.5s
+ ✔ Container stack-init-redpanda-1         Started             1.4s
+ ```
 
 # Test
 

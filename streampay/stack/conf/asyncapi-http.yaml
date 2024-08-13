@@ -4,11 +4,6 @@ info:
   title: StreamPay HTTP API
   version: 1.0.0
 servers:
-  secure_sse:
-    host: localhost:9090
-    protocol: sse-secure
-    security:
-      - $ref: '#/components/securitySchemes/httpOauth'
   secure_http:
     host: localhost:9090
     protocol: https
@@ -187,6 +182,7 @@ operations:
     channel:
       $ref: '#/channels/streampay-current-balance'
     bindings:
+      x-zilla-sse: {}
       x-zilla-sse-kafka:
         method: GET
         filters:
@@ -214,6 +210,7 @@ operations:
     channel:
       $ref: '#/channels/streampay-balance-histories'
     bindings:
+      x-zilla-sse: {}
       x-zilla-sse-kafka:
         method: GET
         filters:
@@ -227,6 +224,8 @@ operations:
     action: receive
     channel:
       $ref: '#/channels/streampay-activities'
+    bindings:
+      x-zilla-sse: {}
     messages:
       - $ref: '#/channels/streampay-activities/messages/StreampayActivity.message'
     security:
@@ -236,6 +235,7 @@ operations:
     channel:
       $ref: '#/channels/streampay-payment-request'
     bindings:
+      x-zilla-sse: {}
       x-zilla-sse-kafka:
         method: GET
         filters:
