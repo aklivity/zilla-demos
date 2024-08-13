@@ -1,0 +1,129 @@
+services:
+  redpanda:
+    image: 'docker.vectorized.io/vectorized/redpanda:v24.1.9'
+    hostname: redpanda.internal.net
+    command:
+      - redpanda
+      - start
+      - '--set redpanda.enable_sasl=true'
+      - '--set redpanda.superusers=["user"]'
+      - '--smp'
+      - '1'
+      - '--reserve-memory'
+      - 0M
+      - '--overprovisioned'
+      - '--node-id'
+      - '0'
+      - '--kafka-addr'
+      - 'INSIDE://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092'
+      - '--advertise-kafka-addr'
+      - 'INSIDE://redpanda.internal.net:29092,OUTSIDE://localhost:9092'
+    networks:
+      - net0
+    ports:
+      - '9092:9092'
+      - '29092:29092'
+      - '9644:9644'
+    healthcheck:
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      test: ["CMD", "bash", "-c", "echo -n '' > /dev/tcp/127.0.0.1/29092"]
+
+  redpanda-init:
+    image: "docker.vectorized.io/vectorized/redpanda:v24.1.9"
+    networks:
+      - net0
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    entrypoint: [ '/bin/sh', '-c' ]
+    environment:
+      REDPANDA_ADMIN: redpanda.internal.net:9644
+      REDPANDA_BROKER: redpanda.internal.net:29092
+    command: |
+      "
+      # Create a user
+      rpk acl user create user -p redpanda --api-urls $${REDPANDA_ADMIN}
+      
+      rpk topic create commands --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create replies --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create transactions --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create total-transactions --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create average-transactions --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create activities --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create balances -c cleanup.policy=compact --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create balance-histories --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create payment-requests -c cleanup.policy=compact --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create users -c cleanup.policy=compact --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      "
+
+  redpanda-console:
+    image: docker.redpanda.com/vectorized/console:master-173596f
+    networks:
+      - net0
+    entrypoint: /bin/sh
+    command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
+    environment:
+      CONFIG_FILEPATH: /tmp/config.yml
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["redpanda.internal.net:29092"]
+          sasl:
+            enabled: true
+            username: user
+            password: redpanda
+            mechanism: SCRAM-SHA-256
+    ports:
+      - "8080:8080"
+    depends_on:
+      redpanda:
+        condition: service_healthy
+
+  streampay-stream:
+    image: "streampay-stream:develop-SNAPSHOT"
+    networks:
+      - net0
+    environment:
+      SPRING_KAFKA_APPLICATION_ID: stream-service
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda.internal.net:29092
+      SPRING_KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+
+  streampay-simulation:
+    image: "streampay-simulation:develop-SNAPSHOT"
+    networks:
+      - net0
+    environment:
+      SPRING_KAFKA_APPLICATION_ID: simulation-service
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda.internal.net:29092
+      SPRING_KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+
+  zilla:
+    image: "ghcr.io/aklivity/zilla:latest"
+    hostname: "zilla"
+    command: [ "start", "-v", "-e", "-Pzilla.engine.verbose.composites", "-Pzilla.binding.kafka.client.produce.record.framing.size=2048", "-Pzilla.binding.kafka.client.connection.pool=false"]
+    volumes:
+      - ./conf:/etc/zilla:ro
+      - ../../extras-containers/streampay/ui/dist/spa:/app/dist:ro
+    networks:
+      - net0
+    ports:
+      - "9090:9090"
+      - "8081:8081"
+    environment:
+      ZILLA_INCUBATOR_ENABLED: "true"
+      VAULT_KEYSTORE_PASSWORD: "generated"
+      KAFKA_SASL_USER: "user"
+      KAFKA_SASL_PASSWORD: "redpanda"
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+
+networks:
+  net0:
