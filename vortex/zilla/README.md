@@ -2,7 +2,7 @@
 
 Zilla example demonstrating HTTP(REST), gRPC & SSE protocol interacting with Kafka Cluster.
 
-![](.assets/zilla.config.svg)
+![](../.assets/zilla.config.svg)
 
 ### Requirements
 

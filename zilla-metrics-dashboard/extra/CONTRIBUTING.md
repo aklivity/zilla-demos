@@ -1,12 +1,10 @@
-We appreciate and recognize [all contributors](https://github.com/vegasbrianc/prometheus/graphs/contributors).
-
-Please note that this project is released with a [Contributor Code of Conduct](https://github.com/vegasbrianc/prometheus/blob/version-2/CODE_OF_CONDUCT.md). 
+Please note that this project is released with a [Contributor Code of Conduct](./CODE_OF_CONDUCT.md).
 By participating in this project you agree to abide by its terms.
 
 # Project Goal
 
-The goal of this project is to create a starting point for using Docker, Prometheues and Grafana. 
-This project is not intended to be production ready but rather a template to help you get started with monitoring containers. 
+The goal of this project is to create a starting point for using Docker, Prometheues and Grafana.
+This project is not intended to be production ready but rather a template to help you get started with monitoring containers.
 
 # Pull Requests
 
