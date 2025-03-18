@@ -11,6 +11,7 @@ This StreamPay app demo consists of 4 main components such as:
 
 * [Node.js](http://nodejs.org/)
 * [Docker](https://www.docker.com/)
+* Java version 17 and below
 
 
 ## Redpanda

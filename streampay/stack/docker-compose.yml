@@ -1,6 +1,6 @@
 services:
   redpanda:
-    image: 'docker.vectorized.io/vectorized/redpanda:v24.1.9'
+    image: docker.redpanda.com/redpandadata/redpanda:v24.3.7
     hostname: redpanda.internal.net
     command:
       - redpanda
@@ -31,7 +31,7 @@ services:
       test: ["CMD", "bash", "-c", "echo -n '' > /dev/tcp/127.0.0.1/29092"]
 
   redpanda-init:
-    image: "docker.vectorized.io/vectorized/redpanda:v24.1.9"
+    image: docker.redpanda.com/redpandadata/redpanda:v24.3.7
     networks:
       - net0
     depends_on:
@@ -59,7 +59,7 @@ services:
       "
 
   redpanda-console:
-    image: docker.redpanda.com/vectorized/console:master-173596f
+    image: docker.redpanda.com/redpandadata/console:v2.8.4
     networks:
       - net0
     entrypoint: /bin/sh
