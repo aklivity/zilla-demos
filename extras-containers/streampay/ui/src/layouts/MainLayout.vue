@@ -58,17 +58,6 @@
           </q-item-section>
         </q-item>
 
-        <q-item
-          clickable
-          v-ripple
-          @click="this.$router.push({ path: '/statement' })"
-        >
-          <q-item-section avatar>
-            <q-icon size="36px" color="primary" name="insights" />
-          </q-item-section>
-
-          <q-item-section>Statement</q-item-section>
-        </q-item>
       </q-list>
 
       <div class="absolute-bottom text-weight-bold" style="padding-left: 80px; padding-right: 80px; margin-bottom: 30px;">
