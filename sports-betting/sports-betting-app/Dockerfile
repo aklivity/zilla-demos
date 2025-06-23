@@ -13,29 +13,20 @@
 # specific language governing permissions and limitations under the License.
 #
 
-# Use a Node.js image
 FROM node:18-alpine
 
-# Install pnpm globally
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Set the working directory
 WORKDIR /app
 
-# Copy only dependency files first for layer caching
 COPY package.json ./
 
-# Install dependencies with pnpm
 RUN pnpm install
 
-# Copy the rest of your application
 COPY . .
 
-# Build the Next.js app
 RUN pnpm build
 
-# Expose the app port
 EXPOSE 3000
 
-# Run the app in production mode
 CMD ["pnpm", "start"]
