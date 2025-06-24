@@ -1,0 +1,287 @@
+#
+# Copyright 2021-2024 Aklivity Inc.
+#
+# Aklivity licenses this file to you under the Apache License,
+# version 2.0 (the "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at:
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+
+asyncapi: 3.0.0
+info:
+  title: Sports Betting
+  version: 1.0.0
+  license:
+    name: Aklivity Community License
+    url: https://github.com/aklivity/zilla/blob/main/LICENSE
+  contact:
+    name: Aklivity Community
+    url: https://www.aklivity.io/slack
+servers:
+  plain:
+    host: localhost:7114
+    protocol: http
+    protocolVersion: "2.0"
+defaultContentType: application/json
+
+channels:
+  bet:
+    address: /bet
+    messages:
+      bet:
+        $ref: "#/components/messages/bet"
+  user:
+    address: /user
+    messages:
+      user:
+        $ref: "#/components/messages/user"
+  user-profile:
+    address: /user-profile/{id}
+    messages:
+      customer:
+        $ref: "#/components/messages/user"
+  verified-bet:
+    address: /bet-verified/{id}
+    messages:
+      customer:
+        $ref: "#/components/messages/verifiedBet"
+  matches:
+    address: /matches
+    messages:
+      matches:
+        $ref: "#/components/messages/matches"
+
+operations:
+  createBet:
+    action: send
+    bindings:
+      http:
+        method: POST
+    channel:
+      $ref: "#/channels/bet"
+  createUser:
+    action: send
+    bindings:
+      http:
+        method: POST
+    channel:
+      $ref: "#/channels/user"
+  receiveUser:
+    action: receive
+    channel:
+      $ref: "#/channels/user-profile"
+    bindings:
+      x-zilla-sse:
+        method: "GET"
+  receiveUserBets:
+    action: receive
+    channel:
+      $ref: "#/channels/verified-bet"
+    bindings:
+      x-zilla-sse:
+        method: "GET"
+  receiveMatches:
+    action: receive
+    channel:
+      $ref: "#/channels/matches"
+    bindings:
+      x-zilla-sse:
+        method: "GET"
+
+components:
+  messages:
+    bet:
+      name: Bet
+      title: bet
+      summary: >-
+        Place a bet.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/Bet"
+    user:
+      name: User
+      title: user
+      summary: Create a User.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/User"
+    verifiedBet:
+      name: Verified Bet
+      title: verifiedBet
+      summary: Verified Bet.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/VerifiedBet"
+    matches:
+      name: Matches
+      title: matches
+      summary: Matches.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/Matches"
+  schemas:
+    Bet:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: Unique identifier of the user placing the bet.
+        eventId:
+          type: integer
+          description: ID of the event the bet is placed on.
+        team:
+          type: string
+          enum: [ home, away ]
+          description: The team the user is betting on.
+        amount:
+          type: number
+          minimum: 0
+          description: The amount wagered on the bet.
+      required:
+        - userId
+        - eventId
+        - team
+        - amount
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: Unique identifier for the user.
+          example: "108007731781808030176"
+        balance:
+          type: number
+          format: float
+          minimum: 0
+          description: Current account balance of the user.
+          example: 90246.46
+    VerifiedBet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the bet.
+          example: "41cb1188-4153-4985-bacb-94b6a3ad2014"
+        user_id:
+          type: string
+          description: Unique identifier of the user who placed the bet.
+          example: "108007731781808030176"
+        event_id:
+          type: integer
+          description: ID of the event the bet is associated with.
+          example: 110
+        event_name:
+          type: string
+          description: Name of the event.
+          example: "Man City vs Liverpool"
+        bet_type:
+          type: string
+          description: Type of bet placed.
+          example: "match_result"
+        team:
+          type: string
+          enum: [ home, away ]
+          description: Team the user bet on.
+          example: "away"
+        result:
+          type: string
+          description: Outcome of the bet.
+          example: "Man City"
+        odds:
+          type: number
+          format: float
+          description: Betting odds at the time of placement.
+          example: 1.3676470588235294
+        amount:
+          type: number
+          format: float
+          minimum: 0
+          description: Amount wagered.
+          example: 12.0
+        potential_winnings:
+          type: number
+          format: float
+          description: Potential return if the bet wins.
+          example: 16.411764705882355
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the bet was placed.
+          example: "2025-06-24T04:18:01.052138416Z"
+        settled_at:
+          type: string
+          description: Timestamp when the bet was settled.
+          example: "2025-06-24T04:18:50.196666800Z"
+        status:
+          type: string
+          enum: [ Pending, Won, Lost ]
+          description: Final outcome status of the bet.
+          example: "Lost"
+      required:
+        - id
+        - user_id
+        - event_id
+        - event_name
+        - bet_type
+        - team
+        - odds
+        - amount
+        - potential_winnings
+        - created_at
+        - status
+    Matches:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the event.
+          example: 210
+        status:
+          type: string
+          enum: [ SCHEDULED, LIVE, COMPLETED, CANCELED ]
+          description: Current status of the event.
+          example: "SCHEDULED"
+        sport:
+          type: string
+          description: Type of sport associated with the event.
+          example: "baseball"
+        teams:
+          type: array
+          description: Names of the teams participating in the event.
+          items:
+            type: string
+          minItems: 2
+          maxItems: 2
+          example: [ "Man City", "Liverpool" ]
+        time:
+          type: string
+          format: date-time
+          description: Scheduled start time of the event.
+          example: "2025-06-24T04:43:50.111588217Z"
+        odds:
+          type: object
+          description: Betting odds for each team.
+          properties:
+            away:
+              type: string
+              description: Odds for the away team.
+              example: "-106"
+            home:
+              type: string
+              description: Odds for the home team.
+              example: "+258"
+      required:
+        - id
+        - status
+        - sport
+        - teams
+        - time
+        - odds

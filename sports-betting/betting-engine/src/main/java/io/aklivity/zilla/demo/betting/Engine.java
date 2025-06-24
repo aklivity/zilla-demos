@@ -170,9 +170,9 @@ public class Engine
             verifiedBet.put("odds", decimalOdds);
             verifiedBet.put("potential_winnings", potentialWinnings);
             verifiedBet.put("status", "Pending");
-            verifiedBet.put("result", null);
+            verifiedBet.put("result", "TBD");
             verifiedBet.put("created_at", Instant.now().toString());
-            verifiedBet.put("settled_at", null);
+            verifiedBet.put("settled_at", "TBD");
 
             String json = mapper.writeValueAsString(verifiedBet);
             producer.send(new ProducerRecord<>("bet-verified", userId, json));
