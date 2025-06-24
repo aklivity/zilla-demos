@@ -1,10 +1,16 @@
-# 🏈 Sports Betting App
+# Sports Betting App 🏈
 
-This is a fully containerized **Sports Betting App** that uses both **HTTP** and **Kafka** for event-driven interactions powered by **Zilla**, **AsyncAPI** Specs & **Kafka**.
+This is a fully containerized **Sports Betting App** that uses **HTTP** and **Kafka** for event-driven interactions. 
+
+## Powered by 
+
+- **Aklivity Zilla**
+- **AsyncAPI** Specs
+- **Kafka**
 
 ---
 
-## 📦 Stack Overview
+## Overview
 
 The system supports:
 
@@ -17,7 +23,7 @@ The system supports:
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Requirements
 
@@ -51,9 +57,9 @@ docker compose down
 
 ---
 
-## 📘 AsyncAPI Specifications
+## AsyncAPI Specifications
 
-The app is defined by two specs:
+The app is defined by HTTP & Kafka specs:
 
 - [`http-asyncapi.yaml`](./zilla/etc/specs/http-asyncapi.yaml)  
   Defines the HTTP endpoints, SSE channels, and message payloads.
