@@ -1,6 +1,6 @@
 # Sports Betting App 🏈
 
-This is a fully containerized **Sports Betting App** that uses **HTTP** and **Kafka** for event-driven interactions. 
+A fully containerized Sports Betting App built on an event-driven architecture using HTTP and Kafka, with real-time updates delivered via Server-Sent Events (SSE).
 
 ## Powered by 
 
