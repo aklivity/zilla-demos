@@ -55,10 +55,10 @@ docker compose down
 
 The app is defined by two specs:
 
-- [`http-asyncapi.yaml`](./etc/specs/http-asyncapi.yaml)  
+- [`http-asyncapi.yaml`](./zilla/etc/specs/http-asyncapi.yaml)  
   Defines the HTTP endpoints, SSE channels, and message payloads.
 
-- [`kafka-asyncapi.yaml`](./etc/specs/kafka-asyncapi.yaml)  
+- [`kafka-asyncapi.yaml`](./zilla/etc/specs/kafka-asyncapi.yaml)  
   Defines the Kafka topics for publishing/consuming bet-related messages.
 
 ### Main Channels
