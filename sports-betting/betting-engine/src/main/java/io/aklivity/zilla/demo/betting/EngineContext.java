@@ -31,16 +31,20 @@ public class EngineContext
     public static final String USER_PROFILE_TOPIC = "user-profile";
     public static final String MATCHES_TOPIC = "matches";
 
-    public final Map<Integer, Map<String, Object>> matches = new ConcurrentHashMap<>();
-    public final Map<String, Map<String, Object>> users = new ConcurrentHashMap<>();
-    public final Map<String, Map<String, Object>> bets = new ConcurrentHashMap<>();
-    public final Random random = new Random();
-
+    public final Map<Integer, Map<String, Object>> matches;
+    public final Map<String, Map<String, Object>> users;
+    public final Map<String, Map<String, Object>> bets;
+    public final Random random;
     public final Properties consumerProps;
     public final Properties producerProps;
 
     public EngineContext()
     {
+        this.matches = new ConcurrentHashMap<>();
+        this.users = new ConcurrentHashMap<>();
+        this.bets = new ConcurrentHashMap<>();
+        this.random = new Random();
+
         String server = System.getenv("KAFKA_BOOTSTRAP_SERVER");
         consumerProps = new Properties();
         consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, server);
