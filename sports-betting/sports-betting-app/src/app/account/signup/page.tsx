@@ -8,7 +8,9 @@ export default function SignupPage() {
   useEffect(() => {
     if (!isAuthenticated) {
       loginWithRedirect({
-        screen_hint: 'signup',
+        authorizationParams: {
+          screen_hint: 'signup',
+        },
       });
     }
   }, [isAuthenticated, loginWithRedirect]);

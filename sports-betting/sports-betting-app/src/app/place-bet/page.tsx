@@ -105,10 +105,11 @@ function MainComponent() {
         ? selectedEvent.odds.home
         : selectedEvent.odds.away;
     const numericOdds = parseInt(odds);
+    const amt = parseFloat(betAmount);
     if (numericOdds > 0) {
-      return ((betAmount * numericOdds) / 100).toFixed(2);
+      return ((amt * numericOdds) / 100).toFixed(2);
     } else {
-      return (betAmount * (100 / Math.abs(numericOdds))).toFixed(2);
+      return (amt * (100 / Math.abs(numericOdds))).toFixed(2);
     }
   };
 
@@ -117,7 +118,8 @@ function MainComponent() {
     setError(null);
     setLoading(true);
 
-    if (!selectedEvent || !selectedTeam || !betAmount || betAmount <= 0 || betAmount > balance) {
+    const betAmt = parseFloat(betAmount);
+    if (!selectedEvent || !selectedTeam || !betAmount || betAmt <= 0 || betAmt > balance) {
       setError('Please select an event, team, and enter valid bet amount');
       setLoading(false);
       return;
@@ -144,9 +146,7 @@ function MainComponent() {
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data?.message || 'Failed to place bet');
-        setErrorMessage('Oh no! Looks like your bet failed');
         setTimeout(() => {
-          setErrorMessage('');
           window.location.href = '/';
         }, 2000);
       }

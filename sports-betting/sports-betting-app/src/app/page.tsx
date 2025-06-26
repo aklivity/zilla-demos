@@ -137,10 +137,10 @@ function MainComponent() {
     <div className="min-h-screen bg-gray-100">
       <header className="bg-[#357AFF] text-white shadow-lg">
         <div className="mx-auto flex max-w-7xl items-center justify-between p-4">
-          <div href="/"  className="flex items-center space-x-4">
+          <a href="/" className="flex items-center space-x-4">
             <i className="fas fa-dice text-2xl"></i>
             <h1 className="text-xl font-bold">BetSports</h1>
-          </div>
+          </a>
 
           <nav className="flex items-center space-x-6">
             {user ? (

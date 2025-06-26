@@ -6,10 +6,12 @@ function MainComponent() {
   const { logout } = useAuth0();
 
   const handleSignOut = () => {
-    logout({
-      returnTo: typeof window !== 'undefined' ? window.location.origin : '/',
-    });
-  };
+      logout({
+        logoutParams: {
+          returnTo: typeof window !== 'undefined' ? window.location.origin : '/',
+        },
+      });
+    };
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">

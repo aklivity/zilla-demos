@@ -10,7 +10,9 @@ function MainComponent() {
 
     try {
       await loginWithRedirect({
-        redirectUri: window.location.origin,
+        authorizationParams: {
+          redirect_uri: window.location.origin,
+        },
       });
     } catch (err) {
       console.error('Auth0 login error:', err);
