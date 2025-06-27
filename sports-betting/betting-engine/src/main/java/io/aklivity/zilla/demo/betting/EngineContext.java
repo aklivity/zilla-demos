@@ -16,13 +16,18 @@ package io.aklivity.zilla.demo.betting;
 
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+
+import io.aklivity.zilla.demo.betting.model.Match;
+import io.aklivity.zilla.demo.betting.model.User;
+import io.aklivity.zilla.demo.betting.model.VerifiedBet;
 
 public class EngineContext
 {
@@ -31,19 +36,18 @@ public class EngineContext
     public static final String USER_PROFILE_TOPIC = "user-profile";
     public static final String MATCHES_TOPIC = "matches";
 
-    public final Map<Integer, Map<String, Object>> matches;
-    public final Map<String, Map<String, Object>> users;
-    public final Map<String, Map<String, Object>> bets;
-    public final Random random;
-    public final Properties consumerProps;
-    public final Properties producerProps;
+    public final Map<Integer, Match> matches;
+    public final Map<String, User> users;
+    public final Map<String, VerifiedBet> bets;
+
+    private final Properties consumerProps;
+    private final Properties producerProps;
 
     public EngineContext()
     {
         this.matches = new ConcurrentHashMap<>();
         this.users = new ConcurrentHashMap<>();
         this.bets = new ConcurrentHashMap<>();
-        this.random = new Random();
 
         String server = System.getenv("KAFKA_BOOTSTRAP_SERVER");
         consumerProps = new Properties();
@@ -57,5 +61,15 @@ public class EngineContext
         producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, server);
         producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    }
+
+    public KafkaProducer<String, String> supplyProducer()
+    {
+        return new KafkaProducer<>(producerProps);
+    }
+
+    public KafkaConsumer<String, String> supplyConsumer()
+    {
+        return new KafkaConsumer<>(consumerProps);
     }
 }

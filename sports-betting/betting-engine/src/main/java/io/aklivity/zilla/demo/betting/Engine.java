@@ -14,6 +14,7 @@
  */
 package io.aklivity.zilla.demo.betting;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,15 +28,23 @@ public class Engine
 {
     public static void main(String[] args)
     {
-        EngineContext context = new EngineContext();
-        ExecutorService executor = Executors.newFixedThreadPool(5);
+        try (ExecutorService executor = Executors.newFixedThreadPool(5))
+        {
+            EngineContext context = new EngineContext();
+            executor.submit(new CacheUsersTask(context));
+            executor.submit(new CacheVerifiedBetsTask(context));
+            executor.submit(new MatchBetsTask(context));
+            executor.submit(new SimulatorTask(context));
+            executor.submit(new VerifyBetsTask(context));
+            CountDownLatch stop = new CountDownLatch(1);
+            Runtime.getRuntime().addShutdownHook(new Thread(stop::countDown));
+            stop.await();
 
-        executor.submit(new CacheUsersTask(context));
-        executor.submit(new CacheVerifiedBetsTask(context));
-        executor.submit(new MatchBetsTask(context));
-        executor.submit(new SimulatorTask(context));
-        executor.submit(new VerifyBetsTask(context));
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> executor.shutdownNow()));
+            executor.shutdownNow();
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
     }
 }

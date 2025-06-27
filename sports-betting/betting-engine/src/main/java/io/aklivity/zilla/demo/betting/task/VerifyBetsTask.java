@@ -20,21 +20,24 @@ import static io.aklivity.zilla.demo.betting.EngineContext.USER_PROFILE_TOPIC;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import io.aklivity.zilla.demo.betting.EngineContext;
+import io.aklivity.zilla.demo.betting.model.Bet;
+import io.aklivity.zilla.demo.betting.model.Match;
+import io.aklivity.zilla.demo.betting.model.User;
+import io.aklivity.zilla.demo.betting.model.VerifiedBet;
 
-public class VerifyBetsTask implements Runnable
+public final class VerifyBetsTask implements Runnable
 {
-    private static final ObjectMapper mapper = new ObjectMapper();
     private final EngineContext context;
 
     public VerifyBetsTask(
@@ -46,25 +49,27 @@ public class VerifyBetsTask implements Runnable
     @Override
     public void run()
     {
-        try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(context.consumerProps);
-        KafkaProducer<String, String> producer = new KafkaProducer<>(context.producerProps))
+        try (KafkaConsumer<String, String> consumer = context.supplyConsumer();
+        KafkaProducer<String, String> producer = context.supplyProducer())
         {
             consumer.subscribe(List.of(BET_PLACED_TOPIC));
+            Jsonb jsonb = JsonbBuilder.create();
 
-            while (!Thread.currentThread().isInterrupted())
+            while (true)
             {
                 for (ConsumerRecord<String, String> record : consumer.poll(Duration.ofMillis(100)))
                 {
                     String key = record.key();
                     String value = record.value();
-                    Map<String, Object> bet = mapper.readValue(value, Map.class);
-                    String userId = (String) bet.get("userId");
-                    int eventId = (Integer) bet.get("eventId");
-                    String team = (String) bet.get("team");
-                    double amount = ((Number) bet.get("amount")).doubleValue();
 
-                    Map<String, Object> match = context.matches.get(eventId);
-                    Map<String, Object> user = context.users.get(userId);
+                    Bet bet = jsonb.fromJson(value, Bet.class);
+                    String userId = bet.userId;
+                    int eventId = bet.eventId;
+                    String team = bet.team;
+                    double amount = bet.amount;
+
+                    Match match = context.matches.get(eventId);
+                    User user = context.users.get(userId);
 
                     if (match == null || user == null)
                     {
@@ -72,41 +77,38 @@ public class VerifyBetsTask implements Runnable
                         continue;
                     }
 
-                    Map<String, String> odds = (Map<String, String>) match.get("odds");
-                    List<String> teams = (List<String>) match.get("teams");
+                    Map<String, String> odds = match.odds;
+                    List<String> teams = match.teams;
                     String eventName = String.join(" vs ", teams);
-                    double balance = ((Number) user.get("balance")).doubleValue();
+                    double balance = user.balance;
 
-                    if (balance >= amount && !"COMPLETED".equals(match.get("status")))
+                    if (balance >= amount && !"COMPLETED".equals(match.status))
                     {
                         double rawOdds = Double.parseDouble(odds.get(team));
                         double decimalOdds = convertToDecimalOdds(rawOdds);
                         double potentialWinnings = amount * decimalOdds;
 
-                        Map<String, Object> verifiedBet = new HashMap<>();
-                        verifiedBet.put("id", key);
-                        verifiedBet.put("event_id", eventId);
-                        verifiedBet.put("user_id", userId);
-                        verifiedBet.put("event_name", eventName);
-                        verifiedBet.put("bet_type", "match_result");
-                        verifiedBet.put("team", team);
-                        verifiedBet.put("amount", amount);
-                        verifiedBet.put("odds", decimalOdds);
-                        verifiedBet.put("potential_winnings", potentialWinnings);
-                        verifiedBet.put("status", "Pending");
-                        verifiedBet.put("result", "TBD");
-                        verifiedBet.put("created_at", Instant.now().toString());
-                        verifiedBet.put("settled_at", "TBD");
+                        VerifiedBet verifiedBet = new VerifiedBet();
+                        verifiedBet.id = key;
+                        verifiedBet.eventId = eventId;
+                        verifiedBet.userId = userId;
+                        verifiedBet.eventName = eventName;
+                        verifiedBet.betType = "match_result";
+                        verifiedBet.team = team;
+                        verifiedBet.amount = amount;
+                        verifiedBet.odds = decimalOdds;
+                        verifiedBet.potentialWinnings = potentialWinnings;
+                        verifiedBet.status = "Pending";
+                        verifiedBet.result = "TBD";
+                        verifiedBet.createdAt = Instant.now().toString();
+                        verifiedBet.settledAt = "TBD";
 
-                        String json = mapper.writeValueAsString(verifiedBet);
-                        producer.send(new ProducerRecord<>(BET_VERIFIED_TOPIC, userId, json));
+                        producer.send(new ProducerRecord<>(BET_VERIFIED_TOPIC, userId, jsonb.toJson(verifiedBet)));
                         producer.flush();
                         System.out.println("Bet verified and sent for user: %s event: %d".formatted(userId, eventId));
 
-                        double newBalance = balance - amount;
-                        user.put("balance", newBalance);
-                        String updatedUserJson = mapper.writeValueAsString(user);
-                        producer.send(new ProducerRecord<>(USER_PROFILE_TOPIC, userId, updatedUserJson));
+                        user.balance = balance - amount;
+                        producer.send(new ProducerRecord<>(USER_PROFILE_TOPIC, userId, jsonb.toJson(user)));
                         producer.flush();
                     }
                     else
@@ -124,10 +126,10 @@ public class VerifyBetsTask implements Runnable
     }
 
     private static double convertToDecimalOdds(
-        double americanOdds)
+        double odds)
     {
-        return americanOdds > 0
-            ? (americanOdds / 100.0) + 1.0
-            : (100.0 / -americanOdds) + 1.0;
+        return odds > 0
+            ? (odds / 100.0) + 1.0
+            : (100.0 / -odds) + 1.0;
     }
 }

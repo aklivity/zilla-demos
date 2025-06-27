@@ -18,18 +18,17 @@ import static io.aklivity.zilla.demo.betting.EngineContext.USER_PROFILE_TOPIC;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import io.aklivity.zilla.demo.betting.EngineContext;
+import io.aklivity.zilla.demo.betting.model.User;
 
-public class CacheUsersTask implements Runnable
+public final class CacheUsersTask implements Runnable
 {
-    private static final ObjectMapper mapper = new ObjectMapper();
     private final EngineContext context;
 
     public CacheUsersTask(
@@ -41,15 +40,16 @@ public class CacheUsersTask implements Runnable
     @Override
     public void run()
     {
-        try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(context.consumerProps))
+        try (KafkaConsumer<String, String> consumer = context.supplyConsumer())
         {
             consumer.subscribe(List.of(USER_PROFILE_TOPIC));
+            Jsonb jsonb = JsonbBuilder.create();
 
-            while (!Thread.currentThread().isInterrupted())
+            while (true)
             {
                 for (ConsumerRecord<String, String> record : consumer.poll(Duration.ofMillis(100)))
                 {
-                    Map<String, Object> user = mapper.readValue(record.value(), Map.class);
+                    User user = jsonb.fromJson(record.value(), User.class);
                     context.users.put(record.key(), user);
                 }
                 Thread.sleep(500);

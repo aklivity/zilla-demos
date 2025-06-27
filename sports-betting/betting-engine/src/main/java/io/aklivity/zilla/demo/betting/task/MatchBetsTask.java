@@ -19,20 +19,22 @@ import static io.aklivity.zilla.demo.betting.EngineContext.MATCHES_TOPIC;
 import static io.aklivity.zilla.demo.betting.EngineContext.USER_PROFILE_TOPIC;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import io.aklivity.zilla.demo.betting.EngineContext;
+import io.aklivity.zilla.demo.betting.model.Match;
+import io.aklivity.zilla.demo.betting.model.User;
+import io.aklivity.zilla.demo.betting.model.VerifiedBet;
 
-public class MatchBetsTask implements Runnable
+public final class MatchBetsTask implements Runnable
 {
-    private static final ObjectMapper mapper = new ObjectMapper();
     private final EngineContext context;
 
     public MatchBetsTask(
@@ -44,19 +46,22 @@ public class MatchBetsTask implements Runnable
     @Override
     public void run()
     {
-        try (KafkaProducer<String, String> producer = new KafkaProducer<>(context.producerProps))
+        try (KafkaProducer<String, String> producer = context.supplyProducer())
         {
-            while (!Thread.currentThread().isInterrupted())
+            Jsonb jsonb = JsonbBuilder.create();
+            Random random = new Random();
+
+            while (true)
             {
-                for (Map.Entry<Integer, Map<String, Object>> entry : context.matches.entrySet())
+                for (Map.Entry<Integer, Match> entry : context.matches.entrySet())
                 {
-                    Map<String, Object> match = entry.getValue();
-                    if ("SCHEDULED".equals(match.get("status")))
+                    Match match = entry.getValue();
+                    if ("SCHEDULED".equals(match.status))
                     {
-                        Instant time = Instant.parse((String) match.get("time"));
+                        Instant time = Instant.parse(match.time);
                         if (Instant.now().isAfter(time))
                         {
-                            resolveMatch(entry.getKey(), match, producer);
+                            resolveMatch(entry.getKey(), match, producer, jsonb, random);
                         }
                     }
                 }
@@ -72,47 +77,48 @@ public class MatchBetsTask implements Runnable
     @SuppressWarnings("unchecked")
     private void resolveMatch(
         int eventId,
-        Map<String, Object> match,
-        KafkaProducer<String, String> producer)
+        Match match,
+        KafkaProducer<String, String> producer,
+        Jsonb jsonb,
+        Random random)
     {
-        List<String> teams = (List<String>) match.get("teams");
-        String winnerSide = context.random.nextBoolean() ? "home" : "away";
+        List<String> teams = match.teams;
+        String winnerSide = random.nextBoolean() ? "home" : "away";
         String winningTeam = winnerSide.equals("home") ? teams.get(0) : teams.get(1);
-
-        match.put("status", "COMPLETED");
-        match.put("result", winnerSide);
+        match.status = "COMPLETED";
+        match.result = winnerSide;
 
         try
         {
-            producer.send(new ProducerRecord<>(MATCHES_TOPIC, String.valueOf(eventId), mapper.writeValueAsString(match)));
-            System.out.printf("Match %d completed. Winner: %s%n", eventId, winningTeam);
+            producer.send(new ProducerRecord<>(MATCHES_TOPIC, String.valueOf(eventId), jsonb.toJson(match)));
             producer.flush();
             context.matches.remove(eventId);
+            System.out.printf("Match %d completed. Winner: %s%n", eventId, winningTeam);
         }
         catch (Exception ex)
         {
             ex.printStackTrace();
         }
 
-        for (Map<String, Object> bet : new ArrayList<>(context.bets.values()))
+        for (VerifiedBet bet : context.bets.values())
         {
-            if ((Integer) bet.get("event_id") != eventId || !"Pending".equalsIgnoreCase((String) bet.get("status")))
+            if (bet.eventId != eventId || !"Pending".equalsIgnoreCase(bet.status))
             {
                 continue;
             }
 
-            String userId = (String) bet.get("user_id");
-            boolean won = ((String) bet.get("team")).equalsIgnoreCase(winnerSide);
-            bet.put("result", winningTeam);
-            bet.put("status", won ? "Won" : "Lost");
-            bet.put("settled_at", Instant.now().toString());
+            String userId = bet.userId;
+            boolean won = (bet.team).equalsIgnoreCase(winnerSide);
+            bet.result = winningTeam;
+            bet.status = won ? "Won" : "Lost";
+            bet.settledAt = Instant.now().toString();
 
             try
             {
-                producer.send(new ProducerRecord<>(BET_VERIFIED_TOPIC, userId, mapper.writeValueAsString(bet)));
-                context.bets.remove(bet.get("id"));
-                System.out.printf("Updated bet for event %d: %s%n", eventId, bet.get("id"));
+                producer.send(new ProducerRecord<>(BET_VERIFIED_TOPIC, userId, jsonb.toJson(bet)));
                 producer.flush();
+                context.bets.remove(bet.id);
+                System.out.printf("Updated bet for event %d: %s%n", eventId, bet.id);
             }
             catch (Exception ex)
             {
@@ -121,28 +127,26 @@ public class MatchBetsTask implements Runnable
 
             if (won)
             {
-                creditUser(userId, bet, producer);
+                creditUser(userId, bet, producer, jsonb);
             }
         }
     }
 
     private void creditUser(
         String userId,
-        Map<String, Object> bet,
-        KafkaProducer<String, String> producer)
+        VerifiedBet bet,
+        KafkaProducer<String, String> producer,
+        Jsonb jsonb)
     {
-        Map<String, Object> user = context.users.get(userId);
+        User user = context.users.get(userId);
         if (user != null)
         {
-            double winnings = ((Number) bet.get("potential_winnings")).doubleValue();
-            double balance = ((Number) user.get("balance")).doubleValue();
-            user.put("balance", balance + winnings);
-
+            user.balance = user.balance + bet.potentialWinnings;
             try
             {
-                producer.send(new ProducerRecord<>(USER_PROFILE_TOPIC, userId, mapper.writeValueAsString(user)));
-                System.out.printf("Credited %.2f to user %s%n", winnings, userId);
+                producer.send(new ProducerRecord<>(USER_PROFILE_TOPIC, userId, jsonb.toJson(user)));
                 producer.flush();
+                System.out.printf("Credited %.2f to user %s%n", user.balance, userId);
             }
             catch (Exception ex)
             {

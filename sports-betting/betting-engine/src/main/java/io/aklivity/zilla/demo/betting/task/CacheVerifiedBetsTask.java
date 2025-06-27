@@ -18,18 +18,17 @@ import static io.aklivity.zilla.demo.betting.EngineContext.BET_VERIFIED_TOPIC;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import io.aklivity.zilla.demo.betting.EngineContext;
+import io.aklivity.zilla.demo.betting.model.VerifiedBet;
 
-public class CacheVerifiedBetsTask implements Runnable
+public final class CacheVerifiedBetsTask implements Runnable
 {
-    private static final ObjectMapper mapper = new ObjectMapper();
     private final EngineContext context;
 
     public CacheVerifiedBetsTask(
@@ -41,16 +40,17 @@ public class CacheVerifiedBetsTask implements Runnable
     @Override
     public void run()
     {
-        try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(context.consumerProps))
+        try (KafkaConsumer<String, String> consumer = context.supplyConsumer())
         {
             consumer.subscribe(List.of(BET_VERIFIED_TOPIC));
+            Jsonb jsonb = JsonbBuilder.create();
 
-            while (!Thread.currentThread().isInterrupted())
+            while (true)
             {
                 for (ConsumerRecord<String, String> record : consumer.poll(Duration.ofMillis(100)))
                 {
-                    Map<String, Object> bet = mapper.readValue(record.value(), Map.class);
-                    context.bets.put((String) bet.get("id"), bet);
+                    VerifiedBet bet = jsonb.fromJson(record.value(), VerifiedBet.class);
+                    context.bets.put(bet.id, bet);
                 }
                 Thread.sleep(500);
             }

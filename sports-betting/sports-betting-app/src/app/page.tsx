@@ -105,7 +105,7 @@ function MainComponent() {
         },
         body: JSON.stringify({
           userId: userId,
-          balance: 90010,
+          balance: 100000,
         }),
       });
 

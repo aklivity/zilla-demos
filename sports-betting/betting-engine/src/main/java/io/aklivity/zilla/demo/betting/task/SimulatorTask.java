@@ -18,20 +18,31 @@ import static io.aklivity.zilla.demo.betting.EngineContext.MATCHES_TOPIC;
 
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import io.aklivity.zilla.demo.betting.EngineContext;
+import io.aklivity.zilla.demo.betting.model.Match;
 
-public class SimulatorTask implements Runnable
+public final class SimulatorTask implements Runnable
 {
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final List<String> SPORTS = List.of("soccer", "football", "hockey", "basketball", "baseball");
+    private static final List<String[]> TEAMS_LIST = List.of(
+        new String[]{"Barcelona", "Real Madrid"},
+        new String[]{"Manchester City", "Liverpool"},
+        new String[]{"Bayern Munich", "Borussia Dortmund"},
+        new String[]{"Juventus", "AC Milan"},
+        new String[]{"Dallas Cowboys", "San Francisco 49ers"},
+        new String[]{"Green Bay Packers", "Chicago Bears"},
+        new String[]{"Chicago Bulls", "New York Knicks"},
+        new String[]{"New York Yankees", "Boston Red Sox"});
+
     private final EngineContext context;
 
     public SimulatorTask(
@@ -43,43 +54,33 @@ public class SimulatorTask implements Runnable
     @Override
     public void run()
     {
-        try (KafkaProducer<String, String> producer = new KafkaProducer<>(context.producerProps))
+        try (KafkaProducer<String, String> producer = context.supplyProducer())
         {
+            Jsonb jsonb = JsonbBuilder.create();
+            Random random = new Random();
+
             int eventId = 100;
-            List<String[]> teamsList = List.of(
-                new String[]{"Barcelona", "Real Madrid"},
-                new String[]{"Manchester City", "Liverpool"},
-                new String[]{"Bayern Munich", "Borussia Dortmund"},
-                new String[]{"Juventus", "AC Milan"},
-                new String[]{"Dallas Cowboys", "San Francisco 49ers"},
-                new String[]{"Green Bay Packers", "Chicago Bears"},
-                new String[]{"Chicago Bulls", "New York Knicks"},
-                new String[]{"New York Yankees", "Boston Red Sox"}
-            );
-            List<String> sports = List.of("soccer", "football", "hockey", "basketball", "baseball");
 
-            while (!Thread.currentThread().isInterrupted())
+            while (true)
             {
-                Map<String, Object> match = new LinkedHashMap<>();
-                String[] teams = teamsList.get(context.random.nextInt(teamsList.size()));
-                match.put("id", eventId);
-                match.put("status", "SCHEDULED");
-                match.put("sport", sports.get(context.random.nextInt(sports.size())));
-                match.put("teams", Arrays.asList(teams[0], teams[1]));
-                match.put("time", Instant.now().plusSeconds(60).toString());
+                String[] teams = TEAMS_LIST.get(random.nextInt(TEAMS_LIST.size()));
+                int homeOdds = 100 + random.nextInt(201);
+                int awayOdds = 100 + random.nextInt(201);
 
-                int homeOdds = 100 + context.random.nextInt(201);
-                int awayOdds = 100 + context.random.nextInt(201);
+                Match match = new Match();
+                match.id = eventId;
+                match.status = "SCHEDULED";
+                match.sport = SPORTS.get(random.nextInt(SPORTS.size()));
+                match.teams = Arrays.asList(teams[0], teams[1]);
+                match.time = Instant.now().plusSeconds(60).toString();
+                match.odds = Map.of(
+                    "home", (random.nextBoolean() ? "+" : "-") + homeOdds,
+                    "away", (random.nextBoolean() ? "+" : "-") + awayOdds);
 
-                match.put("odds", Map.of(
-                    "home", (context.random.nextBoolean() ? "+" : "-") + homeOdds,
-                    "away", (context.random.nextBoolean() ? "+" : "-") + awayOdds
-                ));
-
-                String json = mapper.writeValueAsString(match);
-                producer.send(new ProducerRecord<>(MATCHES_TOPIC, String.valueOf(eventId), json));
-                System.out.println("Scheduled Event: " + json);
+                producer.send(new ProducerRecord<>(MATCHES_TOPIC, String.valueOf(eventId), jsonb.toJson(match)));
+                producer.flush();
                 context.matches.put(eventId++, match);
+                System.out.println("Scheduled Event: %s : ID: %d".formatted(match.teams ,match.id));
                 Thread.sleep(15_000);
             }
         }
