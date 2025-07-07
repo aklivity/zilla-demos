@@ -36,6 +36,7 @@ public class Engine
             executor.submit(new MatchBetsTask(context));
             executor.submit(new SimulatorTask(context));
             executor.submit(new VerifyBetsTask(context));
+
             CountDownLatch stop = new CountDownLatch(1);
             Runtime.getRuntime().addShutdownHook(new Thread(stop::countDown));
             stop.await();

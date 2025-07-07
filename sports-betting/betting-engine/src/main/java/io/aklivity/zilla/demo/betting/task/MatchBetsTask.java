@@ -36,11 +36,15 @@ import io.aklivity.zilla.demo.betting.model.VerifiedBet;
 public final class MatchBetsTask implements Runnable
 {
     private final EngineContext context;
+    private final Jsonb jsonb;
+    private final Random random;
 
     public MatchBetsTask(
         EngineContext context)
     {
         this.context = context;
+        this.jsonb = JsonbBuilder.create();
+        this.random = new Random();
     }
 
     @Override
@@ -48,9 +52,6 @@ public final class MatchBetsTask implements Runnable
     {
         try (KafkaProducer<String, String> producer = context.supplyProducer())
         {
-            Jsonb jsonb = JsonbBuilder.create();
-            Random random = new Random();
-
             while (true)
             {
                 for (Map.Entry<Integer, Match> entry : context.matches.entrySet())
@@ -61,7 +62,7 @@ public final class MatchBetsTask implements Runnable
                         Instant time = Instant.parse(match.time);
                         if (Instant.now().isAfter(time))
                         {
-                            resolveMatch(entry.getKey(), match, producer, jsonb, random);
+                            resolveMatch(entry.getKey(), match, producer);
                         }
                     }
                 }
@@ -78,9 +79,7 @@ public final class MatchBetsTask implements Runnable
     private void resolveMatch(
         int eventId,
         Match match,
-        KafkaProducer<String, String> producer,
-        Jsonb jsonb,
-        Random random)
+        KafkaProducer<String, String> producer)
     {
         List<String> teams = match.teams;
         String winnerSide = random.nextBoolean() ? "home" : "away";
@@ -93,7 +92,7 @@ public final class MatchBetsTask implements Runnable
             producer.send(new ProducerRecord<>(MATCHES_TOPIC, String.valueOf(eventId), jsonb.toJson(match)));
             producer.flush();
             context.matches.remove(eventId);
-            System.out.printf("Match %d completed. Winner: %s%n", eventId, winningTeam);
+            System.out.println("Match %d completed. Winner: %s".formatted(eventId, winningTeam));
         }
         catch (Exception ex)
         {
@@ -118,7 +117,7 @@ public final class MatchBetsTask implements Runnable
                 producer.send(new ProducerRecord<>(BET_VERIFIED_TOPIC, userId, jsonb.toJson(bet)));
                 producer.flush();
                 context.bets.remove(bet.id);
-                System.out.printf("Updated bet for event %d: %s%n", eventId, bet.id);
+                System.out.println("Updated bet for event %d: %s".formatted(eventId, bet.id));
             }
             catch (Exception ex)
             {
@@ -127,7 +126,7 @@ public final class MatchBetsTask implements Runnable
 
             if (won)
             {
-                creditUser(userId, bet, producer, jsonb);
+                creditUser(userId, bet, producer);
             }
         }
     }
@@ -135,8 +134,7 @@ public final class MatchBetsTask implements Runnable
     private void creditUser(
         String userId,
         VerifiedBet bet,
-        KafkaProducer<String, String> producer,
-        Jsonb jsonb)
+        KafkaProducer<String, String> producer)
     {
         User user = context.users.get(userId);
         if (user != null)
@@ -146,7 +144,7 @@ public final class MatchBetsTask implements Runnable
             {
                 producer.send(new ProducerRecord<>(USER_PROFILE_TOPIC, userId, jsonb.toJson(user)));
                 producer.flush();
-                System.out.printf("Credited %.2f to user %s%n", user.balance, userId);
+                System.out.println("Credited %.2f to user %s".formatted(user.balance, userId));
             }
             catch (Exception ex)
             {

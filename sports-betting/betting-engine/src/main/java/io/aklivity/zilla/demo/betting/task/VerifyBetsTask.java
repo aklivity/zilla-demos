@@ -73,7 +73,7 @@ public final class VerifyBetsTask implements Runnable
 
                     if (match == null || user == null)
                     {
-                        System.out.printf("Timeout waiting for data: userId=%s, eventId=%d%n", userId, eventId);
+                        System.out.println("Timeout waiting for data: userId=%s, eventId=%d".formatted(userId, eventId));
                         continue;
                     }
 
@@ -113,7 +113,7 @@ public final class VerifyBetsTask implements Runnable
                     }
                     else
                     {
-                        System.out.printf("User %s has insufficient balance to place bet of %.2f%n", userId, amount);
+                        System.out.println("User %s has insufficient balance to place bet of %.2f".formatted(userId, amount));
                     }
                 }
                 Thread.sleep(500);
