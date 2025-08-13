@@ -14,11 +14,11 @@
 
     "eon_node": {
         "namespace": "spBv1.0",
-        "group_id": "IoTSensors",
-        "node_id": "SparkplugB",
+        "group_id": "SmartBuildings",
+        "node_id": "Building2",
         "devices": [
             {
-                "device_id": "emulatedDevice",
+                "device_id": "Device1",
                 "store_and_forward": true,
                 "time_to_live": 10,
                 "simulators": [
@@ -29,14 +29,7 @@
                         "delay_min": 3,
                         "delay_max": 6,
                         "randomize": false
-                    }
-                ]
-            },
-            {
-                "device_id": "anotherEmulatedDevice",
-                "store_and_forward": true,
-                "time_to_live": 15,
-                "simulators": [
+                    },
                     {
                         "sensor_id": "Humidity",
                         "mean": 40.7,
@@ -44,6 +37,29 @@
                         "delay_min": 4,
                         "delay_max": 10,
                         "randomize": true
+                    }
+                ]
+            },
+            {
+                "device_id": "Device2",
+                "store_and_forward": true,
+                "time_to_live": 15,
+                "simulators": [
+                    {
+                        "sensor_id": "CO2",
+                        "mean": 450,
+                        "standard_deviation": 50,
+                        "delay_min": 5,
+                        "delay_max": 12,
+                        "randomize": true
+                    },
+                    {
+                        "sensor_id": "LightLevel",
+                        "mean": 300,
+                        "standard_deviation": 40,
+                        "delay_min": 2,
+                        "delay_max": 8,
+                        "randomize": false
                     }
                 ]
             }

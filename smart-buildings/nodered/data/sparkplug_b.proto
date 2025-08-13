@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-package org.eclipse.tahu.protobuf;
+package io.aklivity;
 
 option go_package = "third_party/sparkplug_b";
 

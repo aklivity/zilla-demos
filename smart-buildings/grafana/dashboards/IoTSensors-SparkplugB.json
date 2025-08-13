@@ -224,7 +224,7 @@
       "pluginVersion": "8.2.1",
       "targets": [
         {
-          "query": "import \"strings\"\nfrom(bucket: \"simulators\")\n  |> range(start: -1d)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"devices_certs\")\n  //|> filter(fn: (r) => r[\"device_id\"] == \"emulatedDevice\")\n  |> filter(fn: (r) => contains(value: r[\"device_id\"], set: ${device_id:json}))\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> unique(column: \"device_id\")\n  |> group(columns: [\"device_id\"] )\n  |> drop(columns: [\"_time\", \"_start\", \"_stop\",\"_measurement\"])\n  |> filter(fn: (r) => not strings.hasSuffix(v: r._field, suffix: \"alias\"))\n  \n  |> rename(columns: {_field: \"Properties\", _value: \"Value\"})\n  |> group()\n",
+          "query": "import \"strings\"\nfrom(bucket: \"simulators\")\n  |> range(start: -1d)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"devices_certs\")\n  //|> filter(fn: (r) => r[\"device_id\"] == \"Device1\")\n  |> filter(fn: (r) => contains(value: r[\"device_id\"], set: ${device_id:json}))\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> unique(column: \"device_id\")\n  |> group(columns: [\"device_id\"] )\n  |> drop(columns: [\"_time\", \"_start\", \"_stop\",\"_measurement\"])\n  |> filter(fn: (r) => not strings.hasSuffix(v: r._field, suffix: \"alias\"))\n  \n  |> rename(columns: {_field: \"Properties\", _value: \"Value\"})\n  |> group()\n",
           "refId": "A"
         }
       ],
@@ -286,8 +286,8 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "IoTSensors",
-          "value": "IoTSensors"
+          "text": "SmartBuildings",
+          "value": "SmartBuildings"
         },
         "datasource": "InfluxDB",
         "definition": "from(bucket: \"simulators\")\n  |> range(start:-1w)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"devices_certs\")\n  |> filter(fn: (r) => r[\"namespace\"] == \"${namespace}\")\n  |> group()\n  |> keep(columns: [\"group_id\"])\n  |> unique(column: \"group_id\")",
@@ -335,10 +335,10 @@
         "current": {
           "selected": true,
           "text": [
-            "emulatedDevice"
+            "Device1"
           ],
           "value": [
-            "emulatedDevice"
+            "Device1"
           ]
         },
         "datasource": "InfluxDB",
@@ -414,7 +414,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "IoTSensors SparkplugB",
+  "title": "SmartBuildings",
   "uid": "oNI6q-nVz",
   "version": 10
 }

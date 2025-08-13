@@ -1,6 +1,6 @@
 {
     "name": "node-red-project",
-    "description": "IoTSensorsMQTT-SpB demo",
+    "description": "SmartBuildings",
     "version": "0.0.1",
     "private": true,
     "dependencies": {

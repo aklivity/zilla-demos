@@ -1,7 +1,4 @@
 services:
-##########################################################
-########################## InfluxDB ######################
-##########################################################
   influxdb:
     image: influxdb:latest
     volumes:
@@ -25,9 +22,6 @@ services:
       retries: 5
       test: ["CMD", "curl", "-f", "http://influxdb:8086"]
 
-##########################################################
-########################## Grafana #######################
-##########################################################
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -44,13 +38,10 @@ services:
       influxdb:
         condition: service_healthy
 
-##########################################################
-################## EoN Nodes Sparkplug B #################
-##########################################################
-  eonNode:
+  eonNodeBuilding1:
     image: amineamaach/sensors-sparkplugb:v1.0.0
     restart: "no"
-    container_name: eonNode
+    container_name: eonNodeBuilding1
     hostname: IOTSensorsMQTT-spB
     volumes:
     - ./eon-nodes/configs/building1.json:/configs/config.json
@@ -66,9 +57,25 @@ services:
       mqtt:
         condition: service_healthy
 
-##########################################################
-######################### NodeRed ########################
-##########################################################
+  eonNodeBuilding2:
+    image: amineamaach/sensors-sparkplugb:v1.0.0
+    restart: "no"
+    container_name: eonNodeBuilding2
+    hostname: IOTSensorsMQTT-spB
+    volumes:
+      - ./eon-nodes/configs/building2.json:/configs/config.json
+    ports:
+      - 8181:8181
+    networks:
+      - spB-net
+    depends_on:
+      nodered:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
+      mqtt:
+        condition: service_healthy
+
   nodered:
     image: nodered/node-red:latest
     container_name: nodered
@@ -92,15 +99,12 @@ services:
       mqtt:
         condition: service_healthy
 
-
-##########################################################
-################### MQTT/ZILLA/KAFKA #####################
-##########################################################
   mqtt:
     image:  ghcr.io/aklivity/zilla:develop-SNAPSHOT
     ports:
       - 1883:1883
       - 8083:8083
+      - 7114:7114
     networks:
       - nodered-net
       - spB-net
@@ -191,10 +195,7 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
-  
-#########################################################
-######################## Prometheus #####################
-#########################################################
+
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -212,7 +213,8 @@ services:
       - main-net
       - spB-net
     depends_on:
-      - eonNode
+      - eonNodeBuilding1
+      - eonNodeBuilding2
 
 networks:
   main-net:
