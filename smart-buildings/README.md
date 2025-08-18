@@ -20,12 +20,20 @@ Zilla seamlessly bridges these MQTT streams to Kafka, enabling downstream integr
 - Node-RED visualizes SparkplugB message flow and enables automation via Zilla.
 - Grafana visualizes real-time and historical trends.
 
+## Build the stack
+
+Build the images from scratch (ignores cache):
+
+```bash
+docker-compose build --no-cache
+```
+
 ## Start the stack
 
 Launch all services in the background:
 
 ```bash
-docker compose up -d
+docker compose up --wait
 ```
 
 ```
