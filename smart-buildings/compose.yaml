@@ -1,0 +1,224 @@
+services:
+  influxdb:
+    image: influxdb:latest
+    ports:
+      - "8086:8086"
+    networks:
+      - main-net
+    restart: unless-stopped
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=mypasswordmypasswordmypassword
+      - DOCKER_INFLUXDB_INIT_ORG=simulators-project
+      - DOCKER_INFLUXDB_INIT_BUCKET=simulators
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=mytokenmytokenmytoken
+    container_name: influxdb
+    healthcheck:
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      test: ["CMD", "curl", "-f", "http://influxdb:8086"]
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - main-net
+    volumes:
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+      - ./grafana/dashboards/:/var/lib/grafana/dashboards/
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+    depends_on:
+      influxdb:
+        condition: service_healthy
+
+  eonNodeBuilding1:
+    image: amineamaach/sensors-sparkplugb:v1.0.0
+    restart: "no"
+    container_name: eonNodeBuilding1
+    hostname: IOTSensorsMQTT-spB
+    volumes:
+    - ./eon-nodes/configs/building1.json:/configs/config.json
+    ports:
+      - 8080:8080
+    networks:
+      - spB-net
+    depends_on:
+      nodered:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
+      mqtt:
+        condition: service_healthy
+
+  eonNodeBuilding2:
+    image: amineamaach/sensors-sparkplugb:v1.0.0
+    restart: "no"
+    container_name: eonNodeBuilding2
+    hostname: IOTSensorsMQTT-spB
+    volumes:
+      - ./eon-nodes/configs/building2.json:/configs/config.json
+    ports:
+      - 8181:8181
+    networks:
+      - spB-net
+    depends_on:
+      nodered:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
+      mqtt:
+        condition: service_healthy
+
+  nodered:
+    image: nodered/node-red:latest
+    build: ./nodered
+    container_name: nodered
+    environment:
+      - TZ=America/New_York
+    ports:
+      - "1880:1880"
+    networks:
+      - main-net
+      - nodered-net
+    healthcheck:
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      test: ["CMD", "curl", "-f", "http://nodered:1880"]
+    depends_on:
+      influxdb:
+        condition: service_healthy
+      mqtt:
+        condition: service_healthy
+
+  mqtt:
+    image:  ghcr.io/aklivity/zilla:develop-SNAPSHOT
+    ports:
+      - 1883:1883
+      - 8083:8083
+      - 7114:7114
+    networks:
+      - nodered-net
+      - spB-net
+      - kafka-net
+    restart: unless-stopped
+    environment:
+      KAFKA_BOOTSTRAP_SERVER: ${KAFKA_BOOTSTRAP_SERVER:-kafka:9092}
+    container_name: mqtt
+    volumes:
+      - ./zilla/:/etc/zilla/
+    command: start -v -e
+    healthcheck:
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      test: ["CMD", "bash", "-c", "echo -n '' > /dev/tcp/127.0.0.1/1883"]
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+
+  kafka-init:
+    image: bitnami/kafka:3.2
+    container_name: kafka-init
+    networks:
+      - kafka-net
+    working_dir: /opt/bitnami/kafka/bin
+    entrypoint: /bin/bash -c
+    environment:
+      KAFKA_BOOTSTRAP_SERVER: ${KAFKA_BOOTSTRAP_SERVER:-kafka:9092}
+    command:
+      - |
+        touch config.properties
+
+        #echo "security.protocol=SASL_SSL
+        #sasl.mechanism=PLAIN
+        #sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \\
+        #    username=\"$${KAFKA_API_KEY}\" \\
+        #    password=\"$${KAFKA_API_SECRET}\";
+        #" >> config.properties
+
+        kafka-topics.sh --command-config config.properties --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --create --if-not-exists --partitions 2 --topic iot-mqtt-source &&
+        kafka-topics.sh --command-config config.properties --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --create --if-not-exists --partitions 2 --topic iot-mqtt-sink &&
+        kafka-topics.sh --command-config config.properties --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --create --if-not-exists --partitions 2 --topic mqtt-messages &&
+        kafka-topics.sh --command-config config.properties --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --create --if-not-exists --partitions 2 --topic mqtt-retained --config cleanup.policy=compact &&
+        kafka-topics.sh --command-config config.properties --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --create --if-not-exists --partitions 2 --topic mqtt-sessions --config cleanup.policy=compact
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  kafka:
+    image: bitnami/kafka:3.2
+    container_name: kafka
+    restart: unless-stopped
+    ports:
+      - 9092:9092
+    networks:
+      - kafka-net
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_CFG_NODE_ID: "1"
+      KAFKA_CFG_BROKER_ID: "1"
+      KAFKA_CFG_PROCESS_ROLES: "broker,controller"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@127.0.0.1:9093"
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTER_BROKER"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "INTER_BROKER:PLAINTEXT,CONTROLLER:PLAINTEXT,CLIENT:PLAINTEXT"
+      KAFKA_CFG_LISTENERS: "INTER_BROKER://:29092,CLIENT://:9092,CONTROLLER://:9093"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "INTER_BROKER://localhost:29092,CLIENT://kafka:9092"
+      KAFKA_CFG_LOG_DIRS: "/tmp/logs"
+    healthcheck:
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      test: ["CMD", "bash", "-c", "echo -n '' > /dev/tcp/127.0.0.1/29092"]
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    container_name: kafka-ui
+    restart: unless-stopped
+    ports:
+      - 8081:8081
+    networks:
+      - kafka-net
+    environment:
+      SERVER_PORT: 8081
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 9090:9090
+    networks:
+      - main-net
+      - spB-net
+    depends_on:
+      - eonNodeBuilding1
+      - eonNodeBuilding2
+
+networks:
+  main-net:
+  emqx-net:
+  spB-net:
+  nodered-net:
+  kafka-net:
+
+volumes:
+  prometheus_data: {}

@@ -1,0 +1,76 @@
+{
+    "mqtt_config": {
+        "url": "tcp://mqtt:1883",
+        "qos": 1,
+        "client_id": "",
+        "user": "",
+        "password": "",
+        "keep_alive": 5,
+        "connect_timeout": "30s",
+        "connect_retry": 3,
+        "clean_start": false,
+        "session_expiry_interval" : 60 
+    },
+
+    "eon_node": {
+        "namespace": "spBv1.0",
+        "group_id": "SmartBuildings",
+        "node_id": "Building2",
+        "devices": [
+            {
+                "device_id": "Device1",
+                "store_and_forward": true,
+                "time_to_live": 10,
+                "simulators": [
+                    {
+                        "sensor_id": "Temperature",
+                        "mean": 30.6,
+                        "standard_deviation": 3.1,
+                        "delay_min": 3,
+                        "delay_max": 6,
+                        "randomize": false
+                    },
+                    {
+                        "sensor_id": "Humidity",
+                        "mean": 40.7,
+                        "standard_deviation": 2.3,
+                        "delay_min": 4,
+                        "delay_max": 10,
+                        "randomize": true
+                    }
+                ]
+            },
+            {
+                "device_id": "Device2",
+                "store_and_forward": true,
+                "time_to_live": 15,
+                "simulators": [
+                    {
+                        "sensor_id": "CO2",
+                        "mean": 450,
+                        "standard_deviation": 50,
+                        "delay_min": 5,
+                        "delay_max": 12,
+                        "randomize": true
+                    },
+                    {
+                        "sensor_id": "LightLevel",
+                        "mean": 300,
+                        "standard_deviation": 40,
+                        "delay_min": 2,
+                        "delay_max": 8,
+                        "randomize": false
+                    }
+                ]
+            }
+        ]
+    },
+
+    "logger": {
+        "level": "INFO",
+        "format": "TEXT",
+        "disable_timestamp": true
+    },
+    
+    "enable_prometheus": true
+}

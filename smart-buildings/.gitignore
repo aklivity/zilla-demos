@@ -1,0 +1,3 @@
+influxdb
+prometheus_data
+*.log

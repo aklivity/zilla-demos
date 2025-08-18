@@ -1,0 +1,11 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'SmartBuildings-monitor'
+
+scrape_configs:
+  - job_name: 'SmartBuildings'
+    scrape_interval: 1s
+    static_configs:
+      - targets: ['eonNodeBuilding1:8080', 'eonNodeBuilding2:8181']
