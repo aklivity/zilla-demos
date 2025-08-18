@@ -1,0 +1,13 @@
+{
+    "name": "node-red-project",
+    "description": "SmartBuildings",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "node-red-contrib-influxdb": "~0.6.1",
+        "node-red-contrib-protobuf": "^1.1.1"
+    },
+    "scripts": {
+        "start": "node $NODE_OPTIONS node_modules/node-red/red.js $FLOWS"
+    }
+}
