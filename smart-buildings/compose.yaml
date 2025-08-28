@@ -97,7 +97,7 @@ services:
         condition: service_healthy
 
   mqtt:
-    image:  ghcr.io/aklivity/zilla:develop-SNAPSHOT
+    image:  ghcr.io/aklivity/zilla:latest
     ports:
       - 1883:1883
       - 8083:8083
