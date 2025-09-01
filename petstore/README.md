@@ -91,7 +91,7 @@ docker run --rm -v ./private.pem:/private.pem bitnami/jwt-cli encode \
 
 ## Using the Petstore APIs
 
-The Zilla Petstore is an [HTTP Kafka proxy](https://docs.aklivity.io/zilla/latest/concepts/kafka-proxies/http-proxy.html) and exposes common entity CRUD endpoints with the entity data being stored on Kafka topics. Leveraging Kafka's `cleanup.policy=compact` feature, Zilla enables a standard REST backend architecture with Kafka as the storage layer. A UUID is generated for created objects and used as the Kafka message key.
+The Zilla Petstore is an [HTTP Kafka proxy](https://docs.aklivity.io/zilla/latest/concepts/proxy/http/kafka.html) and exposes common entity CRUD endpoints with the entity data being stored on Kafka topics. Leveraging Kafka's `cleanup.policy=compact` feature, Zilla enables a standard REST backend architecture with Kafka as the storage layer. A UUID is generated for created objects and used as the Kafka message key.
 
 ### Generate a REST client
 
