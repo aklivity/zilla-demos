@@ -74,18 +74,16 @@ docker compose --profile kafka down
 
 Following topics are used:
 
-- `commands` - This topics get populated by Zilla API Gateway and responsible for processing commands
-such as `PayCommand`, `RequestCommand`.
+- `commands` - This topics get populated by Zilla API Gateway and responsible for processing commands such as `PayCommand`, `RequestCommand`.
 - `replies` - HTTP response for processed command should be posted to this topic for correlated response.
 - `transactions` - Stores information about about each transaction between users.
 - `activities` - Event sourcing topic that logs all the activities in the system between users.
 - `balances` - Tracks latest balance of a user comping from transactions table.
 - `payment-requests` - Store payments requested by the user.
-- `users` - Stores information about users(logcompacted topic).
+- `users` - Stores information about users(log compacted topic).
 
 ## Redpanda Console/Kafbat
-Console gives you a simple, interactive approach for gaining visibility into your topics, masking data, managing consumer groups, and exploring 
-real-time data with time-travel debugging. 
+Console gives you a simple, interactive approach for gaining visibility into your topics, managing consumer groups, and explore data. 
 
 You can access it at http://localhost:8080.
 
@@ -97,14 +95,11 @@ It also has statistic topologies that builds activities, statistics out of topic
 **Docker Images: `streampay-stream` & `streampay-simulation`**
 
 ## StreamPay UI
-This app is build using `Vue.js` and `Quasar` frameworks and contains user authentication component as well
-which uses Auth0 platform.
+This app is build using `Vue.js` and `Quasar` frameworks and contains user authentication component as well which uses Auth0 platform.
 
 App UI is available at: **[http://localhost:8081](http://localhost:8081)**
 
 ## AsyncAPI Specifications
-
-The app is defined by HTTP & Kafka specs:
 
 - [`asyncapi-http.yaml`](./zilla/asyncapi-http.yaml)  
   Defines the HTTP endpoints, SSE channels, and message payloads.
@@ -115,8 +110,7 @@ The app is defined by HTTP & Kafka specs:
 - [`asyncapi-redpanda.yaml`](./zilla/asyncapi-redpanda.yaml)  
   Defines the Redpanda topics for publishing/consuming bet-related messages.
 
-## Zilla API Gateway
-Zilla API Gateway hosts both app UI and APIs. 
+### Main Channels
 
 | Protocol | Method | Endpoint              | Topic                |
 |----------|--------|-----------------------|----------------------|
