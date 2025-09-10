@@ -1,14 +1,14 @@
 # StreamPay App Demo
 
-Streampay a web-based payments app that demonstrates how Zilla integrates seamlessly with Kafka or Redpanda.
+StreamPay is a web-based payments application that demonstrates how Zilla integrates seamlessly with Kafka or Redpanda to enable event-driven financial transactions.
 
-This StreamPay app demo consists these main components:
+This demo is composed of the following main components:
 
-- Redpanda/Apache Kafka.
-- Redpanda Console/Kafbat.
-- Event processing service written using Spring Boot.
-- Zilla API Gateway that hosts both app web interface and APIs.
-- StreamPay app UI
+- Redpanda/Apache Kafka
+- Redpanda Console/Kafbat
+- Event processing service
+- Zilla
+- StreamPay UI
 
 ## Getting Started
 
@@ -28,17 +28,15 @@ docker-compose build --no-cache
 
 ### 2. Start the stack
 
-#### Using Redpanda
+Launch all services in the background with either **Redpanda** or **Apache Kafka**:
 
-Launch all services in the background with Redpanda:
+#### Using Redpanda
 
 ```bash
 docker compose up -d
 ```
 
 #### Using Apache Kafka
-
-Launch all services in the background with Redpanda:
 
 ```bash
 docker compose --profile kafka up -d
@@ -54,17 +52,15 @@ Click on login and use one of the option to authenticate.
 
 ### 4. Stop the stack
 
-#### Using Redpanda
-
 Shut down and clean up resources:
+
+#### Using Redpanda
 
 ```bash
 docker compose down
 ```
 
 #### Using Apache Kafka
-
-Shut down and clean up resources:
 
 ```bash
 docker compose --profile kafka down
