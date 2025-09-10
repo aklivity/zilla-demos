@@ -1,25 +1,23 @@
 # StreamPay App Demo
 This StreamPay app demo consists of 4 main components such as:
 
-::: tabs
-
-@tab Redpanda
-
+<details>
+<summary>Redpanda</summary>
 - Redpanda.
 - Redpanda Console.
-- Event processing service written using `Spring Boot`.
+- Event processing service written using Spring Boot.
 - Zilla API Gateway that hosts both app web interface and APIs.
 - StreamPay app UI
+</details>
 
-@tab Apache Kafka
-
+<details>
+<summary>Apache Kafka</summary>
 - Apache Kafka.
 - Kafbat.
-- Event processing service written using `Spring Boot`.
+- Event processing service written using Spring Boot.
 - Zilla API Gateway that hosts both app web interface and APIs.
 - StreamPay app UI
-
-:::
+</details>
 
 ## Requirements
 
