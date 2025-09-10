@@ -2,7 +2,7 @@
 
 Streampay a web-based payments app that demonstrates how Zilla integrates seamlessly with Kafka or Redpanda.
 
-This StreamPay app demo consists of 4 main components such as:
+This StreamPay app demo consists these main components:
 
 - Redpanda/Apache Kafka.
 - Redpanda Console/Kafbat.
