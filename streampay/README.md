@@ -1,11 +1,25 @@
 # StreamPay App Demo
 This StreamPay app demo consists of 4 main components such as:
 
+::: tabs
+
+@tab Redpanda
+
 - Redpanda.
 - Redpanda Console.
 - Event processing service written using `Spring Boot`.
 - Zilla API Gateway that hosts both app web interface and APIs.
 - StreamPay app UI
+
+@tab Apache Kafka
+
+- Apache Kafka.
+- Kafbat.
+- Event processing service written using `Spring Boot`.
+- Zilla API Gateway that hosts both app web interface and APIs.
+- StreamPay app UI
+
+:::
 
 ## Requirements
 
@@ -36,37 +50,9 @@ This service responsible for processing commands such as `PayCommand`, `RequestC
 to the appropriate topics. It also has statistic topologies that builds activities, statistics out of topics such as
 `transactions`, and `payment-requests`
 
-### Build the service
-All components are launched from docker stack defined in `stack.yaml`, however, `streampay-stream` and `streampay-simulation`
-services which have reference to `image: "streampay-stream:develop-SNAPSHOT"` and `image: "streampay-simulation:develop-SNAPSHOT`
-should be built locally. Please run the below command to build the images.
-
-```shell
-cd extras-containers/streampay/service
-./mvnw clean install
-cd stream
-docker build -t streampay-stream:develop-SNAPSHOT . --platform linux/x86_64
-cd ..
-cd simulation
-docker build -t streampay-simulation:develop-SNAPSHOT . --platform linux/x86_64
-```
-The above command generates `streampay-stream:develop-SNAPSHOT` and `streampay-simulation:develop-SNAPSHOT` images.
-
 ## StreamPay UI
 This app is build using `Vue.js` and `Quasar` frameworks and contains user authentication component as well
 which uses Auth0 platform.
-
-### Build
-
-```shell
-cd ../../ui/
-npm i -g @quasar/cli
-npm install
-quasar build
-cd ../../../streampay/stack/
-```
-
-The above command generates `dist` folder with all the necessary files to be hosted by Zilla API Gateway.
 
 ## Zilla API Gateway
 Zilla API Gateway hosts both app UI and APIs. Following endpoints are configured in `zilla.jon`
