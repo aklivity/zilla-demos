@@ -44,7 +44,15 @@ Launch all services in the background with Redpanda:
 docker compose --profile kafka up -d
 ```
 
-### 3. Stop the stack
+### 3. UI
+
+> 🖥️ App UI is available at: **[http://localhost:8081](http://localhost:8081)**
+
+![screenshot](./assets/screenshot.png)
+
+Click on login and use one of the option to authenticate.
+
+### 4. Stop the stack
 
 #### Using Redpanda
 
@@ -61,12 +69,6 @@ Shut down and clean up resources:
 ```bash
 docker compose --profile kafka down
 ```
-
-> 🖥️ App UI is available at: **[http://localhost:8081](http://localhost:8081)**
-
-![screenshot](./assets/screenshot.png)
-
-Click on login and use one of the option to authenticate.
 
 ## Event streaming topics
 
