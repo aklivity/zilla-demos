@@ -23,7 +23,7 @@ This demo is composed of the following main components:
 Build the images from scratch (ignores cache):
 
 ```bash
-docker-compose build --no-cache
+docker compose build --no-cache
 ```
 
 ### 2. Start the stack
@@ -76,7 +76,7 @@ Following topics are used:
 - `activities` - Event sourcing topic that logs all the activities in the system between users.
 - `balances` - Tracks latest balance of a user comping from transactions table.
 - `payment-requests` - Store payments requested by the user.
-- `users` - Stores information about users(log compacted topic).
+- `users` - Stores information about users (log compacted topic).
 
 ## Redpanda Console/Kafbat
 Console gives you a simple, interactive approach for gaining visibility into your topics, managing consumer groups, and explore data. 
