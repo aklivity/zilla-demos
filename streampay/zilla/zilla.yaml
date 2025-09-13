@@ -41,7 +41,7 @@ catalogs:
         streampay_http:
           path: asyncapi-http.yaml
         streampay_kafka:
-          path: ${{env.ASYNCAPI_KAFKA_SPEC}}
+          path: asyncapi-kafka.yaml
 bindings:
   http_asyncapi_server:
     type: asyncapi

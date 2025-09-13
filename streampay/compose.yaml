@@ -3,7 +3,7 @@ services:
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:v24.3.7
     profiles: [redpanda]
-    hostname: redpanda.internal.net
+    hostname: kafka.internal.net
     command:
       - redpanda
       - start
@@ -19,7 +19,7 @@ services:
       - '--kafka-addr'
       - 'INSIDE://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092'
       - '--advertise-kafka-addr'
-      - 'INSIDE://redpanda.internal.net:29092,OUTSIDE://localhost:9092'
+      - 'INSIDE://kafka.internal.net:29092,OUTSIDE://localhost:9092'
     ports:
       - '9092:9092'
       - '29092:29092'
@@ -38,8 +38,8 @@ services:
         condition: service_healthy
     entrypoint: [ '/bin/sh', '-c' ]
     environment:
-      REDPANDA_ADMIN: redpanda.internal.net:9644
-      REDPANDA_BROKER: redpanda.internal.net:29092
+      REDPANDA_ADMIN: kafka.internal.net:9644
+      REDPANDA_BROKER: kafka.internal.net:29092
     command: |
       "
       # Create a user
@@ -66,7 +66,7 @@ services:
       CONFIG_FILEPATH: /tmp/config.yml
       CONSOLE_CONFIG_FILE: |
         kafka:
-          brokers: ["redpanda.internal.net:29092"]
+          brokers: ["kafka.internal.net:29092"]
           sasl:
             enabled: true
             username: user
@@ -83,7 +83,7 @@ services:
     profiles: [redpanda]
     environment:
       SPRING_KAFKA_APPLICATION_ID: stream-service
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda.internal.net:29092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.internal.net:29092
       SPRING_KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
       SPRING_KAFKA_SASL_USERNAME: user
       SPRING_KAFKA_SASL_PASSWORD: redpanda
@@ -92,11 +92,11 @@ services:
         condition: service_completed_successfully
 
   streampay-redpanda-simulation:
-    image: "streampay-simulation:develop-SNAPSHOT"
+    image: "ghcr.io/aklivity/zilla/demos/streampay-simulation:develop-SNAPSHOT"
     profiles: [redpanda]
     environment:
       SPRING_KAFKA_APPLICATION_ID: simulation-service
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: redpanda.internal.net:29092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.internal.net:29092
       SPRING_KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
       SPRING_KAFKA_SASL_USERNAME: user
       SPRING_KAFKA_SASL_PASSWORD: redpanda
@@ -118,7 +118,6 @@ services:
       VAULT_KEYSTORE_PASSWORD: "generated"
       KAFKA_SASL_USER: "user"
       KAFKA_SASL_PASSWORD: "redpanda"
-      ASYNCAPI_KAFKA_SPEC: "asyncapi-redpanda.yaml"
     depends_on:
       redpanda-init:
         condition: service_completed_successfully
@@ -127,7 +126,7 @@ services:
     image: bitnami/kafka:3.5
     profiles: [kafka]
     restart: unless-stopped
-    hostname: kafka.examples.dev
+    hostname: kafka.internal.net
     ports:
       - 9092:9092
     healthcheck:
@@ -147,7 +146,7 @@ services:
       KAFKA_CFG_PROCESS_ROLES: "broker,controller"
       KAFKA_CFG_LISTENERS: "CLIENT://:9092,INTERNAL://:29092,CONTROLLER://:9093"
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "CLIENT://localhost:9092,INTERNAL://kafka.examples.dev:29092"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "CLIENT://localhost:9092,INTERNAL://kafka.internal.net:29092"
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_CFG_SASL_ENABLED_MECHANISMS: "SCRAM-SHA-256"
       KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: "SCRAM-SHA-256"
@@ -165,7 +164,7 @@ services:
         max_attempts: 0
     entrypoint: ["/bin/sh", "-c"]
     environment:
-      KAFKA_BOOTSTRAP_SERVER: kafka.examples.dev:29092
+      KAFKA_BOOTSTRAP_SERVER: kafka.internal.net:29092
     command:
       - |
         echo -e "creating client.properties";
@@ -200,7 +199,7 @@ services:
         condition: service_healthy
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka.examples.dev:29092
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka.internal.net:29092
       KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SASL_PLAINTEXT
       KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: SCRAM-SHA-256
       KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule required username="user" password="bitnami";
@@ -210,7 +209,7 @@ services:
     profiles: [kafka]
     environment:
       SPRING_KAFKA_APPLICATION_ID: stream-service
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.examples.dev:29092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.internal.net:29092
       SPRING_KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
       SPRING_KAFKA_SASL_USERNAME: user
       SPRING_KAFKA_SASL_PASSWORD: bitnami
@@ -223,7 +222,7 @@ services:
     profiles: [kafka]
     environment:
       SPRING_KAFKA_APPLICATION_ID: simulation-service
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.examples.dev:29092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.internal.net:29092
       SPRING_KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
       SPRING_KAFKA_SASL_USERNAME: user
       SPRING_KAFKA_SASL_PASSWORD: bitnami
@@ -243,7 +242,6 @@ services:
     environment:
       ZILLA_INCUBATOR_ENABLED: "true"
       VAULT_KEYSTORE_PASSWORD: "generated"
-      ASYNCAPI_KAFKA_SPEC: "asyncapi-kafka.yaml"
       KAFKA_SASL_USER: "user"
       KAFKA_SASL_PASSWORD: "bitnami"
     depends_on:
