@@ -103,9 +103,6 @@ App UI is available at: **[http://localhost:8081](http://localhost:8081)**
 - [`asyncapi-kafka.yaml`](./zilla/asyncapi-kafka.yaml)  
   Defines the Kafka topics for publishing/consuming bet-related messages.
 
-- [`asyncapi-redpanda.yaml`](./zilla/asyncapi-redpanda.yaml)  
-  Defines the Redpanda topics for publishing/consuming bet-related messages.
-
 ### Main Channels
 
 | Protocol | Method | Endpoint              | Topic                |
