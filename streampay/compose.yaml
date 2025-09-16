@@ -1,0 +1,264 @@
+name: streampay
+services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.3.7
+    profiles: [redpanda]
+    hostname: kafka.internal.net
+    command:
+      - redpanda
+      - start
+      - '--set redpanda.enable_sasl=true'
+      - '--set redpanda.superusers=["user"]'
+      - '--smp'
+      - '1'
+      - '--reserve-memory'
+      - 0M
+      - '--overprovisioned'
+      - '--node-id'
+      - '0'
+      - '--kafka-addr'
+      - 'INSIDE://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092'
+      - '--advertise-kafka-addr'
+      - 'INSIDE://kafka.internal.net:29092,OUTSIDE://localhost:9092'
+    ports:
+      - '9092:9092'
+      - '29092:29092'
+      - '9644:9644'
+    healthcheck:
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      test: ["CMD", "bash", "-c", "echo -n '' > /dev/tcp/127.0.0.1/29092"]
+
+  redpanda-init:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.3.7
+    profiles: [redpanda]
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    entrypoint: [ '/bin/sh', '-c' ]
+    environment:
+      REDPANDA_ADMIN: kafka.internal.net:9644
+      REDPANDA_BROKER: kafka.internal.net:29092
+    command: |
+      "
+      # Create a user
+      rpk acl user create user -p redpanda --api-urls $${REDPANDA_ADMIN}
+      
+      rpk topic create commands --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create replies --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create transactions --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create total-transactions --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create average-transactions --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create activities --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create balances -c cleanup.policy=compact --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create balance-histories --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create payment-requests -c cleanup.policy=compact --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      rpk topic create users -c cleanup.policy=compact --brokers $${REDPANDA_BROKER} --user user --password redpanda --sasl-mechanism SCRAM-SHA-256
+      "
+
+  redpanda-console:
+    image: docker.redpanda.com/redpandadata/console:v2.8.4
+    profiles: [redpanda]
+    entrypoint: /bin/sh
+    command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
+    environment:
+      CONFIG_FILEPATH: /tmp/config.yml
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["kafka.internal.net:29092"]
+          sasl:
+            enabled: true
+            username: user
+            password: redpanda
+            mechanism: SCRAM-SHA-256
+    ports:
+      - "8080:8080"
+    depends_on:
+      redpanda:
+        condition: service_healthy
+
+  streampay-redpanda-stream:
+    image: "ghcr.io/aklivity/zilla/demos/streampay-stream:develop-SNAPSHOT"
+    profiles: [redpanda]
+    environment:
+      SPRING_KAFKA_APPLICATION_ID: stream-service
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.internal.net:29092
+      SPRING_KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      SPRING_KAFKA_SASL_USERNAME: user
+      SPRING_KAFKA_SASL_PASSWORD: redpanda
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+
+  streampay-redpanda-simulation:
+    image: "ghcr.io/aklivity/zilla/demos/streampay-simulation:develop-SNAPSHOT"
+    profiles: [redpanda]
+    environment:
+      SPRING_KAFKA_APPLICATION_ID: simulation-service
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.internal.net:29092
+      SPRING_KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      SPRING_KAFKA_SASL_USERNAME: user
+      SPRING_KAFKA_SASL_PASSWORD: redpanda
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+
+  zilla-redpanda:
+    image: "ghcr.io/aklivity/zilla:latest"
+    profiles: [redpanda]
+    hostname: "zilla"
+    command: [ "start", "-v", "-e", "-Pzilla.engine.verbose.composites", "-Pzilla.binding.kafka.client.produce.record.framing.size=2048", "-Pzilla.binding.kafka.client.connection.pool=false" ]
+    volumes:
+      - ./zilla:/etc/zilla:ro
+    ports:
+      - "9090:9090"
+    environment:
+      ZILLA_INCUBATOR_ENABLED: "true"
+      VAULT_KEYSTORE_PASSWORD: "generated"
+      KAFKA_SASL_USER: "user"
+      KAFKA_SASL_PASSWORD: "redpanda"
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+
+  kafka:
+    image: bitnami/kafka:3.5
+    profiles: [kafka]
+    restart: unless-stopped
+    hostname: kafka.internal.net
+    ports:
+      - 9092:9092
+    healthcheck:
+      test: /opt/bitnami/kafka/bin/kafka-cluster.sh cluster-id --bootstrap-server localhost:9092 || exit 1
+      interval: 1s
+      timeout: 60s
+      retries: 60
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_CFG_NODE_ID: "1"
+      KAFKA_CFG_BROKER_ID: "1"
+      KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@127.0.0.1:9093"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "CLIENT:PLAINTEXT,INTERNAL:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_CFG_LOG_DIRS: "/tmp/logs"
+      KAFKA_CFG_PROCESS_ROLES: "broker,controller"
+      KAFKA_CFG_LISTENERS: "CLIENT://:9092,INTERNAL://:29092,CONTROLLER://:9093"
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "CLIENT://localhost:9092,INTERNAL://kafka.internal.net:29092"
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CFG_SASL_ENABLED_MECHANISMS: "SCRAM-SHA-256"
+      KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: "SCRAM-SHA-256"
+
+  kafka-init:
+    image: bitnami/kafka:3.5
+    profiles: [kafka]
+    user: root
+    depends_on:
+      kafka:
+        condition: service_healthy
+    deploy:
+      restart_policy:
+        condition: none
+        max_attempts: 0
+    entrypoint: ["/bin/sh", "-c"]
+    environment:
+      KAFKA_BOOTSTRAP_SERVER: kafka.internal.net:29092
+    command:
+      - |
+        echo -e "creating client.properties";
+        cat <<EOT >> client.properties
+        security.protocol=SASL_PLAINTEXT
+        sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required username="user" password="bitnami";
+        sasl.mechanism=SCRAM-SHA-256
+        EOT
+
+        echo "Creating kafka topic";
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --topic commands --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --command-config client.properties
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --topic replies --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --command-config client.properties
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --topic transactions --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --command-config client.properties
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --topic total-transactions --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --command-config client.properties
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --topic average-transactions --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --command-config client.properties
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --topic activities --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --command-config client.properties
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --topic balances --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --config cleanup.policy=compact --command-config client.properties
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --topic balance-histories --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --command-config client.properties
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --topic payment-requests --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --config cleanup.policy=compact --command-config client.properties
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --topic users --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --config cleanup.policy=compact --command-config client.properties
+        echo "Successfully created the following topics:";
+        /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --command-config client.properties --list --exclude-internal;
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:v1.0.0
+    profiles: [kafka]
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka.internal.net:29092
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: SCRAM-SHA-256
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule required username="user" password="bitnami";
+
+  streampay-kafka-stream:
+    image: "ghcr.io/aklivity/zilla/demos/streampay-stream:develop-SNAPSHOT"
+    profiles: [kafka]
+    environment:
+      SPRING_KAFKA_APPLICATION_ID: stream-service
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.internal.net:29092
+      SPRING_KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      SPRING_KAFKA_SASL_USERNAME: user
+      SPRING_KAFKA_SASL_PASSWORD: bitnami
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+
+  streampay-kafka-simulation:
+    image: "ghcr.io/aklivity/zilla/demos/streampay-simulation:develop-SNAPSHOT"
+    profiles: [kafka]
+    environment:
+      SPRING_KAFKA_APPLICATION_ID: simulation-service
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.internal.net:29092
+      SPRING_KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      SPRING_KAFKA_SASL_USERNAME: user
+      SPRING_KAFKA_SASL_PASSWORD: bitnami
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+
+  zilla-kafka:
+    image: "ghcr.io/aklivity/zilla:latest"
+    profiles: [kafka]
+    hostname: "zilla"
+    command: [ "start", "-v", "-e", "-Pzilla.engine.verbose.composites", "-Pzilla.binding.kafka.client.produce.record.framing.size=2048", "-Pzilla.binding.kafka.client.connection.pool=false"]
+    volumes:
+      - ./zilla:/etc/zilla:ro
+    ports:
+      - "9090:9090"
+    environment:
+      ZILLA_INCUBATOR_ENABLED: "true"
+      VAULT_KEYSTORE_PASSWORD: "generated"
+      KAFKA_SASL_USER: "user"
+      KAFKA_SASL_PASSWORD: "bitnami"
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+
+  app:
+    build:
+      context: ./ui
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+    stdin_open: true
+    tty: true
+
+networks:
+  default:
+    driver: bridge

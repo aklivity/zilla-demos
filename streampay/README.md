@@ -1,75 +1,109 @@
 # StreamPay App Demo
-This StreamPay app demo consists of 4 main components such as:
 
-- Redpanda.
-- Redpanda Console.
-- Event processing service written using `Spring Boot`.
-- Zilla API Gateway that hosts both app web interface and APIs.
-- StreamPay app UI
+StreamPay is a web-based payments application that demonstrates how Zilla integrates seamlessly with Kafka or Redpanda to enable event-driven financial transactions.
 
-## Requirements
+This demo is composed of the following main components:
+
+- Redpanda/Apache Kafka
+- Redpanda Console/Kafbat
+- Event processing service
+- Zilla
+- StreamPay UI
+
+## Getting Started
+
+### Requirements
 
 * [Node.js](http://nodejs.org/)
 * [Docker](https://www.docker.com/)
-* Java version 17 and below
 
 
-## Redpanda
-Redpanda serves both as event streaming source and database table to store information about users, transactions,
-and stats. Following topics are created:
-- `commands` - This topics get populated by Zilla API Gateway and responsible for processing commands
-such as `PayCommand`, `RequestCommand`.
+### 1. Build the stack
+
+Build the images from scratch (ignores cache):
+
+```bash
+docker compose build --no-cache
+```
+
+### 2. Start the stack
+
+Launch all services in the background with either **Redpanda** or **Apache Kafka**:
+
+#### Using Redpanda
+
+```bash
+docker compose up -d
+```
+
+#### Using Apache Kafka
+
+```bash
+docker compose --profile kafka up -d
+```
+
+### 3. UI
+
+> 🖥️ App UI is available at: **[http://localhost:8081](http://localhost:8081)**
+
+![screenshot](./assets/screenshot.png)
+
+Click on login and use one of the option to authenticate.
+
+### 4. Stop the stack
+
+Shut down and clean up resources:
+
+#### Using Redpanda
+
+```bash
+docker compose down
+```
+
+#### Using Apache Kafka
+
+```bash
+docker compose --profile kafka down
+```
+
+## Event streaming topics
+
+Following topics are used:
+
+- `commands` - This topics get populated by Zilla API Gateway and responsible for processing commands such as `PayCommand`, `RequestCommand`.
 - `replies` - HTTP response for processed command should be posted to this topic for correlated response.
 - `transactions` - Stores information about about each transaction between users.
 - `activities` - Event sourcing topic that logs all the activities in the system between users.
 - `balances` - Tracks latest balance of a user comping from transactions table.
 - `payment-requests` - Store payments requested by the user.
-- `users` - Stores information about users(logcompacted topic).
+- `users` - Stores information about users (log compacted topic).
 
-## Redpanda Console
-Redpanda Console is a developer-friendly UI for managing your Kafka/Redpanda workloads. Console gives you a simple,
-interactive approach for gaining visibility into your topics, masking data, managing consumer groups, and exploring 
-real-time data with time-travel debugging. You can access it at http://localhost:8080.
+## Redpanda Console/Kafbat
+Console gives you a simple, interactive approach for gaining visibility into your topics, managing consumer groups, and explore data. 
+
+You can access it at http://localhost:8080.
 
 ## Event Processing Service
-This service responsible for processing commands such as `PayCommand`, `RequestCommand` and producing messages
-to the appropriate topics. It also has statistic topologies that builds activities, statistics out of topics such as
-`transactions`, and `payment-requests`
+This service responsible for processing commands such as `PayCommand`, `RequestCommand` and producing messages to the appropriate topics. 
 
-### Build the service
-All components are launched from docker stack defined in `stack.yaml`, however, `streampay-stream` and `streampay-simulation`
-services which have reference to `image: "streampay-stream:develop-SNAPSHOT"` and `image: "streampay-simulation:develop-SNAPSHOT`
-should be built locally. Please run the below command to build the images.
+It also has statistic topologies that builds activities, statistics out of topics such as `transactions`, and `payment-requests`
 
-```shell
-cd extras-containers/streampay/service
-./mvnw clean install
-cd stream
-docker build -t streampay-stream:develop-SNAPSHOT . --platform linux/x86_64
-cd ..
-cd simulation
-docker build -t streampay-simulation:develop-SNAPSHOT . --platform linux/x86_64
-```
-The above command generates `streampay-stream:develop-SNAPSHOT` and `streampay-simulation:develop-SNAPSHOT` images.
+**Docker Images: `streampay-stream` & `streampay-simulation`**
 
 ## StreamPay UI
-This app is build using `Vue.js` and `Quasar` frameworks and contains user authentication component as well
-which uses Auth0 platform.
+This app is build using `Vue.js` and `Quasar` frameworks and contains user authentication component as well which uses Auth0 platform.
 
-### Build
+App UI is available at: **[http://localhost:8081](http://localhost:8081)**
 
-```shell
-cd ../../ui/
-npm i -g @quasar/cli
-npm install
-quasar build
-cd ../../../streampay/stack/
-```
+## AsyncAPI Specifications
 
-The above command generates `dist` folder with all the necessary files to be hosted by Zilla API Gateway.
+- [`asyncapi-http.yaml`](./zilla/asyncapi-http.yaml)  
+  Defines the HTTP endpoints, SSE channels, and message payloads.
 
-## Zilla API Gateway
-Zilla API Gateway hosts both app UI and APIs. Following endpoints are configured in `zilla.jon`
+- [`asyncapi-kafka.yaml`](./zilla/asyncapi-kafka.yaml)  
+  Defines the Kafka topics for publishing/consuming bet-related messages.
+
+### Main Channels
 
 | Protocol | Method | Endpoint              | Topic                |
 |----------|--------|-----------------------|----------------------|
@@ -84,30 +118,4 @@ Zilla API Gateway hosts both app UI and APIs. Following endpoints are configured
 | HTTP     | PUT    | /current-user         | users                |
 | HTTP     | GET    | /users                | users                |
 
-
-## Launch the stack
-Run following command to launch the docker compose stack:
-
-```shell
-docker compose up -d
-```
-
-```shell
-#Output
-[+] Running 7/7
- ✔ Network stack_net0                      Created             0.2s
- ✔ Container stack-streampay-stream-1      Started             1.0s
- ✔ Container stack-zilla-1                 Started             1.0s
- ✔ Container stack-redpanda-1              Started             1.1s
- ✔ Container stack-streampay-simulation-1  Started             1.0s
- ✔ Container stack-redpanda-console-1      Started             1.5s
- ✔ Container stack-init-redpanda-1         Started             1.4s
- ```
-
-# Test
-
-Navigate to `http://localhost:8081` in the browser.
-
-![screenshot](./assets/screenshot.png)
-
-Click on login and use one of the option to authenticate. Happy testing!
+---
