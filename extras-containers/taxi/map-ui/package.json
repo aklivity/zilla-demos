@@ -51,7 +51,7 @@
     "css-loader": "^3.6.0",
     "css-minimizer-webpack-plugin": "^4.2.2",
     "dom-to-image": "^2.6.0",
-    "eslint": "^7.32.0",
+    "eslint": "^9.26.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-friendly-formatter": "^3.0.0",
     "eslint-loader": "^4.0.2",
