@@ -1,7 +1,7 @@
 name: ${NAMESPACE:-zilla-mcp-kafka-ecosystem-proxy}
 services:
   zilla:
-    image: ghcr.io/aklivity/zilla:${ZILLA_VERSION:-latest}
+    image: ghcr.io/aklivity/zilla:${ZILLA_VERSION:-2.4.0-rc34}
     restart: unless-stopped
     hostname: zilla.examples.dev
     ports:
