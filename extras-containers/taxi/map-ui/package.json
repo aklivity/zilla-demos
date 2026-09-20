@@ -136,7 +136,7 @@
     "vue-hot-reload-api": "^2.3.4",
     "vue-server-renderer": "^2.7.14",
     "vue-template-compiler": "^2.7.14",
-    "webpack-dev-server": "^4.15.1"
+    "webpack-dev-server": "^5.2.1"
   },
   "engines": {
     "node": ">=14.0.0",
