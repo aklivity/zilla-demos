@@ -69,16 +69,19 @@ const toggleAllModel = computed({
 });
 
 function uuid() {
-    let uuid = "";
-    for (let i = 0; i < 32; i++) {
-        let random = (Math.random() * 16) | 0;
-
-        if (i === 8 || i === 12 || i === 16 || i === 20)
-            uuid += "-";
-
-        uuid += (i === 12 ? 4 : i === 16 ? (random & 3) | 8 : random).toString(16);
+    if (globalThis.crypto?.randomUUID) {
+        return globalThis.crypto.randomUUID();
     }
-    return uuid;
+
+    const bytes = new Uint8Array(16);
+    globalThis.crypto.getRandomValues(bytes);
+
+    // RFC 4122 version 4 UUID
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
 function addTodo(value) {
