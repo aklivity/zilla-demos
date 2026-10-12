@@ -5,21 +5,8 @@ const vueLoaderConfig = require('./vue-loader.conf')
 const webpack = require('webpack')
 const packageJson = require("../package.json")
 
-let ORSKEY = process.env.ORSKEY
-let BITLYLOGIN = process.env.BITLYLOGIN
-let BITLYAPIKEY = process.env.BITLYAPIKEY
-
 let env = {
   PACKAGE_JSON: JSON.stringify(packageJson)
-}
-if (ORSKEY) {
-  env.ORSKEY = `"${ORSKEY}"`
-}
-if (BITLYLOGIN) {
-  env.BITLYLOGIN = `"${BITLYLOGIN}"`
-}
-if (BITLYAPIKEY) {
-  env.BITLYAPIKEY = `"${BITLYAPIKEY}"`
 }
 
 const createLintingRule = () => ({
