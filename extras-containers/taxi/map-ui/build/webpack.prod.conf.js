@@ -14,7 +14,7 @@ const env = process.env.NODE_ENV === 'testing'
   ? require('../config/dev.env')
   : require('../config/prod.env')
 
-console.log(env)
+console.log('Webpack env keys:', Object.keys(env))
 
 const webpackConfig = merge(baseWebpackConfig, {
   mode: 'production',
