@@ -1,0 +1,128 @@
+name: ${NAMESPACE:-zilla-llm-multi-provider-proxy}
+
+services:
+  tei:
+    image: ghcr.io/huggingface/text-embeddings-inference:${TEI_VERSION:-cpu-1.9}
+    restart: unless-stopped
+    hostname: tei
+    command:
+      - --model-id=sentence-transformers/all-MiniLM-L6-v2
+    volumes:
+      - tei-cache:/data
+    healthcheck:
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 180s
+      start_interval: 500ms
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:80/health"]
+
+  presidio-analyzer:
+    image: mcr.microsoft.com/presidio-analyzer:${PRESIDIO_VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      GUNICORN_CMD_ARGS: --no-control-socket
+    healthcheck:
+      interval: 10s
+      timeout: 3s
+      retries: 60
+      start_period: 30s
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/health')"]
+
+  zilla:
+    image: ghcr.io/aklivity/${ZILLA_IMAGE:-zilla}:${ZILLA_VERSION:-2.5.0-rc1}
+    restart: unless-stopped
+    hostname: zilla.examples.dev
+    ports:
+      - 7161:7161
+      - 7162:7162
+      - 7190:7190
+    healthcheck:
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 15s
+      start_interval: 250ms
+      test: ["CMD", "sh", "-c", "test -f /var/run/zilla/ready"]
+    environment:
+      ZILLA_PLUS_LICENSE_KEY: ${ZILLA_PLUS_LICENSE_KEY:-}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
+    volumes:
+      - ./etc:/etc/zilla
+    command: start -v -e
+    depends_on:
+      tei:
+        condition: service_healthy
+      presidio-analyzer:
+        condition: service_healthy
+
+  gradio:
+    build: ./client
+    restart: unless-stopped
+    ports:
+      - 7860:7860
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    healthcheck:
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+      start_interval: 500ms
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:7860')"]
+    depends_on:
+      zilla:
+        condition: service_healthy
+
+  llm-client:
+    build: ./client
+    deploy:
+      replicas: 0
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    entrypoint: ["python", "cli.py"]
+
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    restart: unless-stopped
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      zilla:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:13.2.3
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/llm-gateway.json
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    healthcheck:
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+      start_interval: 500ms
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3000/api/health"]
+    depends_on:
+      - prometheus
+
+volumes:
+  tei-cache:
+
+networks:
+  default:
+    driver: bridge
