@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: zilla
+    fallback_scrape_protocol: PrometheusText0.0.4
+    static_configs:
+      - targets: ["zilla:7190"]
