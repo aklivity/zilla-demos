@@ -28,7 +28,7 @@ Two more services back the guardrails: `tei` serves the embeddings the jailbreak
 
 - docker compose
 - An OpenAI API key and an Anthropic API key
-- Part 2 only: a Zilla Plus license key, and AWS credentials allowed to call `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream`
+- Part 2 only: a Zilla Plus license key, which you can [request here](https://www.aklivity.io/request-demo), and AWS credentials allowed to call `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream`
 
 ## Setup
 
@@ -129,7 +129,7 @@ curl -s http://localhost:7190/metrics | grep '^llm_'
 
 Part 2 runs the same `zilla` service, on the same ports, with the same `etc/zilla.yaml`. Only the image changes, and then one route and one client are added to the config.
 
-Part 2 needs Zilla Plus `2.1.0-rc2` or later, built on Zilla `2.5.0-rc1`, which includes the classifiers, guardrails, and fallback that Part 1's `zilla.yaml` uses.
+Part 2 needs Zilla Plus `2.1.0-rc3` or later, built on Zilla `2.5.0-rc4`, which includes the classifiers, guardrails, and fallback that Part 1's `zilla.yaml` uses.
 
 ### Switch to Zilla Plus
 
@@ -137,7 +137,7 @@ Uncomment the Part 2 lines in `.env` and fill them in:
 
 ```text
 ZILLA_IMAGE=zilla-plus
-ZILLA_VERSION=2.1.0-rc2
+ZILLA_VERSION=2.1.0-rc3
 ZILLA_PLUS_LICENSE_KEY=<your-zilla-plus-license-key>
 AWS_REGION=us-east-1
 AWS_ACCESS_KEY_ID=<your-aws-access-key-id>
