@@ -388,8 +388,8 @@ docker compose down -v
 
 ## References
 
-- [Zilla docs -- `mcp` bindings](https://docs.aklivity.io/zilla/latest/reference/config/bindings/mcp/README.html)
-- [Zilla docs -- `mcp-schema-registry` binding](https://docs.aklivity.io/zilla/latest/reference/config/bindings/mcp-schema-registry/README.html)
-- [Zilla docs -- `mcp-kafka-connect` binding](https://docs.aklivity.io/zilla/latest/reference/config/bindings/mcp-kafka-connect/README.html)
-- [Zilla docs -- `mcp-kafka` binding](https://docs.aklivity.io/zilla/latest/reference/config/bindings/mcp-kafka/README.html)
-- [Zilla docs -- `jwt` guard](https://docs.aklivity.io/zilla/latest/reference/config/guards/jwt.html)
+- [Zilla docs -- `mcp` bindings](https://docs.aklivity.io/latest/reference/2.x/config/bindings/mcp/)
+- [Zilla docs -- `mcp-schema-registry` binding](https://docs.aklivity.io/latest/reference/2.x/config/bindings/mcp-schema-registry/)
+- [Zilla docs -- `mcp-kafka-connect` binding](https://docs.aklivity.io/latest/reference/2.x/config/bindings/mcp-kafka-connect/)
+- [Zilla docs -- `mcp-kafka` binding](https://docs.aklivity.io/latest/reference/2.x/config/bindings/mcp-kafka/)
+- [Zilla docs -- `jwt` guard](https://docs.aklivity.io/latest/reference/2.x/config/guards/jwt.html)

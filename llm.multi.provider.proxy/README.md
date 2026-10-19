@@ -235,8 +235,7 @@ docker compose down -v
 
 ## References
 
-- [Zilla docs -- `llm` binding](https://docs.aklivity.io/zilla/latest/reference/2.x/config/bindings/llm/README.html)
-- [Zilla docs -- `llm` metrics](https://docs.aklivity.io/zilla/latest/reference/2.x/config/telemetry/metrics/llm.html)
-- [Zilla docs -- `inline` guard](https://docs.aklivity.io/zilla/latest/reference/2.x/config/guards/inline.html)
+- [Zilla docs -- AI Gateway](https://docs.aklivity.io/latest/ai-gateway/)
+- [Zilla docs -- AI Gateway metrics](https://docs.aklivity.io/latest/ai-gateway/monitoring-observability/metrics/)
+- [Zilla docs -- `inline` guard](https://docs.aklivity.io/latest/reference/2.x/config/guards/inline.html)
 - [`llm.proxy` example](https://github.com/aklivity/zilla/tree/develop/examples/llm.proxy)
-- [`llm.aws.bedrock` example](https://github.com/aklivity/zilla-plus/tree/develop/examples/llm.aws.bedrock)

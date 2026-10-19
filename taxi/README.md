@@ -1,14 +1,12 @@
 # Taxi Demo
 
-[Live Demo](https://taxi.aklivity.io/)
-
 This demo showcases the MQTT and REST protocols proxied to Kafka by Zilla. Zilla is using [OpenAPI](https://www.openapis.org/) and [AsyncAPI](https://www.asyncapi.com/) spec definitions to generate the necessary proxy config. The demo uses [Open Street Maps](https://www.openstreetmap.org/), [Open Route Service](https://openrouteservice.org/), and the [MQTT Simulator](https://github.com/DamascenoRafael/mqtt-simulator) to demonstrate a real-world taxi-hailing and location tracking service.
 
 ![zilla-taxi-demo-diagram](.assets/zilla-taxi-demo-diagram@2x.png)
 
 ## Using the Taxi UI
 
-The [Taxi Map UI](https://taxi.aklivity.io/) highlights downtown San Jose, CA bars. You can hail a taxi to simulate traveling to each destination. Some shuttle buses also run routes to the bars and make permanent round trips.
+The [Taxi Map UI](http://localhost/) highlights downtown San Jose, CA bars. You can hail a taxi to simulate traveling to each destination. Some shuttle buses also run routes to the bars and make permanent round trips.
 
 - Clicking on one of the bar markers lets you hail a taxi
 - The hailed taxi will "pick up" the passenger at the San Jose, CA Convention center
@@ -20,9 +18,9 @@ The [Taxi Map UI](https://taxi.aklivity.io/) highlights downtown San Jose, CA ba
 
 1. This demo has multiple taxi/bus IoT clients publishing location updates to Kafka using Zilla as the MQTT broker.
 1. The red Bar markers indicate destinations and the green Vehicle markers represent the taxi/bus IoT clients.
-1. Use the [Taxi Map UI](https://taxi.aklivity.io/) and click on a bar icon to "Hail a Taxi".
+1. Use the [Taxi Map UI](http://localhost/) and click on a bar icon to "Hail a Taxi".
 1. The map will show the route and the hailed taxi following it. You can use the "Clear Route" button in the sidebar or click the Aklivity logo to see the full map.
-1. Open the [Kafka UI](https://taxi.aklivity.io/kafka/ui/clusters/taxi-demo/all-topics/taxi-locations/messages?seekDirection=TAILING&seekType=LATEST) in `live` mode to see the taxi locations updates.
+1. Open the `taxi-locations` topic in the [Kafka UI](http://localhost:8080/) in `live` mode to see the taxi locations updates.
    1. Notice the MQTT topic includes the bar name in the key: `taxi/Fox_Tale_Ferm-86439137/location`.
    1. Each message is an individual location update with a new Lat Long coord.
    1. Once the taxi gets to the destination, it will stop sending new updates.
