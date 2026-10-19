@@ -1,0 +1,671 @@
+openapi: 3.1.0
+info:
+  title: GitHub (mock)
+  version: 1.0.0
+servers:
+  - url: https://api.github.com
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: jwt
+paths:
+  /repos/{owner}/{repo}:
+    get:
+      operationId: get_repo
+      summary: Get a repository by owner and name
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  full_name:
+                    type: string
+                  description:
+                    type: string
+                  homepage:
+                    type: string
+                  private:
+                    type: boolean
+                  default_branch:
+                    type: string
+  /repos/{owner}/{repo}/branches:
+    get:
+      operationId: list_branches
+      summary: List branches in a repository
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    protected:
+                      type: boolean
+  /repos/{owner}/{repo}/issues:
+    get:
+      operationId: list_issues
+      summary: List issues in a repository
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [open, closed, all]
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    number:
+                      type: integer
+                    title:
+                      type: string
+                    state:
+                      type: string
+                    body:
+                      type: string
+    post:
+      operationId: create_issue
+      summary: Create an issue in a repository
+      security:
+        - bearerAuth: ["github:issues:write"]
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+      responses:
+        "201":
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  number:
+                    type: integer
+                  title:
+                    type: string
+                  state:
+                    type: string
+                  body:
+                    type: string
+  /repos/{owner}/{repo}/issues/{number}:
+    get:
+      operationId: get_issue
+      summary: Get an issue by number
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  number:
+                    type: integer
+                  title:
+                    type: string
+                  state:
+                    type: string
+                  body:
+                    type: string
+    patch:
+      operationId: update_issue
+      summary: Update an issue's title, body, or state
+      security:
+        - bearerAuth: ["github:issues:write"]
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+                state:
+                  type: string
+                  enum: [open, closed]
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  number:
+                    type: integer
+                  title:
+                    type: string
+                  state:
+                    type: string
+                  body:
+                    type: string
+  /repos/{owner}/{repo}/issues/{number}/comments:
+    get:
+      operationId: list_issue_comments
+      summary: List comments on an issue
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    body:
+                      type: string
+                    user:
+                      type: string
+    post:
+      operationId: create_issue_comment
+      summary: Create a comment on an issue
+      security:
+        - bearerAuth: ["github:issues:write"]
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body:
+                  type: string
+      responses:
+        "201":
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  body:
+                    type: string
+                  user:
+                    type: string
+  /repos/{owner}/{repo}/pulls:
+    post:
+      operationId: create_pr
+      summary: Create a pull request to merge one branch into another
+      security:
+        - bearerAuth: ["github:pr:write"]
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, head, base]
+              properties:
+                title:
+                  type: string
+                head:
+                  type: string
+                base:
+                  type: string
+      responses:
+        "201":
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  number:
+                    type: integer
+                  html_url:
+                    type: string
+                  state:
+                    type: string
+                  title:
+                    type: string
+    get:
+      operationId: list_pulls
+      summary: List pull requests in a repository
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [open, closed, merged, all]
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    number:
+                      type: integer
+                    html_url:
+                      type: string
+                    state:
+                      type: string
+                    title:
+                      type: string
+  /repos/{owner}/{repo}/pulls/{number}:
+    get:
+      operationId: get_pull_by_number
+      summary: Get a pull request by owner, repo, and number
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  number:
+                    type: integer
+                  html_url:
+                    type: string
+                  state:
+                    type: string
+                  title:
+                    type: string
+    patch:
+      operationId: update_pull
+      summary: Update a pull request's title, body, or state
+      security:
+        - bearerAuth: ["github:pr:write"]
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+                state:
+                  type: string
+                  enum: [open, closed]
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  number:
+                    type: integer
+                  html_url:
+                    type: string
+                  state:
+                    type: string
+                  title:
+                    type: string
+  /repos/{owner}/{repo}/pulls/{number}/merge:
+    put:
+      operationId: merge_pull
+      summary: Merge a pull request
+      security:
+        - bearerAuth: ["github:pr:write"]
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                commit_message:
+                  type: string
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  merged:
+                    type: boolean
+                  message:
+                    type: string
+                  sha:
+                    type: string
+  /repos/{owner}/{repo}/pulls/{number}/files:
+    get:
+      operationId: list_pull_files
+      summary: List the files changed by a pull request
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    filename:
+                      type: string
+                    additions:
+                      type: integer
+                    deletions:
+                      type: integer
+                    status:
+                      type: string
+  /repos/{owner}/{repo}/pulls/{number}/reviews:
+    get:
+      operationId: list_pull_reviews
+      summary: List reviews on a pull request
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    body:
+                      type: string
+                    event:
+                      type: string
+                    user:
+                      type: string
+    post:
+      operationId: create_pull_review
+      summary: Create a review on a pull request
+      security:
+        - bearerAuth: ["github:pr:write"]
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [event]
+              properties:
+                body:
+                  type: string
+                event:
+                  type: string
+                  enum: [APPROVE, REQUEST_CHANGES, COMMENT]
+      responses:
+        "201":
+          description: created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  body:
+                    type: string
+                  event:
+                    type: string
+                  user:
+                    type: string

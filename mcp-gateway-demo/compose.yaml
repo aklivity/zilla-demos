@@ -1,0 +1,144 @@
+name: ${NAMESPACE:-zilla-mcp-proxy}
+services:
+  zilla:
+    image: ghcr.io/aklivity/zilla:${ZILLA_VERSION:-2.0.0}
+    restart: unless-stopped
+    hostname: zilla.examples.dev
+    ports:
+      - 7114:7114
+      - 7190:7190
+      # - 4444:4444
+    healthcheck:
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 15s
+      test: ["CMD", "sh", "-c", "test -f /var/run/zilla/ready"]
+    environment:
+      ZILLA_INCUBATOR_ENABLED: "true"
+      KAFKA_BOOTSTRAP_SERVER: kafka.examples.dev:29092
+      MCP_CACHE_HYDRATION_JWT: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImV4YW1wbGUifQ.eyJhdWQiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSIsImV4cCI6NDkzODc0OTIyMCwiaXNzIjoiaHR0cHM6Ly9hdXRoLmV4YW1wbGUuY29tIiwic2NvcGUiOiJnaXRodWI6dG9vbHMga2Fma2E6dG9vbHMifQ.keofa9mmzo42St7sGCy8VbAWTDO9CWwuaVELGFxI4LAurSe_qShIbgqglNNvDUi-AAsBzieHl4lJVElEpJRRfCKgrtmM2AyniIWytsIXKlEwVnS52XfZbzfykiGRDUo4HwVNMtlFwWNu17Yfh8QnVgpjN9mnjlF1FAM1UjDP4mZICjHlSYtAAp4t6zUx_-g-A0Bi-N4D14XUnz6fedo9__VzDjJjrhzAohXxMqOCnJ5GkoJekc1_jWxcR7BqiMvnuldcFoVU1sSQ4Tsh7kaNMNCu1_URYs3pX9A9ZH4YzVphTf3LIMKZr2UHytNjvgJ7dMhgvVhK43X0PSMWWVNE0Q"
+    volumes:
+      - ./etc:/etc/zilla
+    command: start -v -e
+    depends_on:
+      everything:
+        condition: service_healthy
+      ghapi:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+
+  everything:
+    image: node:20-alpine
+    hostname: everything
+    restart: unless-stopped
+    command: ["npx", "-y", "@modelcontextprotocol/server-everything", "streamableHttp"]
+    environment:
+      PORT: "3001"
+    healthcheck:
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      test: ["CMD", "nc", "-z", "127.0.0.1", "3001"]
+
+  # Mock GitHub REST API backing the mcp_openapi "github" toolkit.
+  ghapi:
+    image: node:20-alpine
+    hostname: ghapi
+    restart: unless-stopped
+    working_dir: /app
+    command: ["sh", "-c", "npm install --no-audit --no-fund --silent && node server.mjs"]
+    environment:
+      PORT: "4001"
+    volumes:
+      - ./ghapi:/app
+    healthcheck:
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      test: ["CMD", "nc", "-z", "127.0.0.1", "4001"]
+
+  # Real single-node Kafka broker (KRaft mode) backing the mcp_kafka "kafka" toolkit.
+  kafka:
+    image: apache/kafka:4.1.1
+    restart: unless-stopped
+    hostname: kafka.examples.dev
+    ports:
+      - 9092:9092
+    healthcheck:
+      test: /opt/kafka/bin/kafka-cluster.sh cluster-id --bootstrap-server kafka.examples.dev:29092 || exit 1
+      interval: 1s
+      timeout: 60s
+      retries: 60
+    environment:
+      KAFKA_NODE_ID: "1"
+      KAFKA_BROKER_ID: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@127.0.0.1:9093"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_LISTENERS: "CLIENT://0.0.0.0:9092,INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093"
+      KAFKA_ADVERTISED_LISTENERS: "CLIENT://localhost:9092,INTERNAL://kafka.examples.dev:29092"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CLIENT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_LOG_DIRS: "/tmp/logs"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+  # One-shot topic setup; auto-create also covers this, but an explicit topic
+  # documents intent the same way every other *.kafka.* example in this repo does.
+  kafka-init:
+    image: apache/kafka:4.1.1
+    user: root
+    depends_on:
+      kafka:
+        condition: service_healthy
+        restart: true
+    deploy:
+      restart_policy:
+        condition: none
+        max_attempts: 0
+    entrypoint: ["/bin/sh", "-c"]
+    environment:
+      KAFKA_BOOTSTRAP_SERVER: kafka.examples.dev:29092
+    command:
+      - |
+        echo "Creating kafka topic";
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --create --if-not-exists --topic orders
+        echo "Successfully created the following topics:";
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server $${KAFKA_BOOTSTRAP_SERVER} --list --exclude-internal;
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:v1.0.0
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    depends_on:
+      kafka:
+        condition: service_healthy
+        restart: true
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka.examples.dev:29092
+
+  # Mints JWTs for the authn_jwt guard. Run on demand, e.g.:
+  #   docker compose run --rm jwt-cli encode --alg RS256 --kid example \
+  #       --iss https://auth.example.com --aud https://api.example.com \
+  #       --exp=+1d --no-iat --payload "scope=github:tools" --secret @/private.pem
+  jwt-cli:
+    image: bitnamilegacy/jwt-cli
+    stdin_open: true
+    tty: true
+    profiles:
+      - on-demand
+    volumes:
+      - ./private.pem:/private.pem
+
+networks:
+  default:
+    driver: bridge

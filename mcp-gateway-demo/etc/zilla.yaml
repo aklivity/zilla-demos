@@ -1,0 +1,319 @@
+---
+name: example
+stores:
+  cache:
+    type: memory
+guards:
+  authn_jwt:
+    type: jwt
+    options:
+      issuer: https://auth.example.com
+      audience: https://api.example.com
+      keys:
+        - kty: RSA
+          n: lphdEcMpCplK5UYAhxPnF/kuE8dL9dHznfb8z124/vgI3CGDB9AQCGzcNOYOT4h9q+M9nKidcWnPyyIZ/GrGa7YWPQusckpPbWOaNMxjwRZ799TVHVV2xdJxige5C1lMpunho/vDlnUh1UmTsPXOmdWR3KS/+uFZzVAjNaFphpnl/1nGZAjtje5ynf/UHZ2rZPMUL6gkPqJ3kgWZugaCe0G8QWaETn1sLNInb93g5yVQCmF3KSg+xsWUIG5OYvVrKLvNNXgKOWyFbTR5Ium63kM6Rm2d3YoX5V0e7ucu1Hj52QkF0pCVXwOfqeYwkQ2O3m7HXbDVcMQLVanAmfFj2w==
+          e: AQAB
+          alg: RS256
+          kid: example
+catalogs:
+  github_catalog:
+    type: filesystem
+    options:
+      subjects:
+        github:
+          path: specs/github.openapi.yaml
+bindings:
+  north_tcp_server:
+    type: tcp
+    kind: server
+    options:
+      host: 0.0.0.0
+      port:
+        - 7114
+    routes:
+      - when:
+          - port: 7114
+        exit: north_http_server
+  north_http_server:
+    type: http
+    kind: server
+    options:
+      access-control:
+        policy: cross-origin
+    routes:
+      - when:
+          - headers:
+              :scheme: http
+              :path: /mcp
+        exit: north_mcp_server
+  north_mcp_server:
+    type: mcp
+    kind: server
+    options:
+      authorization:
+        authn_jwt:
+          credentials: "Bearer {credentials}"
+    exit: north_mcp_proxy
+    telemetry:
+      metrics:
+        - mcp.*
+      attributes:
+        method: ${mcp.method}
+        tool: ${mcp.tool}
+        outcome: ${mcp.outcome}
+  north_mcp_proxy:
+    type: mcp
+    kind: proxy
+    options:
+      cache:
+        store: cache
+        ttl: PT5M
+        # warms the cache for every guarded toolkit route below, independent of
+        # any real caller's own token -- tools/list is served from this cache
+        # and filtered per caller by each tool's own security scheme (see
+        # "Toolkit access vs per-tool access" in the README), so hydration
+        # needs a credential broad enough to see everything once, up front,
+        # not to grant any real caller access. Every guarded route below falls
+        # back to this same shared credential for its own hydration south
+        # connection unless it configures its own routes[].with.cache.credentials
+        # override, so one broad credential is enough here. This is the raw
+        # JWT, not a "Bearer "-prefixed header value -- it's handed directly to
+        # guard.reauthorize(), not extracted from a header. Its scope claim must
+        # include every guarded toolkit route's own toolkit-level scope below --
+        # a toolkit added without updating this credential silently never
+        # hydrates: the guard rejects the hydration stream, tools/list never
+        # shows it (not even as a cold/searchable tool), yet tools/call still
+        # works fine since real calls use the caller's own JWT, not this one
+        authorization:
+          authn_jwt:
+            credentials: ${{env.MCP_CACHE_HYDRATION_JWT}}
+        # a fixed handful of frequently used tools stay eagerly listed; every other
+        # tool across every toolkit (the "everything" reference server's dozen-plus
+        # demo tools, most visibly) is omitted from tools/list -- because the search
+        # tool below exists, "omitted" means discoverable by keyword, not gone: a
+        # cold tool remains directly callable by name, exactly like an eager one
+        tools:
+          eager:
+            policy: explicit
+            match:
+              - everything__echo
+              - github__create_pr
+              - kafka__produce_message
+              - kafka__consume_messages
+          search:
+            toolkit: zilla
+    routes:
+      - exit: south_mcp_client_everything
+        when:
+          - toolkit: everything
+      - exit: south_mcp_openapi_github
+        when:
+          - toolkit: github
+        guarded:
+          authn_jwt:
+            - github:tools
+      - exit: south_mcp_kafka_client
+        when:
+          - toolkit: kafka
+        guarded:
+          authn_jwt:
+            - kafka:tools
+  south_mcp_client_everything:
+    type: mcp
+    kind: client
+    options:
+      server: http://everything:3001/mcp
+    exit: sys:http_client
+  south_mcp_openapi_github:
+    type: mcp-openapi
+    kind: client
+    options:
+      specs:
+        github:
+          catalog:
+            github_catalog:
+              subject: github
+          # the OpenAPI document declares the public https://api.github.com
+          # server; this overrides the actual outbound target to the local mock
+          server: http://ghapi:4001
+          security:
+            bearerAuth: authn_jwt
+      # forwards this session's own JWT and an extracted identity claim
+      # upstream, same options.authorization.credentials.headers shape
+      # mcp_http uses -- ghapi echoes x-user-identity back as opened_by,
+      # making the forwarding directly observable
+      authorization:
+        authn_jwt:
+          credentials:
+            headers:
+              authorization: "Bearer {credentials}"
+              x-user-identity: "{identity}"
+      tools:
+        list_branches:
+          description: List branches in a repository.
+        list_issues:
+          description: List issues in a repository.
+        create_issue:
+          description: Create an issue in a repository.
+          summary: "Created issue #${result.number}: ${result.title}"
+        update_issue:
+          description: Update an issue's title, body, or state.
+        list_issue_comments:
+          description: List comments on an issue.
+        create_issue_comment:
+          description: Create a comment on an issue.
+        create_pr:
+          description: Create a pull request to merge one branch into another.
+          summary: "Created pull request #${result.number}: ${result.title}"
+        list_pulls:
+          description: List pull requests in a repository.
+        update_pull:
+          description: Update a pull request's title, body, or state.
+        merge_pull:
+          description: Merge a pull request.
+          summary: "${result.message}"
+        list_pull_files:
+          description: List the files changed by a pull request.
+        list_pull_reviews:
+          description: List reviews on a pull request.
+        create_pull_review:
+          description: Create a review on a pull request.
+      resources:
+        repo_by_name:
+          description: A repository by owner and name.
+          mimeType: application/json
+        issue_by_number:
+          description: An issue by owner, repo, and number.
+          mimeType: application/json
+        pull_by_number:
+          description: A pull request by owner, repo, and number.
+          mimeType: application/json
+    routes:
+      # repos
+      - when:
+          - resource: repo_by_name
+        with:
+          spec: github
+          operation: get_repo
+      - when:
+          - tool: list_branches
+        with:
+          spec: github
+          operation: list_branches
+      # issues
+      - when:
+          - tool: list_issues
+        with:
+          spec: github
+          operation: list_issues
+      - when:
+          - tool: create_issue
+        with:
+          spec: github
+          operation: create_issue
+      - when:
+          - resource: issue_by_number
+        with:
+          spec: github
+          operation: get_issue
+      - when:
+          - tool: update_issue
+        with:
+          spec: github
+          operation: update_issue
+      - when:
+          - tool: list_issue_comments
+        with:
+          spec: github
+          operation: list_issue_comments
+      - when:
+          - tool: create_issue_comment
+        with:
+          spec: github
+          operation: create_issue_comment
+      # pulls
+      - when:
+          - tool: create_pr
+        with:
+          spec: github
+          operation: create_pr
+      - when:
+          - tool: list_pulls
+        with:
+          spec: github
+          operation: list_pulls
+      # GET with three path params -> a dynamic resource template
+      # ("/repos/{owner}/{repo}/pulls/{number}")
+      - when:
+          - resource: pull_by_number
+        with:
+          spec: github
+          operation: get_pull_by_number
+      - when:
+          - tool: update_pull
+        with:
+          spec: github
+          operation: update_pull
+      - when:
+          - tool: merge_pull
+        with:
+          spec: github
+          operation: merge_pull
+      - when:
+          - tool: list_pull_files
+        with:
+          spec: github
+          operation: list_pull_files
+      - when:
+          - tool: list_pull_reviews
+        with:
+          spec: github
+          operation: list_pull_reviews
+      - when:
+          - tool: create_pull_review
+        with:
+          spec: github
+          operation: create_pull_review
+  south_mcp_kafka_client:
+    type: mcp-kafka
+    kind: client
+    options:
+      servers:
+        - ${{env.KAFKA_BOOTSTRAP_SERVER}}
+    # tool + topics together restrict each route to an allow-list of topics
+    # (exact names or *-glob patterns), not just a tool-name dispatch; a
+    # produce_message/consume_messages call naming any other topic has no
+    # matching route and is rejected
+    routes:
+      - when:
+          - tool: produce_message
+            topics: [orders]
+      - when:
+          - tool: consume_messages
+            topics: [orders]
+telemetry:
+  metrics:
+    - mcp.initialize
+    - mcp.initialize.duration
+    - mcp.tools.list
+    - mcp.tools.list.duration
+    - mcp.tools.call
+    - mcp.tools.call.duration
+    - mcp.prompts.list
+    - mcp.prompts.list.duration
+    - mcp.prompts.get
+    - mcp.prompts.get.duration
+    - mcp.resources.list
+    - mcp.resources.list.duration
+    - mcp.resources.read
+    - mcp.resources.read.duration
+  exporters:
+    stdout_logs_exporter:
+      type: stdout
+    prometheus_exporter:
+      type: prometheus
+      options:
+        endpoints:
+          - scheme: http
+            port: 7190
+            path: /metrics
