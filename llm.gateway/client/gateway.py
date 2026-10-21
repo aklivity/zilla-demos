@@ -3,18 +3,37 @@ import os
 import time
 
 import anthropic
+import boto3
+import botocore.config
+import botocore.exceptions
+import httpx
 import openai
+from google import genai
+from google.genai import errors as genai_errors
+from google.genai import types as genai_types
 
 OPENAI_BASE_URL = os.environ.get("ZILLA_OPENAI_BASE_URL", "http://zilla:7161/v1")
 ANTHROPIC_BASE_URL = os.environ.get("ZILLA_ANTHROPIC_BASE_URL", "http://zilla:7162")
+GEMINI_BASE_URL = os.environ.get("ZILLA_GEMINI_BASE_URL", "http://zilla:7163")
+BEDROCK_BASE_URL = os.environ.get("ZILLA_BEDROCK_BASE_URL", "http://zilla:7164")
 
 SDK_OPENAI = "OpenAI SDK"
 SDK_ANTHROPIC = "Anthropic SDK"
-SDKS = [SDK_OPENAI, SDK_ANTHROPIC]
+SDK_GEMINI = "Gemini SDK"
+SDK_BEDROCK = "AWS SDK (Bedrock)"
+SDKS = [SDK_OPENAI, SDK_ANTHROPIC, SDK_GEMINI, SDK_BEDROCK]
+
+SDK_INFO = {
+    SDK_OPENAI: ("openai", "OpenAI API", "7161", OPENAI_BASE_URL),
+    SDK_ANTHROPIC: ("anthropic", "Anthropic API", "7162", ANTHROPIC_BASE_URL),
+    SDK_GEMINI: ("gemini", "Gemini API", "7163", GEMINI_BASE_URL),
+    SDK_BEDROCK: ("aws-bedrock", "Bedrock API", "7164", BEDROCK_BASE_URL),
+}
 
 PROVIDERS = [
     ("gpt-", "OpenAI", "openai", "OPENAI_API_KEY"),
     ("claude-", "Anthropic", "anthropic", "ANTHROPIC_API_KEY"),
+    ("gemini-", "Gemini", "gemini", "GEMINI_API_KEY"),
     ("anthropic.", "AWS Bedrock", "aws-bedrock", None),
     ("amazon.", "AWS Bedrock", "aws-bedrock", None),
     ("us.anthropic.", "AWS Bedrock", "aws-bedrock", None),
@@ -44,6 +63,16 @@ ANTHROPIC_TOOLS = [{
     },
 }]
 
+GEMINI_TOOLS = [genai_types.Tool(function_declarations=[genai_types.FunctionDeclaration(
+    name="get_weather",
+    description="Get the current weather for a city",
+    parameters_json_schema=ANTHROPIC_TOOLS[0]["input_schema"])])]
+
+BEDROCK_TOOLS = {"tools": [{"toolSpec": {
+    "name": "get_weather",
+    "description": "Get the current weather for a city",
+    "inputSchema": {"json": ANTHROPIC_TOOLS[0]["input_schema"]}}}]}
+
 
 def provider_for(model):
     for prefix, name, dialect, key_env in PROVIDERS:
@@ -52,9 +81,9 @@ def provider_for(model):
     return None, None, None
 
 
-def api_key_for(model, overrides):
+def api_key_for(sdk, model, overrides):
     _, dialect, key_env = provider_for(model)
-    if dialect == "aws-bedrock":
+    if sdk == SDK_BEDROCK or dialect == "aws-bedrock":
         return "unused"
     if key_env is None:
         return None
@@ -65,9 +94,7 @@ def route_summary(sdk, model):
     name, dialect, _ = provider_for(model)
     if name is None:
         return f"`{model}` matches no route in `zilla.yaml`, so Zilla rejects it."
-    sdk_dialect = "openai" if sdk == SDK_OPENAI else "anthropic"
-    port = "7161" if sdk == SDK_OPENAI else "7162"
-    api = "OpenAI API" if sdk == SDK_OPENAI else "Anthropic API"
+    sdk_dialect, api, port, _ = SDK_INFO[sdk]
     translated = "translated" if dialect != sdk_dialect else "no translation"
     return f"{api} → Zilla :{port} → {name} ({translated})"
 
@@ -75,7 +102,7 @@ def route_summary(sdk, model):
 def chat(sdk, model, prompt, stream, tools, max_tokens, overrides=None):
     model = (model or "").strip()
     route = route_summary(sdk, model)
-    key = api_key_for(model, overrides)
+    key = api_key_for(sdk, model, overrides)
     if provider_for(model)[0] is not None and not key:
         _, _, key_env = provider_for(model)
         yield "", f"**Route:** {route}  \n**Error:** set `{key_env}` or enter it under API keys."
@@ -87,15 +114,24 @@ def chat(sdk, model, prompt, stream, tools, max_tokens, overrides=None):
     started = time.monotonic()
     text, usage = "", None
     try:
-        calls = _openai_chat if sdk == SDK_OPENAI else _anthropic_chat
+        calls = {SDK_OPENAI: _openai_chat, SDK_ANTHROPIC: _anthropic_chat,
+                 SDK_GEMINI: _gemini_chat, SDK_BEDROCK: _bedrock_chat}[sdk]
         for text, usage in calls(model, prompt, stream, tools, max_tokens, key or "none"):
             yield text, _meta(route, usage, started, done=False)
         yield text, _meta(route, usage, started, done=True)
     except (openai.APIStatusError, anthropic.APIStatusError) as ex:
         yield text, f"**Route:** {route}  \n**Error {ex.status_code}:** {_error_message(ex)}"
-    except (openai.APIConnectionError, anthropic.APIConnectionError):
-        base = OPENAI_BASE_URL if sdk == SDK_OPENAI else ANTHROPIC_BASE_URL
-        hint = " AWS Bedrock models need Part 2 (Zilla Plus) first." if provider_for(model)[1] == "aws-bedrock" else ""
+    except genai_errors.APIError as ex:
+        yield text, f"**Route:** {route}  \n**Error {ex.code}:** {ex.message or ex}"
+    except botocore.exceptions.ClientError as ex:
+        status = ex.response.get("ResponseMetadata", {}).get("HTTPStatusCode", "")
+        yield text, f"**Route:** {route}  \n**Error {status}:** {ex.response.get('Error', {}).get('Message') or ex}"
+    except (openai.APIConnectionError, anthropic.APIConnectionError, httpx.TransportError,
+            botocore.exceptions.EndpointConnectionError, botocore.exceptions.ConnectionClosedError):
+        base = SDK_INFO[sdk][3]
+        hint = ""
+        if sdk == SDK_BEDROCK or provider_for(model)[1] == "aws-bedrock":
+            hint = " The AWS SDK and AWS Bedrock models need Part 2 (Zilla Plus) first."
         yield text, (f"**Route:** {route}  \n**Error:** no response from Zilla at `{base}`. "
                      f"Check that Zilla is running and that `{model}` matches a route in `zilla.yaml`.{hint}")
 
@@ -162,6 +198,76 @@ def _anthropic_chat(model, prompt, stream, tools, max_tokens, key):
             yield text, None
         final = events.get_final_message()
     yield _anthropic_text(final), (final.usage.input_tokens, final.usage.output_tokens)
+
+
+def _gemini_chat(model, prompt, stream, tools, max_tokens, key):
+    client = genai.Client(api_key=key, http_options=genai_types.HttpOptions(
+        base_url=GEMINI_BASE_URL, api_version="v1beta", timeout=120_000,
+        retry_options=genai_types.HttpRetryOptions(attempts=1)))
+    config = genai_types.GenerateContentConfig(max_output_tokens=max_tokens)
+    if tools:
+        config.tools = GEMINI_TOOLS
+        config.automatic_function_calling = genai_types.AutomaticFunctionCallingConfig(disable=True)
+
+    if not stream:
+        resp = client.models.generate_content(model=model, contents=prompt, config=config)
+        calls = [(c.name, json.dumps(c.args)) for c in resp.function_calls or []]
+        yield _with_tool_calls(_gemini_text(resp), calls), _gemini_usage(resp)
+        return
+
+    text, usage = "", None
+    for chunk in client.models.generate_content_stream(model=model, contents=prompt, config=config):
+        usage = _gemini_usage(chunk) or usage
+        text += _gemini_text(chunk)
+        yield text, usage
+    yield text, usage
+
+
+def _gemini_text(resp):
+    return "".join(part.text for candidate in resp.candidates or []
+                   for part in ((candidate.content.parts if candidate.content else None) or [])
+                   if part.text and not part.thought)
+
+
+def _gemini_usage(resp):
+    meta = resp.usage_metadata
+    if not meta or not meta.prompt_token_count:
+        return None
+    return meta.prompt_token_count, (meta.candidates_token_count or 0) + (meta.thoughts_token_count or 0)
+
+
+def _bedrock_chat(model, prompt, stream, tools, max_tokens, key):
+    client = boto3.client(
+        "bedrock-runtime", endpoint_url=BEDROCK_BASE_URL, region_name="us-east-1",
+        aws_access_key_id="zilla", aws_secret_access_key="zilla",
+        config=botocore.config.Config(retries={"max_attempts": 1}, read_timeout=120, connect_timeout=5))
+    kwargs = {
+        "modelId": model,
+        "messages": [{"role": "user", "content": [{"text": prompt}]}],
+        "inferenceConfig": {"maxTokens": max_tokens},
+    }
+    if tools:
+        kwargs["toolConfig"] = BEDROCK_TOOLS
+
+    if not stream:
+        resp = client.converse(**kwargs)
+        content = resp.get("output", {}).get("message", {}).get("content", [])
+        text = "".join(block.get("text", "") for block in content)
+        calls = [(b["toolUse"]["name"], json.dumps(b["toolUse"].get("input"))) for b in content if "toolUse" in b]
+        usage = resp.get("usage")
+        yield _with_tool_calls(text, calls), ((usage.get("inputTokens"), usage.get("outputTokens")) if usage else None)
+        return
+
+    text, usage = "", None
+    for event in client.converse_stream(**kwargs)["stream"]:
+        delta = event.get("contentBlockDelta", {}).get("delta", {})
+        if delta.get("text"):
+            text += delta["text"]
+        metadata = event.get("metadata", {}).get("usage")
+        if metadata:
+            usage = (metadata.get("inputTokens"), metadata.get("outputTokens"))
+        yield text, usage
+    yield text, usage
 
 
 def _anthropic_text(message):

@@ -1,7 +1,9 @@
 import os
 import sys
 
-from gateway import SDK_ANTHROPIC, SDK_OPENAI, chat
+from gateway import SDK_ANTHROPIC, SDK_BEDROCK, SDK_GEMINI, SDK_OPENAI, chat
+
+SDK_NAMES = {"openai": SDK_OPENAI, "anthropic": SDK_ANTHROPIC, "gemini": SDK_GEMINI, "bedrock": SDK_BEDROCK}
 
 
 def flag(name):
@@ -9,7 +11,7 @@ def flag(name):
 
 
 def main():
-    sdk = SDK_ANTHROPIC if os.environ.get("SDK", "openai").lower() == "anthropic" else SDK_OPENAI
+    sdk = SDK_NAMES.get(os.environ.get("SDK", "openai").lower(), SDK_OPENAI)
     model = os.environ.get("MODEL", "gpt-4o-mini")
     tools = flag("TOOLS")
     default_prompt = "What is the weather in Paris?" if tools else "In one sentence, what is an LLM gateway?"
