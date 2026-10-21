@@ -1,5 +1,5 @@
 ---
-name: llm-multi-provider-proxy
+name: llm-gateway
 telemetry:
   metrics:
     - llm.active.requests

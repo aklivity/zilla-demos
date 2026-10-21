@@ -1,4 +1,4 @@
-# llm.multi.provider.proxy
+# llm.gateway
 
 An LLM gateway for OpenAI, Anthropic and AWS Bedrock. One Zilla gateway accepts OpenAI API requests on port `7161` and Anthropic API requests on port `7162`, routes each request to a provider by the model it asks for, and translates between the OpenAI and Anthropic APIs when the client and the provider speak different ones. Your own API keys pass through to the provider, and none are stored in `zilla.yaml`.
 

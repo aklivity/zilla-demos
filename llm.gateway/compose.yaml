@@ -1,4 +1,4 @@
-name: ${NAMESPACE:-zilla-llm-multi-provider-proxy}
+name: ${NAMESPACE:-zilla-llm-gateway}
 
 services:
   tei:
