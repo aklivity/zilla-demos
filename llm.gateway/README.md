@@ -81,6 +81,8 @@ Open the Gradio compare app at [http://localhost:7860](http://localhost:7860).
 
 4. **Gemini.** Pick the Gemini SDK and `gemini-3.5-flash-lite`, and the request reaches Gemini in its own API. With a `gpt-*` model, the Gemini SDK reaches OpenAI, and the reply comes back in Gemini format. The OpenAI and Anthropic SDKs can ask for a `gemini-*` model too, with your Gemini key.
 
+   <img src=".assets/gemini_sdk_to_gemini.png" alt="Gemini SDK to gemini-3.5-flash-lite, routed to Gemini with no translation" width="720">
+
 5. **Streaming.** Turn on Stream and repeat any step. Tokens arrive as the provider generates them, in the format of the SDK you picked.
 
 6. **Compare.** Open the Compare tab to send one prompt to a `gpt-*` and a `claude-*` model side by side through the same OpenAI SDK, with the route, token usage and time of each.
@@ -266,8 +268,6 @@ A request from the AWS SDK is signed for AWS rather than carrying a provider API
 
 In the Gradio app, pick the OpenAI SDK and a Bedrock model ID, such as `amazon.nova-micro-v1:0` or `us.anthropic.claude-haiku-4-5-20251001-v1:0`. Newer models are called through a cross-region inference profile ID, such as `us.anthropic.…`, which the `us.*` patterns route. The request goes to the same `7161` endpoint, and the reply comes back in OpenAI format, streamed or not.
 
-<img src=".assets/aws_bedrock.gif" alt="OpenAI SDK streaming a reply from amazon.nova-micro-v1:0 on AWS Bedrock through Zilla Plus" width="720">
-
 From the command line:
 
 ```bash
@@ -276,7 +276,11 @@ docker compose run --rm \
     llm-client
 ```
 
-To call Zilla with the AWS SDK, pick the AWS SDK (Bedrock) in the Gradio app. With a Bedrock model ID, the request goes to Bedrock. With `gpt-4o-mini`, `claude-haiku-4-5` or `gemini-3.5-flash-lite`, Zilla translates the Converse request to that provider's API, and the reply comes back in Bedrock format. `claude-primary` falls back to `claude-haiku-4-5`, and the Part 1 guardrails reject the same prompts. From the command line:
+To call Zilla with the AWS SDK, pick the AWS SDK (Bedrock) in the Gradio app. With a Bedrock model ID, the request goes to Bedrock. With `gpt-4o-mini`, `claude-haiku-4-5` or `gemini-3.5-flash-lite`, Zilla translates the Converse request to that provider's API, and the reply comes back in Bedrock format. `claude-primary` falls back to `claude-haiku-4-5`, and the Part 1 guardrails reject the same prompts.
+
+<img src=".assets/aws_bedrock.gif" alt="AWS SDK streaming a reply from amazon.nova-micro-v1:0 on AWS Bedrock through the Zilla Plus Bedrock API on port 7164" width="720">
+
+From the command line:
 
 ```bash
 docker compose run --rm \
