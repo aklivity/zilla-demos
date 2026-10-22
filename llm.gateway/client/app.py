@@ -2,20 +2,21 @@ import os
 
 import gradio as gr
 
-from gateway import ANTHROPIC_BASE_URL, OPENAI_BASE_URL, SDK_OPENAI, SDKS, chat
+from gateway import ANTHROPIC_BASE_URL, BEDROCK_BASE_URL, GEMINI_BASE_URL, OPENAI_BASE_URL, SDK_OPENAI, SDKS, chat
 
 MODELS = [m.strip() for m in os.environ.get(
-    "MODELS", "gpt-4o-mini,claude-haiku-4-5,claude-primary,us.anthropic.claude-haiku-4-5-20251001-v1:0,amazon.nova-micro-v1:0").split(",") if m.strip()]
+    "MODELS", "gpt-4o-mini,claude-haiku-4-5,gemini-3.5-flash-lite,claude-primary,us.anthropic.claude-haiku-4-5-20251001-v1:0,amazon.nova-micro-v1:0").split(",") if m.strip()]
 
 INTRO = f"""
 # Zilla LLM Gateway
 
 
-Send the same prompt through Zilla with the OpenAI or Anthropic SDK.
-Zilla routes each request by model (`gpt-*` to OpenAI, `claude-*` to Anthropic,
+Send the same prompt through Zilla with the OpenAI, Anthropic or Gemini SDK, or with the AWS SDK in Part 2.
+Zilla routes each request by model (`gpt-*` to OpenAI, `claude-*` to Anthropic, `gemini-*` to Gemini,
 `anthropic.*`, `amazon.*`, `us.anthropic.*` and `us.amazon.*` to AWS Bedrock with Zilla Plus) and translates between APIs when needed.
 
-This app calls Zilla at `{OPENAI_BASE_URL}` (OpenAI SDK) and `{ANTHROPIC_BASE_URL}` (Anthropic SDK).
+This app calls Zilla at `{OPENAI_BASE_URL}` (OpenAI SDK), `{ANTHROPIC_BASE_URL}` (Anthropic SDK),
+`{GEMINI_BASE_URL}` (Gemini SDK) and `{BEDROCK_BASE_URL}` (AWS SDK).
 """
 
 
@@ -23,16 +24,16 @@ def key_placeholder(env):
     return f"Using ${env}" if os.environ.get(env) else f"${env} is not set"
 
 
-def keys(openai_key, anthropic_key):
-    return {"OPENAI_API_KEY": openai_key, "ANTHROPIC_API_KEY": anthropic_key}
+def keys(openai_key, anthropic_key, gemini_key):
+    return {"OPENAI_API_KEY": openai_key, "ANTHROPIC_API_KEY": anthropic_key, "GEMINI_API_KEY": gemini_key}
 
 
-def send(sdk, model, prompt, stream, tools, max_tokens, openai_key, anthropic_key):
-    yield from chat(sdk, model, prompt, stream, tools, int(max_tokens), keys(openai_key, anthropic_key))
+def send(sdk, model, prompt, stream, tools, max_tokens, openai_key, anthropic_key, gemini_key):
+    yield from chat(sdk, model, prompt, stream, tools, int(max_tokens), keys(openai_key, anthropic_key, gemini_key))
 
 
-def side(sdk, model, prompt, stream, max_tokens, openai_key, anthropic_key):
-    yield from chat(sdk, model, prompt, stream, False, int(max_tokens), keys(openai_key, anthropic_key))
+def side(sdk, model, prompt, stream, max_tokens, openai_key, anthropic_key, gemini_key):
+    yield from chat(sdk, model, prompt, stream, False, int(max_tokens), keys(openai_key, anthropic_key, gemini_key))
 
 
 with gr.Blocks(title="Zilla LLM Gateway") as demo:
@@ -43,6 +44,7 @@ with gr.Blocks(title="Zilla LLM Gateway") as demo:
         with gr.Row():
             openai_key = gr.Textbox(label="OpenAI API key", type="password", placeholder=key_placeholder("OPENAI_API_KEY"))
             anthropic_key = gr.Textbox(label="Anthropic API key", type="password", placeholder=key_placeholder("ANTHROPIC_API_KEY"))
+            gemini_key = gr.Textbox(label="Gemini API key", type="password", placeholder=key_placeholder("GEMINI_API_KEY"))
 
     with gr.Tab("Chat"):
         with gr.Row(equal_height=False):
@@ -59,7 +61,7 @@ with gr.Blocks(title="Zilla LLM Gateway") as demo:
                 meta = gr.Markdown()
         send_button.click(
             send,
-            [sdk, model, prompt, stream, tools, max_tokens, openai_key, anthropic_key],
+            [sdk, model, prompt, stream, tools, max_tokens, openai_key, anthropic_key, gemini_key],
             [reply, meta])
 
     with gr.Tab("Compare"):
@@ -84,7 +86,7 @@ with gr.Blocks(title="Zilla LLM Gateway") as demo:
                 (right_sdk, right_model, right_reply, right_meta)]:
             compare_button.click(
                 side,
-                [column_sdk, column_model, compare_prompt, compare_stream, compare_max_tokens, openai_key, anthropic_key],
+                [column_sdk, column_model, compare_prompt, compare_stream, compare_max_tokens, openai_key, anthropic_key, gemini_key],
                 [column_reply, column_meta])
 
 if __name__ == "__main__":

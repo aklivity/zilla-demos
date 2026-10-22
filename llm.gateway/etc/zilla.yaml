@@ -80,6 +80,9 @@ bindings:
       port:
         - 7161
         - 7162
+        - 7163
+        # Part 2 (Zilla Plus): uncomment to add AWS Bedrock
+        # - 7164
     routes:
       - when:
           - port: 7161
@@ -87,6 +90,13 @@ bindings:
       - when:
           - port: 7162
         exit: north_http_server_anthropic
+      - when:
+          - port: 7163
+        exit: north_http_server_gemini
+      # Part 2 (Zilla Plus): uncomment to add AWS Bedrock
+      # - when:
+      #     - port: 7164
+      #   exit: north_http_server_bedrock
 
   north_http_server_openai:
     type: http
@@ -121,6 +131,38 @@ bindings:
       metrics:
         - llm.*
     exit: north_llm_proxy
+
+  north_http_server_gemini:
+    type: http
+    kind: server
+    exit: north_llm_server_gemini
+  north_llm_server_gemini:
+    type: llm
+    kind: server
+    options:
+      dialect: gemini
+      authorization:
+        api_key:
+          credentials: "{credentials}"
+    telemetry:
+      metrics:
+        - llm.*
+    exit: north_llm_proxy
+
+  # Part 2 (Zilla Plus): uncomment to add AWS Bedrock
+  # north_http_server_bedrock:
+  #   type: http
+  #   kind: server
+  #   exit: north_llm_server_bedrock
+  # north_llm_server_bedrock:
+  #   type: llm
+  #   kind: server
+  #   options:
+  #     dialect: aws-bedrock
+  #   telemetry:
+  #     metrics:
+  #       - llm.*
+  #   exit: north_llm_proxy
 
   north_llm_proxy:
     type: llm
@@ -175,6 +217,22 @@ bindings:
         with:
           fallback:
             - claude-haiku-4-5
+      # Part 2 (Zilla Plus): uncomment to add AWS Bedrock
+      # - when:
+      #     - dialect: aws-bedrock
+      #       model:
+      #         - gpt-*
+      #   exit: south_llm_client_openai_aws_sdk
+      # - when:
+      #     - dialect: aws-bedrock
+      #       model:
+      #         - claude-*
+      #   exit: south_llm_client_anthropic_aws_sdk
+      # - when:
+      #     - dialect: aws-bedrock
+      #       model:
+      #         - gemini-*
+      #   exit: south_llm_client_gemini_aws_sdk
       - when:
           - model:
               - gpt-*
@@ -183,6 +241,10 @@ bindings:
           - model:
               - claude-*
         exit: south_llm_client_anthropic
+      - when:
+          - model:
+              - gemini-*
+        exit: south_llm_client_gemini
       # Part 2 (Zilla Plus): uncomment to add AWS Bedrock
       # - when:
       #     - model:
@@ -212,6 +274,20 @@ bindings:
     options:
       dialect: anthropic
       server: https://api.anthropic.com
+      authorization:
+        api_key:
+          credentials: "{credentials}"
+    telemetry:
+      metrics:
+        - llm.*
+    exit: sys:http_client
+
+  south_llm_client_gemini:
+    type: llm
+    kind: client
+    options:
+      dialect: gemini
+      server: https://generativelanguage.googleapis.com
       authorization:
         api_key:
           credentials: "{credentials}"
@@ -265,3 +341,61 @@ bindings:
   #   options:
   #     host: bedrock-runtime.us-east-1.amazonaws.com
   #     port: 443
+
+  # Part 2 (Zilla Plus): uncomment to add AWS Bedrock
+  # south_llm_client_openai_aws_sdk:
+  #   type: llm
+  #   kind: client
+  #   options:
+  #     dialect: openai
+  #     server: https://api.openai.com
+  #   telemetry:
+  #     metrics:
+  #       - llm.*
+  #   exit: south_http_client_openai_aws_sdk
+  #
+  # south_http_client_openai_aws_sdk:
+  #   type: http
+  #   kind: client
+  #   options:
+  #     overrides:
+  #       authorization: Bearer ${{env.OPENAI_API_KEY}}
+  #   exit: sys:tls_client
+  #
+  # south_llm_client_anthropic_aws_sdk:
+  #   type: llm
+  #   kind: client
+  #   options:
+  #     dialect: anthropic
+  #     server: https://api.anthropic.com
+  #   telemetry:
+  #     metrics:
+  #       - llm.*
+  #   exit: south_http_client_anthropic_aws_sdk
+  #
+  # south_http_client_anthropic_aws_sdk:
+  #   type: http
+  #   kind: client
+  #   options:
+  #     overrides:
+  #       x-api-key: ${{env.ANTHROPIC_API_KEY}}
+  #   exit: sys:tls_client
+  #
+  # south_llm_client_gemini_aws_sdk:
+  #   type: llm
+  #   kind: client
+  #   options:
+  #     dialect: gemini
+  #     server: https://generativelanguage.googleapis.com
+  #   telemetry:
+  #     metrics:
+  #       - llm.*
+  #   exit: south_http_client_gemini_aws_sdk
+  #
+  # south_http_client_gemini_aws_sdk:
+  #   type: http
+  #   kind: client
+  #   options:
+  #     overrides:
+  #       x-goog-api-key: ${{env.GEMINI_API_KEY}}
+  #   exit: sys:tls_client
