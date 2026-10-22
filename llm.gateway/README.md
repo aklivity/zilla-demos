@@ -1,6 +1,6 @@
 # llm.gateway
 
-An LLM gateway for OpenAI, Anthropic, Gemini and AWS Bedrock. One Zilla gateway accepts OpenAI API requests on port `7161`, Anthropic API requests on port `7162` and Gemini API requests on port `7163`, routes each request to a provider by the model it asks for, and translates between the APIs when the client and the provider speak different ones. Your own API keys pass through to the provider, and none are stored in `zilla.yaml`.
+An LLM gateway for OpenAI, Anthropic, Gemini and AWS Bedrock. One [Zilla gateway](https://github.com/aklivity/zilla) accepts OpenAI API requests on port `7161`, Anthropic API requests on port `7162` and Gemini API requests on port `7163`, routes each request to a provider by the model it asks for, and translates between the APIs when the client and the provider speak different ones. Your own API keys pass through to the provider, and none are stored in `zilla.yaml`.
 
 The demo has two parts:
 
