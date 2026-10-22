@@ -135,6 +135,19 @@ Open the Grafana dashboard at [http://localhost:3000](http://localhost:3000) to 
 
 <img src=".assets/grafana_tokens_by_provider.png" alt="Grafana dashboard showing requests and input and output tokens by provider" width="720">
 
+The *By model* row breaks tokens, output rate, latency and time to first token down by the model that served each request, and counts requests by the model asked for and the model that answered, so the `claude-primary` fallback shows up as `claude-primary → claude-haiku-4-5-…`. The labels come from the `telemetry.attributes` on each `llm` binding:
+
+```yaml
+    telemetry:
+      attributes:
+        requested: ${llm.request.model}
+        served: ${llm.response.model}
+      metrics:
+        - llm.*
+```
+
+`served` is the model as the provider reports it, often a dated version such as `gpt-4o-mini-2024-07-18`.
+
 Or read the raw metrics from Zilla:
 
 ```bash
