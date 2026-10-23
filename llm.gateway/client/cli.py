@@ -1,9 +1,10 @@
 import os
 import sys
 
-from gateway import SDK_ANTHROPIC, SDK_BEDROCK, SDK_GEMINI, SDK_OPENAI, chat
+from gateway import SDK_ANTHROPIC, SDK_AZURE, SDK_BEDROCK, SDK_GEMINI, SDK_OPENAI, SDK_VERTEX, chat
 
-SDK_NAMES = {"openai": SDK_OPENAI, "anthropic": SDK_ANTHROPIC, "gemini": SDK_GEMINI, "bedrock": SDK_BEDROCK}
+SDK_NAMES = {"openai": SDK_OPENAI, "anthropic": SDK_ANTHROPIC, "gemini": SDK_GEMINI, "bedrock": SDK_BEDROCK,
+             "azure": SDK_AZURE, "vertex": SDK_VERTEX}
 
 
 def flag(name):
