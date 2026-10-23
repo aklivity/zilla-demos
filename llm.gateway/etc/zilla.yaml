@@ -83,6 +83,9 @@ bindings:
         - 7163
         # Part 2 (Zilla Plus): uncomment to add AWS Bedrock
         # - 7164
+        # Part 2 (Zilla Plus): uncomment to add Azure AI Foundry and Google Vertex AI
+        # - 7165
+        # - 7166
     routes:
       - when:
           - port: 7161
@@ -97,6 +100,13 @@ bindings:
       # - when:
       #     - port: 7164
       #   exit: north_http_server_bedrock
+      # Part 2 (Zilla Plus): uncomment to add Azure AI Foundry and Google Vertex AI
+      # - when:
+      #     - port: 7165
+      #   exit: north_http_server_azure
+      # - when:
+      #     - port: 7166
+      #   exit: north_http_server_vertex
 
   north_http_server_openai:
     type: http
@@ -168,6 +178,47 @@ bindings:
   #   kind: server
   #   options:
   #     dialect: aws-bedrock
+  #   telemetry:
+  #     attributes:
+  #       requested: ${llm.request.model}
+  #       served: ${llm.response.model}
+  #     metrics:
+  #       - llm.*
+  #   exit: north_llm_proxy
+
+  # Part 2 (Zilla Plus): uncomment to add Azure AI Foundry and Google Vertex AI
+  # north_http_server_azure:
+  #   type: http
+  #   kind: server
+  #   exit: north_llm_server_azure
+  # north_llm_server_azure:
+  #   type: llm
+  #   kind: server
+  #   options:
+  #     dialect: azure-foundry
+  #     authorization:
+  #       api_key:
+  #         credentials: "{credentials}"
+  #   telemetry:
+  #     attributes:
+  #       requested: ${llm.request.model}
+  #       served: ${llm.response.model}
+  #     metrics:
+  #       - llm.*
+  #   exit: north_llm_proxy
+  #
+  # north_http_server_vertex:
+  #   type: http
+  #   kind: server
+  #   exit: north_llm_server_vertex
+  # north_llm_server_vertex:
+  #   type: llm
+  #   kind: server
+  #   options:
+  #     dialect: gcp-vertex
+  #     authorization:
+  #       api_key:
+  #         credentials: "Bearer {credentials}"
   #   telemetry:
   #     attributes:
   #       requested: ${llm.request.model}
@@ -265,6 +316,15 @@ bindings:
       #         - us.anthropic.*
       #         - us.amazon.*
       #   exit: south_llm_client_bedrock
+      # Part 2 (Zilla Plus): uncomment to add Azure AI Foundry and Google Vertex AI
+      # - when:
+      #     - model:
+      #         - azure-*
+      #   exit: south_llm_client_azure
+      # - when:
+      #     - model:
+      #         - meta/*
+      #   exit: south_llm_client_vertex
 
   south_llm_client_openai:
     type: llm
@@ -435,3 +495,38 @@ bindings:
   #     overrides:
   #       x-goog-api-key: ${{env.GEMINI_API_KEY}}
   #   exit: sys:tls_client
+
+  # Part 2 (Zilla Plus): uncomment to add Azure AI Foundry and Google Vertex AI
+  # south_llm_client_azure:
+  #   type: llm
+  #   kind: client
+  #   options:
+  #     dialect: azure-foundry
+  #     server: https://${{env.AZURE_OPENAI_RESOURCE}}.openai.azure.com
+  #     classic:
+  #       deployments:
+  #         azure-gpt-4o-mini: ${{env.AZURE_OPENAI_DEPLOYMENT}}
+  #     authorization:
+  #       api_key:
+  #         credentials: "{credentials}"
+  #   telemetry:
+  #     attributes:
+  #       requested: ${llm.request.model}
+  #       served: ${llm.response.model}
+  #     metrics:
+  #       - llm.*
+  #   exit: sys:http_client
+  #
+  # south_llm_client_vertex:
+  #   type: llm
+  #   kind: client
+  #   options:
+  #     dialect: gcp-vertex
+  #     server: https://${{env.GCP_LOCATION}}-aiplatform.googleapis.com/v1/projects/${{env.GCP_PROJECT}}/locations/${{env.GCP_LOCATION}}
+  #   telemetry:
+  #     attributes:
+  #       requested: ${llm.request.model}
+  #       served: ${llm.response.model}
+  #     metrics:
+  #       - llm.*
+  #   exit: sys:http_client

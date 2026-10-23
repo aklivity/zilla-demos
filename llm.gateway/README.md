@@ -1,11 +1,11 @@
 # llm.gateway
 
-An LLM gateway for OpenAI, Anthropic, Gemini and AWS Bedrock. One [Zilla gateway](https://github.com/aklivity/zilla) accepts OpenAI API requests on port `7161`, Anthropic API requests on port `7162` and Gemini API requests on port `7163`, routes each request to a provider by the model it asks for, and translates between the APIs when the client and the provider speak different ones. Your own API keys pass through to the provider, and none are stored in `zilla.yaml`.
+An LLM gateway for OpenAI, Anthropic, Gemini, AWS Bedrock, Azure AI Foundry and Google Vertex AI. One [Zilla gateway](https://github.com/aklivity/zilla) accepts OpenAI API requests on port `7161`, Anthropic API requests on port `7162` and Gemini API requests on port `7163`, routes each request to a provider by the model it asks for, and translates between the APIs when the client and the provider speak different ones. Your own API keys pass through to the provider, and none are stored in `zilla.yaml`.
 
 The demo has two parts:
 
 - **Part 1, Zilla (open source):** OpenAI, Anthropic and Gemini behind one gateway, with dialect translation, streaming, tool calls, guardrails, model fallback and token metrics.
-- **Part 2, Zilla Plus:** the same gateway and the same `zilla.yaml`, upgraded to Zilla Plus and extended with AWS Bedrock, as a provider and as an API on port `7164`, so applications written with the AWS SDK get the same routing, fallback and guardrails.
+- **Part 2, Zilla Plus:** the same gateway and the same `zilla.yaml`, upgraded to Zilla Plus and extended with AWS Bedrock, as a provider and as an API on port `7164`, so applications written with the AWS SDK get the same routing, fallback and guardrails, and with Azure AI Foundry and Google Vertex AI, as providers and as APIs on ports `7165` and `7166` for the Azure OpenAI and Vertex AI SDKs.
 
 | Model pattern | Provider | API key sent by the client | Edition |
 |---|---|---|---|
@@ -14,6 +14,8 @@ The demo has two parts:
 | `gemini-*` | Gemini | Your Gemini API key | Zilla |
 | `claude-primary` | A deliberately unreachable Anthropic deployment, falling back to `claude-haiku-4-5` | Your Anthropic API key | Zilla |
 | `anthropic.*`, `amazon.*`, `us.anthropic.*`, `us.amazon.*` | AWS Bedrock | None, signed with AWS credentials | Zilla Plus |
+| `azure-*` | Azure AI Foundry, mapped to your Azure OpenAI deployment | Your Azure OpenAI API key | Zilla Plus |
+| `meta/*` | Google Vertex AI, open models such as `meta/llama-3.3-70b-instruct-maas` | None, a Google access token from a service account key | Zilla Plus |
 
 | Port | Service |
 |---|---|
@@ -21,6 +23,8 @@ The demo has two parts:
 | `7162` | Zilla, Anthropic API |
 | `7163` | Zilla, Gemini API |
 | `7164` | Zilla, Bedrock API (Part 2) |
+| `7165` | Zilla, Azure OpenAI API (Part 2) |
+| `7166` | Zilla, Vertex AI API (Part 2) |
 | `7190` | Zilla, Prometheus metrics |
 | `7860` | Gradio compare app |
 | `3000` | Grafana dashboard |
@@ -32,6 +36,7 @@ Two more services back the guardrails: `tei` serves the embeddings the jailbreak
 - docker compose
 - An OpenAI, Anthropic and Gemini API key, for the providers you want to call
 - Part 2 only: a Zilla Plus license key, which you can [request here](https://www.aklivity.io/request-demo), and AWS credentials allowed to call `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream`
+- Part 2, optional: an Azure OpenAI resource with a deployment and its API key, for Azure AI Foundry, and a Google Cloud project with Vertex AI enabled, an open model such as Llama enabled in Model Garden, and a service account key with the `Vertex AI User` role, for Google Vertex AI
 
 ## Setup
 
@@ -156,7 +161,7 @@ curl -s http://localhost:7190/metrics | grep '^llm_'
 
 ## Part 2: Zilla Plus
 
-Part 2 runs the same `zilla` service with the same `etc/zilla.yaml`. Only the image changes, and then the Bedrock parts of the config are uncommented.
+Part 2 runs the same `zilla` service with the same `etc/zilla.yaml`. Only the image changes, and then the Part 2 parts of the config are uncommented.
 
 Part 2 needs Zilla Plus built on Zilla `2.6.0` or later, which includes the Gemini API, classifiers, guardrails, and fallback that Part 1's `zilla.yaml` uses.
 
@@ -173,6 +178,18 @@ AWS_ACCESS_KEY_ID=<your-aws-access-key-id>
 AWS_SECRET_ACCESS_KEY=<your-aws-secret-access-key>
 AWS_SESSION_TOKEN=<your-aws-session-token>
 ```
+
+For Azure AI Foundry and Google Vertex AI, also fill in these lines. Leave them out if you only want Bedrock:
+
+```text
+AZURE_OPENAI_API_KEY=<your-azure-openai-api-key>
+AZURE_OPENAI_RESOURCE=<your-azure-openai-resource-name>
+AZURE_OPENAI_DEPLOYMENT=<your-deployment-name>
+GCP_PROJECT=<your-google-cloud-project>
+GCP_LOCATION=us-central1
+```
+
+For Google Vertex AI, save your service account key as `etc/gcp/credentials.json`. `etc/gcp/` is git-ignored.
 
 Then recreate the `zilla` service:
 
@@ -302,6 +319,105 @@ docker compose run --rm \
 ```
 
 Bedrock now shows up as a provider, and the Bedrock API as a client API, on the Grafana dashboard.
+
+### Add Azure AI Foundry and Google Vertex AI
+
+The same uncommented lines add two more providers. Models named `azure-*` go to Azure AI Foundry, and `meta/*` models go to Google Vertex AI:
+
+```yaml
+      - when:
+          - model:
+              - azure-*
+        exit: south_llm_client_azure
+      - when:
+          - model:
+              - meta/*
+        exit: south_llm_client_vertex
+```
+
+`south_llm_client_azure` sends requests to your Azure OpenAI resource, with the Azure OpenAI API key the caller sends, in the `api-key` header. Azure OpenAI takes a deployment name rather than a model name, so `classic.deployments` maps `azure-gpt-4o-mini` to the deployment in `AZURE_OPENAI_DEPLOYMENT`:
+
+```yaml
+  south_llm_client_azure:
+    type: llm
+    kind: client
+    options:
+      dialect: azure-foundry
+      server: https://${{env.AZURE_OPENAI_RESOURCE}}.openai.azure.com
+      classic:
+        deployments:
+          azure-gpt-4o-mini: ${{env.AZURE_OPENAI_DEPLOYMENT}}
+      authorization:
+        api_key:
+          credentials: "{credentials}"
+    exit: sys:http_client
+```
+
+`south_llm_client_vertex` sends requests to Vertex AI in your project and location, and gets a Google access token from the service account key in `etc/gcp/credentials.json`, so callers send no Google credentials:
+
+```yaml
+  south_llm_client_vertex:
+    type: llm
+    kind: client
+    options:
+      dialect: gcp-vertex
+      server: https://${{env.GCP_LOCATION}}-aiplatform.googleapis.com/v1/projects/${{env.GCP_PROJECT}}/locations/${{env.GCP_LOCATION}}
+    exit: sys:http_client
+```
+
+In the Gradio app, enter your Azure OpenAI API key under API keys, then pick `azure-gpt-4o-mini` with the OpenAI or Anthropic SDK. For Vertex AI, pick `meta/llama-3.3-70b-instruct-maas` with the OpenAI or Anthropic SDK. The Gemini SDK can't name a `meta/*` model, because a `/` in the model breaks the Gemini API path. From the command line:
+
+```bash
+docker compose run --rm \
+    -e SDK=openai -e MODEL=azure-gpt-4o-mini \
+    llm-client
+```
+
+```bash
+docker compose run --rm \
+    -e SDK=anthropic -e MODEL=meta/llama-3.3-70b-instruct-maas \
+    llm-client
+```
+
+The same lines also add the Azure OpenAI API on port `7165` and the Vertex AI API on port `7166`, so applications written with the Azure OpenAI SDK, or the Gen AI SDK in Vertex AI mode, can point at Zilla:
+
+```yaml
+  north_llm_server_azure:
+    type: llm
+    kind: server
+    options:
+      dialect: azure-foundry
+      authorization:
+        api_key:
+          credentials: "{credentials}"
+    exit: north_llm_proxy
+
+  north_llm_server_vertex:
+    type: llm
+    kind: server
+    options:
+      dialect: gcp-vertex
+      authorization:
+        api_key:
+          credentials: "Bearer {credentials}"
+    exit: north_llm_proxy
+```
+
+Both reach the same `north_llm_proxy`, so any routed model works from these SDKs too, with the same guardrails and fallback. Pick the Azure OpenAI SDK or the Vertex AI SDK in the Gradio app: with `gpt-4o-mini`, `claude-haiku-4-5` or `gemini-3.5-flash-lite`, the request goes to that provider and the reply comes back in the SDK's own format. The app sends the key for the model's provider, as the Azure OpenAI `api-key` or as the Vertex AI access token. The Vertex AI SDK only calls Google's own models, so `meta/*` models need the OpenAI or Anthropic SDK. From the command line:
+
+```bash
+docker compose run --rm \
+    -e SDK=azure -e MODEL=claude-haiku-4-5 \
+    llm-client
+```
+
+```bash
+docker compose run --rm \
+    -e SDK=vertex -e MODEL=gpt-4o-mini \
+    llm-client
+```
+
+Azure AI Foundry and Google Vertex AI show up as providers, `azure` and `vertex`, and the two APIs as client APIs, on the Grafana dashboard.
 
 ## Teardown
 

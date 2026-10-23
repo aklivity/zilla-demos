@@ -11,23 +11,30 @@ import openai
 from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types as genai_types
+from google.oauth2.credentials import Credentials as GoogleCredentials
 
 OPENAI_BASE_URL = os.environ.get("ZILLA_OPENAI_BASE_URL", "http://zilla:7161/v1")
 ANTHROPIC_BASE_URL = os.environ.get("ZILLA_ANTHROPIC_BASE_URL", "http://zilla:7162")
 GEMINI_BASE_URL = os.environ.get("ZILLA_GEMINI_BASE_URL", "http://zilla:7163")
 BEDROCK_BASE_URL = os.environ.get("ZILLA_BEDROCK_BASE_URL", "http://zilla:7164")
+AZURE_BASE_URL = os.environ.get("ZILLA_AZURE_BASE_URL", "http://zilla:7165")
+VERTEX_BASE_URL = os.environ.get("ZILLA_VERTEX_BASE_URL", "http://zilla:7166")
 
 SDK_OPENAI = "OpenAI SDK"
 SDK_ANTHROPIC = "Anthropic SDK"
 SDK_GEMINI = "Gemini SDK"
 SDK_BEDROCK = "AWS SDK (Bedrock)"
-SDKS = [SDK_OPENAI, SDK_ANTHROPIC, SDK_GEMINI, SDK_BEDROCK]
+SDK_AZURE = "Azure OpenAI SDK"
+SDK_VERTEX = "Vertex AI SDK"
+SDKS = [SDK_OPENAI, SDK_ANTHROPIC, SDK_GEMINI, SDK_BEDROCK, SDK_AZURE, SDK_VERTEX]
 
 SDK_INFO = {
     SDK_OPENAI: ("openai", "OpenAI API", "7161", OPENAI_BASE_URL),
     SDK_ANTHROPIC: ("anthropic", "Anthropic API", "7162", ANTHROPIC_BASE_URL),
     SDK_GEMINI: ("gemini", "Gemini API", "7163", GEMINI_BASE_URL),
     SDK_BEDROCK: ("aws-bedrock", "Bedrock API", "7164", BEDROCK_BASE_URL),
+    SDK_AZURE: ("openai", "Azure OpenAI API", "7165", AZURE_BASE_URL),
+    SDK_VERTEX: ("gemini", "Vertex AI API", "7166", VERTEX_BASE_URL),
 }
 
 PROVIDERS = [
@@ -38,6 +45,8 @@ PROVIDERS = [
     ("amazon.", "AWS Bedrock", "aws-bedrock", None),
     ("us.anthropic.", "AWS Bedrock", "aws-bedrock", None),
     ("us.amazon.", "AWS Bedrock", "aws-bedrock", None),
+    ("azure-", "Azure AI Foundry", "azure-foundry", "AZURE_OPENAI_API_KEY"),
+    ("meta/", "Google Vertex AI", "gcp-vertex", None),
 ]
 
 OPENAI_TOOLS = [{
@@ -82,8 +91,8 @@ def provider_for(model):
 
 
 def api_key_for(sdk, model, overrides):
-    _, dialect, key_env = provider_for(model)
-    if sdk == SDK_BEDROCK or dialect == "aws-bedrock":
+    name, dialect, key_env = provider_for(model)
+    if sdk == SDK_BEDROCK or (name is not None and key_env is None):
         return "unused"
     if key_env is None:
         return None
@@ -115,7 +124,8 @@ def chat(sdk, model, prompt, stream, tools, max_tokens, overrides=None):
     text, usage = "", None
     try:
         calls = {SDK_OPENAI: _openai_chat, SDK_ANTHROPIC: _anthropic_chat,
-                 SDK_GEMINI: _gemini_chat, SDK_BEDROCK: _bedrock_chat}[sdk]
+                 SDK_GEMINI: _gemini_chat, SDK_BEDROCK: _bedrock_chat,
+                 SDK_AZURE: _azure_chat, SDK_VERTEX: _vertex_chat}[sdk]
         for text, usage in calls(model, prompt, stream, tools, max_tokens, key or "none"):
             yield text, _meta(route, usage, started, done=False)
         yield text, _meta(route, usage, started, done=True)
@@ -130,14 +140,20 @@ def chat(sdk, model, prompt, stream, tools, max_tokens, overrides=None):
             botocore.exceptions.EndpointConnectionError, botocore.exceptions.ConnectionClosedError):
         base = SDK_INFO[sdk][3]
         hint = ""
-        if sdk == SDK_BEDROCK or provider_for(model)[1] == "aws-bedrock":
-            hint = " The AWS SDK and AWS Bedrock models need Part 2 (Zilla Plus) first."
+        if sdk in (SDK_BEDROCK, SDK_AZURE, SDK_VERTEX) or provider_for(model)[1] in ("aws-bedrock", "azure-foundry", "gcp-vertex"):
+            hint = " The AWS, Azure OpenAI and Vertex AI SDKs, and AWS Bedrock, Azure AI Foundry and Google Vertex AI models, need Part 2 (Zilla Plus) first."
         yield text, (f"**Route:** {route}  \n**Error:** no response from Zilla at `{base}`. "
                      f"Check that Zilla is running and that `{model}` matches a route in `zilla.yaml`.{hint}")
 
 
-def _openai_chat(model, prompt, stream, tools, max_tokens, key):
-    client = openai.OpenAI(base_url=OPENAI_BASE_URL, api_key=key, max_retries=0, timeout=120)
+def _azure_chat(model, prompt, stream, tools, max_tokens, key):
+    client = openai.AzureOpenAI(azure_endpoint=AZURE_BASE_URL, api_key=key, api_version="2024-10-21",
+                                max_retries=0, timeout=120)
+    yield from _openai_chat(model, prompt, stream, tools, max_tokens, key, client)
+
+
+def _openai_chat(model, prompt, stream, tools, max_tokens, key, client=None):
+    client = client or openai.OpenAI(base_url=OPENAI_BASE_URL, api_key=key, max_retries=0, timeout=120)
     kwargs = {
         "model": model,
         "max_tokens": max_tokens,
@@ -200,8 +216,16 @@ def _anthropic_chat(model, prompt, stream, tools, max_tokens, key):
     yield _anthropic_text(final), (final.usage.input_tokens, final.usage.output_tokens)
 
 
-def _gemini_chat(model, prompt, stream, tools, max_tokens, key):
-    client = genai.Client(api_key=key, http_options=genai_types.HttpOptions(
+def _vertex_chat(model, prompt, stream, tools, max_tokens, key):
+    client = genai.Client(
+        vertexai=True, project="zilla-demo", location="us-central1", credentials=GoogleCredentials(token=key),
+        http_options=genai_types.HttpOptions(base_url=VERTEX_BASE_URL, api_version="v1", timeout=120_000,
+                                             retry_options=genai_types.HttpRetryOptions(attempts=1)))
+    yield from _gemini_chat(model, prompt, stream, tools, max_tokens, key, client)
+
+
+def _gemini_chat(model, prompt, stream, tools, max_tokens, key, client=None):
+    client = client or genai.Client(api_key=key, http_options=genai_types.HttpOptions(
         base_url=GEMINI_BASE_URL, api_version="v1beta", timeout=120_000,
         retry_options=genai_types.HttpRetryOptions(attempts=1)))
     config = genai_types.GenerateContentConfig(max_output_tokens=max_tokens)
